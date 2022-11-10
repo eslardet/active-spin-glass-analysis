@@ -1,0 +1,7 @@
+#!/bin/bash
+for N in 100 800 1600 3200
+do
+    for seed in ($(seq -2 0.5 5))
+    for 
+    qsub -v N=$N,seed=2 -N ASG2D_C_test_${N} -q standard bashASG2D.pbs
+done
