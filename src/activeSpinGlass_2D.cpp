@@ -259,6 +259,43 @@ int main(int argc, char*argv[])
     if (saveForce) { forceFile.close(); }
     
     cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", Pe = " << Pe << ", couplingMode = " << couplingMode << endl;
+    switch(couplingMode)
+    {
+        case 'C' : // Constant coupling
+            inputFile >> K0; 
+            cout << " ----> Coupling Constant K0 = " << K0 << endl; 
+            break;
+
+        case 'T' : // Two-populations
+            inputFile >> KAA; 
+            inputFile >> KAB;
+            inputFile >> KBB;
+            cout << " ----> Coupling Constants, KAA = " << KAA << ", KAB = " << KAB << ", KBB = " << KBB << endl; 
+            break;
+
+        case 'G' : // Gaussian distributed couplings
+            inputFile >> KAVG; 
+            inputFile >> STDK;            
+            cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
+            break;
+
+        case 'F' : // Normally distributed ferromagnetic couplings
+            inputFile >> KAVG; 
+            inputFile >> STDK;            
+            cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
+            break;
+
+        case 'A' : // Normally distributed antiferromagnetic couplings
+            inputFile >> KAVG; 
+            inputFile >> STDK;            
+            cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
+            break;
+        
+        default :
+            cerr << "Invalid Couplings Initialization Mode!" << endl;
+            cerr << " --> Valid modes are : 'C', 'T', 'G', 'F', 'A' ... " << endl;
+            exit(1);
+    }
 
     return 0;
 
