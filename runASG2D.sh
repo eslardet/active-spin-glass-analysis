@@ -11,7 +11,7 @@
 ###############
 
 # bd_dir=$HOME/Dropbox/ActiveMatter
-bd_dir=$HOME/Documents/PhD_code/Active_Spin_Glass
+bd_dir=$HOME/Code/Active_Spin_Glass
 bin_dir=$bd_dir/bin
 
 # bin_dir=$HOME/bin
@@ -21,9 +21,9 @@ bin_dir=$bd_dir/bin
 # Parameters #
 ##############
 
-nPart=1000
+nPart=5000
 phi=0.2
-seed=2
+seed=3
 
 gx=1.0
 Pe=20.0
@@ -32,42 +32,42 @@ Rp=5.0
 xTy=1.0
 
 initMode='R'
-couplingMode='T' 
+couplingMode='G' 
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
 #    'G' for Gaussian distribution, 
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
-# K0=100.0
+# K0=1.0
 
-KAA=10.0
-KAB=0.0
-KBB=10.0
+# KAA=10.0
+# KAB=0.0
+# KBB=10.0
 
-# KAVG=10.0
-# STDK=1.0
+KAVG=1.0
+STDK=0.0
 
 dT=2.e-5
 DT=0.01
 eqT=0
-simulT=20
+simulT=0.02
 
 savePos=1
 saveForce=0
 saveCoupling=0
 
-# Windows
+# Local
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Documents/PhD_code/Active_Spin_Glass/simulation_data/Constant/N${nPart}/phi${phi}/s${seed}
+    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/Constant/N${nPart}/phi${phi}/K${K0}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Documents/PhD_code/Active_Spin_Glass/simulation_data/TwoPopulations/N${nPart}/phi${phi}/s${seed}
+    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/TwoPopulations/N${nPart}/phi${phi}/K${KAA}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Documents/PhD_code/Active_Spin_Glass/simulation_data/Gaussian/N${nPart}/phi${phi}/s${seed}
+    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/Gaussian/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Documents/PhD_code/Active_Spin_Glass/simulation_data/Ferromagnetic/N${nPart}/phi${phi}/s${seed}
+    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/Ferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Documents/PhD_code/Active_Spin_Glass/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}/s${seed}
+    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
 fi
 
 # Cluster

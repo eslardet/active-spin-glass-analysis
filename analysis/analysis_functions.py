@@ -17,7 +17,7 @@ def get_files(mode, nPart, phi, K, seed):
         mode_name = "Antiferromagnetic"
     elif mode == "F":
         mode_name = "Ferromagnetic"
-    sim_dir = os.path.abspath('..\..\simulation_data\\' + mode_name + '\\N' + str(nPart) + '\phi' + str(phi) + '\K' + str(K) + '\s' + str(seed))
+    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '/K' + str(K) + '/s' + str(seed))
     inparFile = os.path.join(sim_dir, "inpar")
     posFile = os.path.join(sim_dir, "pos")
     return inparFile, posFile

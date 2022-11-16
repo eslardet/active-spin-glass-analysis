@@ -331,6 +331,7 @@ def plot_vorder_ksd(mode, nPart, phi, KAVG, KSTD_range, seed_range, log=False):
     v_ss = []
     for KSTD in KSTD_range:
         v_ss_sum = 0
+        count_err = 0
         for seed in seed_range:
             sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
             if not os.path.exists(os.path.join(sim_dir, 'stats')):
@@ -338,11 +339,12 @@ def plot_vorder_ksd(mode, nPart, phi, KAVG, KSTD_range, seed_range, log=False):
                     write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
                 except:
                     print(KSTD, seed)
+                    count_err += 1
             try:
                 v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
             except:
                 print("error")
-        v_ss.append(v_ss_sum/len(seed_range))
+        v_ss.append(v_ss_sum/(len(seed_range) - count_err))
     fig, ax = plt.subplots()
     ax.plot(KSTD_range, v_ss, 'o-')
     ax.set_xlabel("KSTD")
@@ -367,12 +369,20 @@ def plot_vorder_ksd_superimpose(mode, nPart_range, phi, KAVG, KSTD_range, seed_r
         v_ss = []
         for KSTD in KSTD_range:
             v_ss_sum = 0
+            count_err = 0
             for seed in seed_range:
                 sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
                 if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                    write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
-                v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
-            v_ss.append(v_ss_sum/len(seed_range))
+                    try:
+                        write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                    except:
+                        print(KSTD, seed)
+                        count_err += 1
+                try:
+                    v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
+                except:
+                    print("error")
+            v_ss.append(v_ss_sum/(len(seed_range) - count_err))
         ax.plot(KSTD_range, v_ss, 'o-', label="N=" + str(nPart))
     ax.set_xlabel("KSTD")
     ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
