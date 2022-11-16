@@ -375,7 +375,7 @@ def plot_vorder_ksd_superimpose(mode, nPart_range, phi, KAVG, KSTD_range, seed_r
         ax.set_xscale("log")
     
     folder = os.path.abspath('../plots/v_order_vs_K/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_KAVG' + str(KAVG) + '.png'
+    filename = mode + '_phi' + str(phi) + '_KAVG' + str(KAVG) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
