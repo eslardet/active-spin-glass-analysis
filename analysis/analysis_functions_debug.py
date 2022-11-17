@@ -391,7 +391,7 @@ def plot_vorder_ksd_superimpose(mode, nPart_range, phi, KAVG, KSTD_range, seed_r
         ax.set_xscale("log")
     
     folder = os.path.abspath('../plots/v_order_vs_K/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_KAVG' + str(KAVG) + '.png'
+    filename = mode + '_phi' + str(phi) + '_KAVG' + str(KAVG) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
@@ -489,11 +489,19 @@ def plot_vorder_sus_ksd_superimpose(mode, nPart_range, phi, KAVG, KSTD_range, se
         v_sus = []
         for KSTD in KSTD_range:
             v_sus_sum = 0
+            count_err = 0
             for seed in seed_range:
                 sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
                 if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                    write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
-                v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
+                    try:
+                        write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                    except:
+                        print(nPart, KSTD, seed)
+                        count_err += 1
+                try: 
+                    v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
+                except:
+                    print("error")
             v_sus.append(v_sus_sum/len(seed_range))
         
         ax.plot(KSTD_range, v_sus, 'o-', label="N=" + str(nPart))

@@ -23,13 +23,37 @@
 #include "activeSpinGlass_2D.h"
 #include "abdSG2D_functions.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
+
+void signal_handler(int signo);
+
 using namespace std;
 
+int main(int argc, char *argv[])
+{
+int sig;
+
+setlinebuf(stdout);
+
+/* On MacOS, if you try to catch SIGCONT, then it's the only signal you will ever see... 
+ * Even when you send -HUP you get to see [19] 
+ *
+ * Also, don't even try to catch SIGKILL. */
+for (sig=1; sig<=32; sig++)
+  if ((sig!=SIGCONT) && (sig!=SIGKILL))
+    signal(sig, signal_handler);
+
+/* From here, do your thing. 
+ * The pause(3) is here only do stop until a signal comes.
+ * This needs to be removed in production code. */
 ////////////////
 //Main Program//
 ////////////////
-int main(int argc, char*argv[])
-{
 
 	//////////////////////////////
 	// Parsing input parameters //
@@ -300,3 +324,16 @@ int main(int argc, char*argv[])
     return 0;
 
 }
+
+
+
+void signal_handler(int signo)
+{
+  fprintf(stdout, "Received signal [%i]\n", signo);
+  /* The next line means that you bail out from whatever signal,
+   * maybe this is not desired. */
+  exit(EXIT_FAILURE);
+}
+
+
+
