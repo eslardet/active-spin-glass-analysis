@@ -433,12 +433,20 @@ def plot_vorder_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD, seed_
         v_ss = []
         for KAVG in KAVG_range:
             v_ss_sum = 0
+            count_err = 0
             for seed in seed_range:
                 sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
                 if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                    write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
-                v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
-            v_ss.append(v_ss_sum/len(seed_range))
+                    try:
+                        write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                    except:
+                        print(nPart, KAVG, seed)
+                        count_err += 1
+                try:
+                    v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
+                except:
+                    print("error")
+            v_ss.append(v_ss_sum/(len(seed_range) - count_err))
         ax.plot(KAVG_range, v_ss, 'o-', label="N=" + str(nPart))
     ax.set_xlabel("KAVG")
     ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
@@ -459,12 +467,20 @@ def plot_vorder_sus_ksd(mode, nPart, phi, KAVG, KSTD_range, seed_range):
     v_sus = []
     for KSTD in KSTD_range:
         v_sus_sum = 0
+        count_err = 0
         for seed in seed_range:
             sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
             if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
-            v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
-        v_sus.append(v_sus_sum/len(seed_range))
+                try:
+                    write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                except:
+                    print(nPart, KAVG, seed)
+                    count_err += 1
+            try:
+                v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
+            except:
+                print("error")
+        v_sus.append(v_sus_sum/(len(seed_range) - count_err))
     fig, ax = plt.subplots()
     ax.plot(KSTD_range, v_sus, 'o-')
     ax.set_xlabel("KSTD")
@@ -541,7 +557,7 @@ def plot_vorder_sus_kavg(mode, nPart, phi, KAVG_range, KSTD, seed_range):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_vorder_sus_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD, seed_range):
+def plot_vorder_sus_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD_range, seed_range):
     """
     Plot the susceptibility of the Vicsek order parameter (over the final 1000 saved timesteps) against K_avg, with a fixed K_std
     Averaged over a number of realizations
@@ -549,17 +565,26 @@ def plot_vorder_sus_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD, s
     """
     fig, ax = plt.subplots()
     for nPart in nPart_range:
-        v_sus = []
-        for KAVG in KAVG_range:
-            v_sus_sum = 0
-            for seed in seed_range:
-                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
-                if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                    write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
-                v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
-            v_sus.append(v_sus_sum/len(seed_range))
-        
-        ax.plot(KAVG_range, v_sus, 'o-', label="N=" + str(nPart))
+        for KSTD in KSTD_range:
+            v_sus = []
+            for KAVG in KAVG_range:
+                v_sus_sum = 0
+                count_err = 0
+                for seed in seed_range:
+                    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
+                    if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                        try:
+                            write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                        except:
+                            print(nPart, KAVG, seed)
+                            count_err += 1
+                    try:
+                        v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
+                    except:
+                        print("error")
+                v_sus.append(v_sus_sum/len(seed_range))
+            
+            ax.plot(KAVG_range, v_sus, 'o-', label="N=" + str(nPart) + ", KSTD=" + str(KSTD))
     ax.set_xlabel("KAVG")
     ax.set_ylabel(r"Vicsek order parameter susceptibility")
     ax.legend()
