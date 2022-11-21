@@ -300,7 +300,7 @@ def write_stats(mode, nPart, phi, K, seed, avg_over):
     v_mean = v_order_ss(mode, nPart, phi, K, seed, avg_over)
     v_sd = v_order_sd(mode, nPart, phi, K, seed, avg_over)
     v_sus = nPart*v_sd**2
-    
+
     sim_dir = get_sim_dir(mode, nPart, phi, K, seed)
     statsFile = open(os.path.join(sim_dir, "stats"), "w")
     statsFile.write(str(v_mean) + '\n')
@@ -321,6 +321,7 @@ def read_stats(mode, nPart, phi, K, seed):
     stats_dict["v_mean"] = float(r[0][0])
     stats_dict["v_sd"] = float(r[1][0])
     stats_dict["v_sus"] = float(r[2][0])
+    stats_dict["q"] = float(r[0][0]**2)
     return stats_dict
 
 def plot_vorder_ksd(mode, nPart, phi, KAVG, KSTD_range, seed_range, log=False):
@@ -422,37 +423,75 @@ def plot_vorder_kavg(mode, nPart, phi, KAVG_range, KSTD, seed_range):
     plt.savefig(os.path.join(folder, filename))
 
 
-def plot_vorder_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD, seed_range):
+def plot_vorder_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD_range, seed_range):
     """
     Plot steady state Vicsek order parameter against K_avg for a fixed K_std (Gaussian distributed couplings)
     Averaged over a number of realizations
-    Superimposed plots for various N
+    Superimposed plots for various N and KSTD
     """
     fig, ax = plt.subplots()
     for nPart in nPart_range:
-        v_ss = []
-        for KAVG in KAVG_range:
-            v_ss_sum = 0
-            count_err = 0
-            for seed in seed_range:
-                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
-                if not os.path.exists(os.path.join(sim_dir, 'stats')):
+        for KSTD in KSTD_range:
+            v_ss = []
+            for KAVG in KAVG_range:
+                v_ss_sum = 0
+                count_err = 0
+                for seed in seed_range:
+                    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
+                    if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                        try:
+                            write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                        except:
+                            print(nPart, KAVG, seed)
+                            count_err += 1
                     try:
-                        write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                        v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
                     except:
-                        print(nPart, KAVG, seed)
-                        count_err += 1
-                try:
-                    v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
-                except:
-                    print("error")
-            v_ss.append(v_ss_sum/(len(seed_range) - count_err))
-        ax.plot(KAVG_range, v_ss, 'o-', label="N=" + str(nPart))
+                        print("error")
+                v_ss.append(v_ss_sum/(len(seed_range) - count_err))
+            ax.plot(KAVG_range, v_ss, 'o-', label="N=" + str(nPart) + ", K_STD=" + str(KSTD))
     ax.set_xlabel("KAVG")
     ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
     ax.legend()
 
     folder = os.path.abspath('../plots/v_order_vs_K/')
+    filename = mode + '_phi' + str(phi) + '_KSTD' + str(KSTD) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def plot_q_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD_range, seed_range):
+    """
+    Plot steady state EA order parameter against K_avg for a fixed K_std (Gaussian distributed couplings)
+    Averaged over a number of realizations
+    Superimposed plots for various N and KSTD
+    """
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for KSTD in KSTD_range:
+            v_ss = []
+            for KAVG in KAVG_range:
+                v_ss_sum = 0
+                count_err = 0
+                for seed in seed_range:
+                    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
+                    if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                        try:
+                            write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                        except:
+                            print(nPart, KAVG, seed)
+                            count_err += 1
+                    try:
+                        v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["q"]
+                    except:
+                        print("error")
+                v_ss.append(v_ss_sum/(len(seed_range) - count_err))
+            ax.plot(KAVG_range, v_ss, 'o-', label="N=" + str(nPart) + ", K_STD=" + str(KSTD))
+    ax.set_xlabel("KAVG")
+    ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/q_vs_K/')
     filename = mode + '_phi' + str(phi) + '_KSTD' + str(KSTD) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
