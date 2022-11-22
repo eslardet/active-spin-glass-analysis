@@ -321,7 +321,7 @@ def read_stats(mode, nPart, phi, K, seed):
     stats_dict["v_mean"] = float(r[0][0])
     stats_dict["v_sd"] = float(r[1][0])
     stats_dict["v_sus"] = float(r[2][0])
-    stats_dict["q"] = float(r[0][0]**2)
+    stats_dict["q"] = float(r[0][0])**2
     return stats_dict
 
 def plot_vorder_ksd(mode, nPart, phi, KAVG, KSTD_range, seed_range, log=False):
