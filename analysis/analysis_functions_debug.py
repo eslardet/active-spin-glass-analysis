@@ -308,6 +308,11 @@ def write_stats(mode, nPart, phi, K, seed, avg_over):
     statsFile.write(str(v_sus))
     statsFile.close()
 
+    ## TO DO: Write file with lower resolution than pos
+
+    ## Remove position files to save space
+    os.remove(os.path.join(sim_dir, "pos"))
+
 def read_stats(mode, nPart, phi, K, seed):
     """
     Read stats file and create dictionary with those statistics
@@ -488,7 +493,7 @@ def plot_q_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD_range, seed
                 v_ss.append(v_ss_sum/(len(seed_range) - count_err))
             ax.plot(KAVG_range, v_ss, 'o-', label="N=" + str(nPart) + ", K_STD=" + str(KSTD))
     ax.set_xlabel("KAVG")
-    ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
+    ax.set_ylabel(r"q order parameter")
     ax.legend()
 
     folder = os.path.abspath('../plots/q_vs_K/')
