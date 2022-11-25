@@ -293,12 +293,43 @@ def v_order_sd(mode, nPart, phi, K, seed, avg_over):
     v_sd = np.std(v_order)
     return v_sd
 
+def write_pos_lowres(mode, nPart, phi, K, seed):
+    sim_dir = get_sim_dir(mode, nPart, phi, K, seed)
+    posFile = os.path.join(sim_dir, "pos")
+    lowresFile = open(os.path.join(sim_dir, "pos_low_res"), "w")
+    with open(posFile) as pf:
+        line_count = 1
+        for line in pf:
+            if (line_count - 7) % 101 == 0:
+                time = float(line)
+            if line_count > 6:
+                if time % 1.0 == 0:
+                    lowresFile.write(line)
+            line_count += 1
+    lowresFile.close()
+
 def write_stats(mode, nPart, phi, K, seed, avg_over):
     """
-    Write a file with various statistics from the simulation data (Vicsek order parameter mean and the standard deviation)
+    Write a file with various statistics from the simulation data (Vicsek order parameter mean, standard deviation, susceptibility)
     """
-    v_mean = v_order_ss(mode, nPart, phi, K, seed, avg_over)
-    v_sd = v_order_sd(mode, nPart, phi, K, seed, avg_over)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, K=K, seed=seed)
+    inpar_dict = get_params(inparFile)
+    DT = inpar_dict["DT"]
+    simulT = inpar_dict["simulT"]
+    max_T = simulT
+    min_T = simulT - avg_over*DT
+    
+    theta_all = get_theta_arr(inparFile, posFile, min_T, max_T)
+    v_order = []
+    for theta_t in theta_all:
+        cos_sum = 0
+        sin_sum = 0
+        for i in theta_t:
+            cos_sum += np.cos(i)
+            sin_sum += np.sin(i)
+        v_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
+    v_mean = np.mean(v_order)
+    v_sd = np.std(v_order)
     v_sus = nPart*v_sd**2
 
     sim_dir = get_sim_dir(mode, nPart, phi, K, seed)
@@ -308,7 +339,8 @@ def write_stats(mode, nPart, phi, K, seed, avg_over):
     statsFile.write(str(v_sus))
     statsFile.close()
 
-    ## TO DO: Write file with lower resolution than pos
+    ## Write file with lower resolution than pos
+    write_pos_lowres(mode, nPart, phi, K, seed)
 
     ## Remove position files to save space
     os.remove(os.path.join(sim_dir, "pos"))
@@ -326,7 +358,6 @@ def read_stats(mode, nPart, phi, K, seed):
     stats_dict["v_mean"] = float(r[0][0])
     stats_dict["v_sd"] = float(r[1][0])
     stats_dict["v_sus"] = float(r[2][0])
-    stats_dict["q"] = float(r[0][0])**2
     return stats_dict
 
 def plot_vorder_ksd(mode, nPart, phi, KAVG, KSTD_range, seed_range, log=False):
