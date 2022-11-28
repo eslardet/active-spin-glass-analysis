@@ -60,12 +60,12 @@ distclean: clean
 	$(RM) -r $(binDir)/$(app)
 
 # Unix
-# buildrepo:
-# 	@mkdir -p $(objDir)
+buildrepo:
+	@mkdir -p $(objDir)
 
 # Windows
-buildrepo:
-	@mkdir $(objDir)
+# buildrepo:
+# 	@mkdir $(objDir)
 
 # usage: $(call make-depend,source-file,object-file,depend-file)
 define make-depend
