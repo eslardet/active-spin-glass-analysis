@@ -323,34 +323,8 @@ def read_stats(mode, nPart, phi, K, seed):
     stats_dict["v_sus"] = float(r[2][0])
     return stats_dict
 
-def plot_vorder_ksd(mode, nPart, phi, KAVG, KSTD_range, seed_range, log=False):
-    """
-    Plot steady state Vicsek order parameter against K_std for a fixed K_avg (Gaussian distributed couplings)
-    Averaged over a number of realizations
-    """
-    v_ss = []
-    for KSTD in KSTD_range:
-        v_ss_sum = 0
-        for seed in seed_range:
-            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
-            if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
-            v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
-        v_ss.append(v_ss_sum/len(seed_range))
-    fig, ax = plt.subplots()
-    ax.plot(KSTD_range, v_ss, 'o-')
-    ax.set_xlabel("KSTD")
-    ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
-    if log == True:
-        ax.set_xscale("log")
-    
-    folder = os.path.abspath('../plots/v_order_vs_K/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_KAVG' + str(KAVG) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
 
-def plot_vorder_ksd_superimpose(mode, nPart_range, phi, KAVG, KSTD_range, seed_range, log=False):
+def plot_vorder_ksd(mode, nPart_range, phi, KAVG, KSTD_range, seed_range, log=False):
     """
     Plot steady state Vicsek order parameter against K_std for a fixed K_avg (Gaussian distributed couplings)
     Averaged over a number of realizations
@@ -380,33 +354,9 @@ def plot_vorder_ksd_superimpose(mode, nPart_range, phi, KAVG, KSTD_range, seed_r
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_vorder_kavg(mode, nPart, phi, KAVG_range, KSTD, seed_range):
-    """
-    Plot steady state Vicsek order parameter against K_avg for a fixed K_std (Gaussian distributed couplings)
-    Averaged over a number of realizations
-    """
-    v_ss = []
-    for KAVG in KAVG_range:
-        v_ss_sum = 0
-        for seed in seed_range:
-            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
-            if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
-            v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
-        v_ss.append(v_ss_sum/len(seed_range))
-    fig, ax = plt.subplots()
-    ax.plot(KAVG_range, v_ss, 'o-')
-    ax.set_xlabel("KAVG")
-    ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
-
-    folder = os.path.abspath('../plots/v_order_vs_K/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_KSTD' + str(KSTD) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
 
 
-def plot_vorder_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD, seed_range):
+def plot_vorder_kavg(mode, nPart_range, phi, KAVG_range, KSTD, seed_range):
     """
     Plot steady state Vicsek order parameter against K_avg for a fixed K_std (Gaussian distributed couplings)
     Averaged over a number of realizations
@@ -435,34 +385,8 @@ def plot_vorder_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD, seed_
     plt.savefig(os.path.join(folder, filename))
 
 
-def plot_vorder_sus_ksd(mode, nPart, phi, KAVG, KSTD_range, seed_range):
-    """
-    Plot susceptibility of Vicsek order parameter against K_std for a given K_avg
-    Averaged over a number of realizations
-    """
-    v_sus = []
-    for KSTD in KSTD_range:
-        v_sus_sum = 0
-        for seed in seed_range:
-            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
-            if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
-            v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
-        v_sus.append(v_sus_sum/len(seed_range))
-    fig, ax = plt.subplots()
-    ax.plot(KSTD_range, v_sus, 'o-')
-    ax.set_xlabel("KSTD")
-    ax.set_ylabel(r"Vicsek order parameter susceptibility")
-    ax.set_xscale("log")
-
-
-    folder = os.path.abspath('../plots/v_order_sus_vs_K/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_KAVG' + str(KAVG) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
         
-def plot_vorder_sus_ksd_superimpose(mode, nPart_range, phi, KAVG, KSTD_range, seed_range):
+def plot_vorder_sus_ksd(mode, nPart_range, phi, KAVG, KSTD_range, seed_range):
     """
     Plot the susceptibility of the Vicsek order parameter (over the final 1000 saved timesteps) against K_std, with a fixed K_std
     Averaged over a number of realizations
@@ -492,32 +416,8 @@ def plot_vorder_sus_ksd_superimpose(mode, nPart_range, phi, KAVG, KSTD_range, se
     plt.savefig(os.path.join(folder, filename))
 
 
-def plot_vorder_sus_kavg(mode, nPart, phi, KAVG_range, KSTD, seed_range):
-    """
-    Plot the susceptibility of the Vicsek order parameter (over the final 1000 saved timesteps) against K_avg, with a fixed K_std
-    Averaged over a number of realizations
-    """
-    v_sus = []
-    for KAVG in KAVG_range:
-        v_sus_sum = 0
-        for seed in seed_range:
-            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
-            if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
-            v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
-        v_sus.append(v_sus_sum/len(seed_range))
-    fig, ax = plt.subplots()
-    ax.plot(KAVG_range, v_sus, 'o-')
-    ax.set_xlabel("KAVG")
-    ax.set_ylabel(r"Vicsek order parameter susceptibility")
-    
-    folder = os.path.abspath('../plots/v_order_sus_vs_K/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_KSTD' + str(KSTD) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
 
-def plot_vorder_sus_kavg_superimpose(mode, nPart_range, phi, KAVG_range, KSTD, seed_range):
+def plot_vorder_sus_kavg(mode, nPart_range, phi, KAVG_range, KSTD, seed_range):
     """
     Plot the susceptibility of the Vicsek order parameter (over the final 1000 saved timesteps) against K_avg, with a fixed K_std
     Averaged over a number of realizations
