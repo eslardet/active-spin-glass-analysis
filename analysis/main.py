@@ -5,4 +5,4 @@ import analysis_functions as fun
 
 # f.snapshot(mode="C", nPart=1000, phi=0.4, K=1.0, seed=2, view_time=10)
 
-fun.snapshot(mode="G", nPart=5000, phi=0.2, K="1.0_0.0", seed=4, view_time=10)
+fun.snapshot(mode="G", nPart=1600, phi=0.2, K="5.0_10.0", seed=1, view_time=20)

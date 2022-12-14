@@ -308,7 +308,7 @@ def write_pos_lowres(mode, nPart, phi, K, seed):
             line_count += 1
     lowresFile.close()
 
-def write_stats(mode, nPart, phi, K, seed, avg_over):
+def write_stats(mode, nPart, phi, K, seed, avg_over, remove_pos=False):
     """
     Write a file with various statistics from the simulation data (Vicsek order parameter mean, standard deviation, susceptibility)
     """
@@ -321,6 +321,8 @@ def write_stats(mode, nPart, phi, K, seed, avg_over):
     
     theta_all = get_theta_arr(inparFile, posFile, min_T, max_T)
     v_order = []
+    q_cos = np.zeros(nPart)
+    q_sin = np.zeros(nPart)
     for theta_t in theta_all:
         cos_sum = 0
         sin_sum = 0
@@ -328,22 +330,28 @@ def write_stats(mode, nPart, phi, K, seed, avg_over):
             cos_sum += np.cos(i)
             sin_sum += np.sin(i)
         v_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
+        q_cos += np.cos(theta_t)
+        q_sin += np.sin(theta_t)
     v_mean = np.mean(v_order)
     v_sd = np.std(v_order)
     v_sus = nPart*v_sd**2
+
+    q_param = np.sum((q_cos/len(theta_all))**2 + (q_sin/len(theta_all))**2)/nPart
 
     sim_dir = get_sim_dir(mode, nPart, phi, K, seed)
     statsFile = open(os.path.join(sim_dir, "stats"), "w")
     statsFile.write(str(v_mean) + '\n')
     statsFile.write(str(v_sd) + '\n')
-    statsFile.write(str(v_sus))
+    statsFile.write(str(v_sus) + '\n')
+    statsFile.write(str(q_param))
     statsFile.close()
 
     ## Write file with lower resolution than pos
     write_pos_lowres(mode, nPart, phi, K, seed)
 
-    ## Remove position files to save space
-    os.remove(os.path.join(sim_dir, "pos"))
+    if remove_pos == True:
+        ## Remove position files to save space
+        os.remove(os.path.join(sim_dir, "pos"))
 
 def read_stats(mode, nPart, phi, K, seed):
     """
@@ -358,6 +366,7 @@ def read_stats(mode, nPart, phi, K, seed):
     stats_dict["v_mean"] = float(r[0][0])
     stats_dict["v_sd"] = float(r[1][0])
     stats_dict["v_sus"] = float(r[2][0])
+    stats_dict["q"] = float(r[3][0])
     return stats_dict
 
 
