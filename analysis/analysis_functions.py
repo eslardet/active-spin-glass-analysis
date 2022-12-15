@@ -614,7 +614,6 @@ def critical_value_kavg(mode, nPart, phi, KAVG_range, KSTD, seed_range):
             except:
                 print("error")
         v_ss.append(v_ss_sum/(len(seed_range) - count_err))
-    ax.plot(KAVG_range, v_ss, 'o-', label="N=" + str(nPart) + ", K_STD=" + str(KSTD))
     for i in range(len(v_ss)):
         if v_ss[i] > 0.5: # For a strictly increasing function
             break
@@ -622,3 +621,43 @@ def critical_value_kavg(mode, nPart, phi, KAVG_range, KSTD, seed_range):
     KAVG_crit = (KAVG_range[i] + KAVG_range[i-1])/2
     
     return KAVG_crit
+
+
+
+def plot_vorder_kavg_ax(mode, nPart_range, phi, KAVG_range, KSTD_range, seed_range, fig, ax):
+    """
+    Plot steady state Vicsek order parameter against K_avg for a fixed K_std (Gaussian distributed couplings)
+    Averaged over a number of realizations
+    Superimposed plots for various N and KSTD
+    """
+    # fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for KSTD in KSTD_range:
+            v_ss = []
+            for KAVG in KAVG_range:
+                v_ss_sum = 0
+                count_err = 0
+                for seed in seed_range:
+                    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
+                    if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                        try:
+                            write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                        except:
+                            print(nPart, KAVG, KSTD, seed)
+                            count_err += 1
+                    try:
+                        v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
+                    except:
+                        print("error")
+                v_ss.append(v_ss_sum/(len(seed_range) - count_err))
+            ax.plot(KAVG_range, v_ss, 'o-', label="N=" + str(nPart) + ", K_STD=" + str(KSTD))
+    ax.set_xlabel("KAVG")
+    ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
+    ax.legend()
+
+    return fig, ax
+    # folder = os.path.abspath('../plots/v_order_vs_K/')
+    # filename = mode + '_phi' + str(phi) + '_KSTD' + str(KSTD) + '.png'
+    # if not os.path.exists(folder):
+    #     os.makedirs(folder)
+    # plt.savefig(os.path.join(folder, filename))
