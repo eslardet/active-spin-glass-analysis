@@ -17,11 +17,24 @@ fig, ax = plt.subplots()
 # filename = 'my_plot'
 # plt.savefig(os.path.join(folder, filename))
 
-
+crit_vals = []
+crit = fun.critical_value_kavg(mode="G", nPart=1600, phi=0.2, KAVG_range=[0.2,0.3,0.4,0.5], KSTD=0.0, seed_range=np.arange(1,11))
+crit_vals.append(crit)
 for KSTD in [1.0,2.0]:
     crit = fun.critical_value_kavg(mode="G", nPart=1600, phi=0.2, KAVG_range=[-2.0,-1.5,-1.0,-0.5,-0.25,0.0,0.1,0.2,0.22,0.24,0.25,0.26,0.28,0.3,0.4,0.5,0.75,1.0,1.25,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0], KSTD=KSTD, seed_range=np.arange(1,11))
-    print(KSTD, crit)
+    crit_vals.append(crit)
 
 for KSTD in [4.0,6.0,8.0,10.0]:
     crit = fun.critical_value_kavg(mode="G", nPart=1600, phi=0.2, KAVG_range=[-2.0,-1.5,-1.0,-0.5,-0.25,0.0,0.25,0.5,0.75,1.0,1.25,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0], KSTD=KSTD, seed_range=np.arange(1,11))
-    print(KSTD, crit)
+    crit_vals.append(crit)
+
+KSTD_range = [0.0,1.0,2.0,4.0,6.0,8.0,10.0]
+ax.plot(KSTD_range, crit_vals, 'o-')
+ax.set_xlim(0,12)
+ax.set_ylim(0,1.2)
+
+ax.set_xlabel("K_STD")
+ax.set_ylabel("Critical K_AVG value")
+folder = os.path.abspath('../plots/')
+filename = 'my_plot'
+plt.savefig(os.path.join(folder, filename))

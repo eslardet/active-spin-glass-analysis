@@ -627,7 +627,7 @@ def critical_value_kavg(mode, nPart, phi, KAVG_range, KSTD, seed_range):
 
     KAVG_crit = (0.5-intercept)/grad
     
-    return v_ss, KAVG_crit
+    return KAVG_crit
 
 
 
