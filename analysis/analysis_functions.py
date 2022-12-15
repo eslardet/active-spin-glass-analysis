@@ -618,9 +618,16 @@ def critical_value_kavg(mode, nPart, phi, KAVG_range, KSTD, seed_range):
         if v_ss[i] > 0.5: # For a strictly increasing function
             break
 
-    KAVG_crit = (KAVG_range[i] + KAVG_range[i-1])/2
+    # Midpoint method
+    # KAVG_crit = (KAVG_range[i] + KAVG_range[i-1])/2
+
+    # Equation of line method (more accurate)
+    grad = (v_ss[i]-v_ss[i-1])/(KAVG_range[i]-KAVG_range[i-1])
+    intercept = v_ss[i] - grad*KAVG_range[i]
+
+    KAVG_crit = (0.5-intercept)/grad
     
-    return KAVG_crit
+    return v_ss, KAVG_crit
 
 
 
