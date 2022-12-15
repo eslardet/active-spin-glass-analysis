@@ -147,7 +147,12 @@ def snapshot(mode, nPart, phi, K, seed, view_time):
     ax.set_ylim(-L/2,L/2)
     ax.set_aspect('equal')
     ax.set_title("t=" + str(view_time))
-    plt.show()
+    
+    folder = os.path.abspath('../snapshots')
+    filename = mode + '_phi' + str(phi) + '_K' + str(K) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
 def animate(mode, nPart, phi, K, seed, min_T=None, max_T=None):
     """
@@ -321,8 +326,8 @@ def write_stats(mode, nPart, phi, K, seed, avg_over, remove_pos=False):
     
     theta_all = get_theta_arr(inparFile, posFile, min_T, max_T)
     v_order = []
-    q_cos = np.zeros(nPart)
-    q_sin = np.zeros(nPart)
+    # q_cos = np.zeros(nPart)
+    # q_sin = np.zeros(nPart)
     for theta_t in theta_all:
         cos_sum = 0
         sin_sum = 0
@@ -330,24 +335,24 @@ def write_stats(mode, nPart, phi, K, seed, avg_over, remove_pos=False):
             cos_sum += np.cos(i)
             sin_sum += np.sin(i)
         v_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
-        q_cos += np.cos(theta_t)
-        q_sin += np.sin(theta_t)
+        # q_cos += np.cos(theta_t)
+        # q_sin += np.sin(theta_t)
     v_mean = np.mean(v_order)
     v_sd = np.std(v_order)
     v_sus = nPart*v_sd**2
 
-    q_param = np.sum((q_cos/len(theta_all))**2 + (q_sin/len(theta_all))**2)/nPart
+    # q_param = np.sum((q_cos/len(theta_all))**2 + (q_sin/len(theta_all))**2)/nPart
 
     sim_dir = get_sim_dir(mode, nPart, phi, K, seed)
     statsFile = open(os.path.join(sim_dir, "stats"), "w")
     statsFile.write(str(v_mean) + '\n')
     statsFile.write(str(v_sd) + '\n')
-    statsFile.write(str(v_sus) + '\n')
-    statsFile.write(str(q_param))
+    statsFile.write(str(v_sus))
+    # statsFile.write(str(q_param))
     statsFile.close()
 
     ## Write file with lower resolution than pos
-    write_pos_lowres(mode, nPart, phi, K, seed)
+    # write_pos_lowres(mode, nPart, phi, K, seed)
 
     if remove_pos == True:
         ## Remove position files to save space
@@ -366,7 +371,7 @@ def read_stats(mode, nPart, phi, K, seed):
     stats_dict["v_mean"] = float(r[0][0])
     stats_dict["v_sd"] = float(r[1][0])
     stats_dict["v_sus"] = float(r[2][0])
-    stats_dict["q"] = float(r[3][0])
+    # stats_dict["q"] = float(r[3][0])
     return stats_dict
 
 
@@ -388,12 +393,12 @@ def plot_vorder_ksd(mode, nPart_range, phi, KAVG, KSTD_range, seed_range, log=Fa
                     try:
                         write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
                     except:
-                        print(KSTD, seed)
-                        count_err += 1
+                        print(nPart, KAVG, KSTD, seed)
                 try:
                     v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
                 except:
                     print("error")
+                    count_err += 1
             v_ss.append(v_ss_sum/(len(seed_range) - count_err))
         ax.plot(KSTD_range, v_ss, 'o-', label="N=" + str(nPart))
     ax.set_xlabel("KSTD")
@@ -429,7 +434,7 @@ def plot_vorder_kavg(mode, nPart_range, phi, KAVG_range, KSTD_range, seed_range)
                         try:
                             write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
                         except:
-                            print(nPart, KAVG, seed)
+                            print(nPart, KAVG, KSTD, seed)
                             count_err += 1
                     try:
                         v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
@@ -466,7 +471,7 @@ def plot_q_kavg(mode, nPart_range, phi, KAVG_range, KSTD_range, seed_range):
                         try:
                             write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
                         except:
-                            print(nPart, KAVG, seed)
+                            print(nPart, KAVG, KSTD, seed)
                             count_err += 1
                     try:
                         v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["q"]
@@ -504,7 +509,7 @@ def plot_vorder_sus_ksd(mode, nPart_range, phi, KAVG, KSTD_range, seed_range):
                     try:
                         write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
                     except:
-                        print(nPart, KSTD, seed)
+                        print(nPart, KAVG, KSTD, seed)
                         count_err += 1
                 try: 
                     v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
@@ -543,7 +548,7 @@ def plot_vorder_sus_kavg(mode, nPart_range, phi, KAVG_range, KSTD_range, seed_ra
                         try:
                             write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
                         except:
-                            print(nPart, KAVG, seed)
+                            print(nPart, KAVG, KSTD, seed)
                             count_err += 1
                     try:
                         v_sus_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_sus"]
@@ -586,3 +591,34 @@ def plot_vorder_N(mode, nPart_range, phi, K, seed, log=False):
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+
+
+def critical_value_kavg(mode, nPart, phi, KAVG_range, KSTD, seed_range):
+    """
+    Find where the plot crosses the horizontal 0.5 line to extract the critical value of KAVG
+    """
+    v_ss = []
+    for KAVG in KAVG_range:
+        v_ss_sum = 0
+        count_err = 0
+        for seed in seed_range:
+            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed)
+            if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                try:
+                    write_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG)+'_'+str(KSTD), seed=seed, avg_over=1000)
+                except:
+                    print(nPart, KAVG, KSTD, seed)
+                    count_err += 1
+            try:
+                v_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, K=str(KAVG) + "_" + str(KSTD), seed=seed)["v_mean"]
+            except:
+                print("error")
+        v_ss.append(v_ss_sum/(len(seed_range) - count_err))
+    ax.plot(KAVG_range, v_ss, 'o-', label="N=" + str(nPart) + ", K_STD=" + str(KSTD))
+    for i in range(len(v_ss)):
+        if v_ss[i] > 0.5: # For a strictly increasing function
+            break
+
+    KAVG_crit = (KAVG_range[i] + KAVG_range[i-1])/2
+    
+    return KAVG_crit
