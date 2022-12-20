@@ -1,0 +1,34 @@
+------------------------------------------------------------
+activeSpinGlass_2D (v1) Simulation Started
+2022-12-15.08:22:03
+------------------------------------------------------------
+ --> Total Number of particles = 5000
+ --> Volume fraction, phi = 0.2
+ --> Seed = 4
+ --> Gamma_x = 1
+ --> Peclet number = 20
+ --> Ratio of LJ interaction radius to particle size = 1
+ --> Ratio of Vicsek interaction radius to particle size = 5
+ --> Ratio of Lx/Ly = 1
+------------------------------------------------------------
+ --> Initial Conditions Mode = R
+------------------------------------------------------------
+ --> Coupling Constants Mode = G
+ ----> Average Coupling Constants, KAVG = 1 and standard deviation, STDK = 0
+------------------------------------------------------------
+ --> Timestep, dt = 2e-05
+ --> Recording Timestep, DT = 0.01
+ --> Equilibration Time = 0
+ --> Simulation Time = 20
+------------------------------------------------------------
+ --> savePos = 1
+ --> saveForce = 0
+ --> saveCoupling = 0
+------------------------------------------------------------
+
+Initializing in mode 'R', particles placed uniformly in the box
+Initializing couplings in mode 'G', Gaussian distributed couplings
+Neq = 0, Nsimul = 1000000 and Nskip = 500
+Volume fraction is phi = 0.2
+Check on the simulation after initialization: 
+ --> Volume fraction = 0.2
