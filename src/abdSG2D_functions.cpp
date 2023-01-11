@@ -55,7 +55,7 @@ void checkParameters()
 {
     if(Rr<1.0) {
         cerr << "Invalid value of Rr, must be >= 1.0!" << endl;
-        exit(1);
+        ::exit(1);
     }
     
     switch(initMode)
@@ -68,7 +68,7 @@ void checkParameters()
         default :
             cerr << "Invalid Initialization Mode!" << endl;
             cerr << " --> Valid modes are : 'R' ... " << endl;
-            exit(1);
+            ::exit(1);
 
     }
 
@@ -105,7 +105,7 @@ void checkParameters()
         default :
             cerr << "Invalid Couplings Initialization Mode!" << endl;
             cerr << " --> Valid modes are : 'C', 'T', 'G', 'F', 'A' ... " << endl;
-            exit(1);
+            ::exit(1);
 
     }
 }
@@ -233,7 +233,7 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     if (saveCoupling) {
         couplingFile.open("coupling",ios::out);
         if(couplingFile.fail())
-        {cerr<<"Failed to open couplings file!"<<endl; exit(1);}
+        {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
         couplingFile.precision(8);
         saveCouplings(K,couplingFile);
         couplingFile.close();
@@ -253,7 +253,7 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     // Open file to write initial conditions
     initposFile.open("initpos",ios::out);
     if (initposFile.fail()) 
-    {cerr << "Can't open initial positions file!" << endl; exit(1);}
+    {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
     initposFile.precision(8);
 
     // Calculate size of the box
@@ -543,7 +543,7 @@ void SRK2(vector<double>& x, vector<double>& fx,
     if ( checkNL(x,y) ) {
         updateNL(x,y);
     }
-        
+
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
     force(x,y,p,fx,fy,fp);
 
@@ -563,7 +563,7 @@ void SRK2(vector<double>& x, vector<double>& fx,
         y[i] += (fy[i]+Fy[i])/2.0*dT + sig_T*normDist(rnd_gen);
         p[i] += (fp[i]+Fp[i])/2.0*dT + sig_R*normDist(rnd_gen);
     }
-    
+
     return;
 }
 
@@ -852,7 +852,7 @@ void fire(vector<double> &px, vector<double> &py, const double dT0, const double
     }
 
     cerr << "Maximum number of iterations exceeded in FIRE!"<< endl;
-    exit(1);
+    ::exit(1);
 
     return;
 }
