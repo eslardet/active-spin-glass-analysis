@@ -1,12 +1,12 @@
 app = activeSpinGlass_2D
 
 srcExt = cpp
-srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src
-objDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/obj
-binDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/bin
+srcDir = $(HOME)/Dropbox/ActiveMatter/codes/src/2D_ActiveSpinGlass/v1
+objDir = $(HOME)/Dropbox/ActiveMatter/codes/obj/2D_ActiveSpinGlass
+binDir = $(HOME)/Dropbox/ActiveMatter/codes/bin
 inc = 
 
-debug = 1
+debug = 0
 
 CFlags = -W -std=c++11 -O2
 LDFlags =
@@ -56,13 +56,8 @@ clean:
 distclean: clean
 	$(RM) -r $(binDir)/$(app)
 
-# Unix
 buildrepo:
 	@mkdir -p $(objDir)
-
-# Windows
-# buildrepo:
-# 	@mkdir $(objDir)
 
 # usage: $(call make-depend,source-file,object-file,depend-file)
 define make-depend
