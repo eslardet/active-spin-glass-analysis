@@ -39,6 +39,7 @@ def get_params(inparFile):
     inpar_dict["nPart"] = int(r[0][0])
     inpar_dict["phi"] = float(r[1][0])
     inpar_dict["seed"] = int(r[2][0])
+    inpar_dict["xTy"] = float(r[7][0])
     inpar_dict["mode"] = r[9][0]
     
     if inpar_dict["mode"] == 'C':
@@ -119,9 +120,12 @@ def snapshot(mode, nPart, phi, K, seed, view_time):
     phi = inpar_dict["phi"]
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
+    xTy = inpar_dict["xTy"]
     
     beta = 2**(1/6)
-    L = np.sqrt(nPart*np.pi*beta**2 / (4*phi))
+    L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
+    Ly = L
+    Lx = L*xTy
     
     with open(posFile) as f:
         reader = csv.reader(f, delimiter="\t")
@@ -129,11 +133,11 @@ def snapshot(mode, nPart, phi, K, seed, view_time):
     
     i = int(view_time/DT)
     view_time = i*DT
-    x = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0], L)
-    y = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1], L)
+    x = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0], Lx)
+    y = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1], Ly)
     theta = np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2]
     
-    fig, ax = plt.subplots(figsize=(5,5), dpi=72)
+    fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     diameter = (ax.get_window_extent().width * 72/fig.dpi) /L *beta
     
     if mode == "T":
@@ -143,8 +147,8 @@ def snapshot(mode, nPart, phi, K, seed, view_time):
     else:
         ax.plot(x, y, 'o', ms=diameter, zorder=1)
     ax.quiver(x, y, np.cos(theta), np.sin(theta), zorder=2)
-    ax.set_xlim(-L/2,L/2)
-    ax.set_ylim(-L/2,L/2)
+    ax.set_xlim(-Lx/2,Lx/2)
+    ax.set_ylim(-Ly/2,Ly/2)
     ax.set_aspect('equal')
     ax.set_title("t=" + str(view_time))
     
@@ -169,37 +173,40 @@ def animate(mode, nPart, phi, K, seed, min_T=None, max_T=None):
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
     seed = inpar_dict["seed"]
+    xTy = inpar_dict["xTy"]
 
     plt.rcParams["animation.html"] = "jshtml"
     plt.ioff()
     plt.rcParams['animation.embed_limit'] = 2**128
 
-    fig, ax = plt.subplots(figsize=(3,3))
+    fig, ax = plt.subplots(figsize=(3*xTy,3))
     
     beta = 2**(1/6)
-    L = np.sqrt(nPart*np.pi*beta**2 / (4*phi))
+    L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
+    Ly = L
+    Lx = L*xTy
     
     diameter = (ax.get_window_extent().width * 72/fig.dpi) /L * beta
 
     points_A, = plt.plot([], [], 'o', ms=diameter, zorder=1)
     points_B, = plt.plot([], [], 'o', ms=diameter, zorder=2)
 
-    x = pbc_wrap(x_all[0], L)
-    y = pbc_wrap(y_all[0], L)
+    x = pbc_wrap(x_all[0], Lx)
+    y = pbc_wrap(y_all[0], Ly)
     theta = theta_all[0]
     arrows = plt.quiver(x, y, np.cos(theta), np.sin(theta), zorder=3)
 
     def init():
-        ax.set_xlim(-L/2, L/2)
-        ax.set_ylim(-L/2, L/2)
+        ax.set_xlim(-Lx/2, Lx/2)
+        ax.set_ylim(-Ly/2, Ly/2)
         if mode == "T":
             return arrows, points_A, points_B,
         else:
             return arrows, points_A
 
     def update(n):
-        x = pbc_wrap(x_all[n], L)
-        y = pbc_wrap(y_all[n], L)
+        x = pbc_wrap(x_all[n], Lx)
+        y = pbc_wrap(y_all[n], Ly)
         theta = theta_all[n]
         if mode == "T":
             nA = nPart//2
