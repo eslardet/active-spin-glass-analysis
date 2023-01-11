@@ -11,7 +11,7 @@
 ###############
 
 # bd_dir=$HOME/Dropbox/ActiveMatter
-bd_dir=$HOME/Code/Active_Spin_Glass
+bd_dir=$HOME/Code/2D_ActiveSpinGlass_EL
 bin_dir=$bd_dir/bin
 
 # bin_dir=$HOME/bin
@@ -23,7 +23,7 @@ bin_dir=$bd_dir/bin
 
 nPart=5000
 phi=0.2
-seed=3
+seed=4
 
 gx=1.0
 Pe=20.0
@@ -59,15 +59,15 @@ saveCoupling=0
 
 # Local
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/Constant/N${nPart}/phi${phi}/K${K0}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Constant/N${nPart}/phi${phi}/K${K0}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/TwoPopulations/N${nPart}/phi${phi}/K${KAA}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/TwoPopulations/N${nPart}/phi${phi}/K${KAA}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/Gaussian/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/Ferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Ferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Code/Active_Spin_Glass/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
 fi
 
 # Cluster

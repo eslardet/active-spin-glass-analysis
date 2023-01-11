@@ -131,8 +131,8 @@ echo ${saveCoupling} >> 'inpar'
 
 #ulimit -c unlimited
 
-# gdb -ex 'run inpar' -ex bt -ex quit ${bin_dir}/activeSpinGlass_2D
+gdb -ex 'run inpar' -ex '' -ex quit ${bin_dir}/activeSpinGlass_2D
 
-time ${bin_dir}/activeSpinGlass_2D inpar
+# time ${bin_dir}/activeSpinGlass_2D inpar
 
 echo "2D Active Spin Glass run done."

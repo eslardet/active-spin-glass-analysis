@@ -1,15 +1,12 @@
 app = activeSpinGlass_2D
 
 srcExt = cpp
-srcDir = $(HOME)/Code/Active_Spin_Glass/src
-objDir = $(HOME)/Code/Active_Spin_Glass/obj
-binDir = $(HOME)/Code/Active_Spin_Glass/bin
-# srcDir = $(HOME)/2D_ActiveSpinGlass_EL/src
-# objDir = $(HOME)/2D_ActiveSpinGlass_EL/obj
-# binDir = $(HOME)/bin
+srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_debug
+objDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/obj
+binDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/bin
 inc = 
 
-debug = 0
+debug = 1
 
 CFlags = -W -std=c++11 -O2
 LDFlags =

@@ -154,6 +154,10 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
         case 'R' : // Particles placed randomly in the box
             initialConditionsRandom(x,y,p);
             break;
+
+        case 'F': // Particle positions from file
+            initialConditionsFile(x,y,p);
+            break;
     }
 
     // Allocation of memory
@@ -251,6 +255,75 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     double dTF = 0.1;
 
     // Open file to write initial conditions
+    initposFile.open("initpos",ios::out);
+    if (initposFile.fail()) 
+    {cerr << "Can't open initial positions file!" << endl; exit(1);}
+    initposFile.precision(8);
+
+    // Calculate size of the box
+    L = sqrt(double(nPart)*PI*SQR(beta/2.0)/(phi*xTy));
+    
+    xmin = 0.0;
+    xmax = xTy*L;
+    ymin = 0.0;
+    ymax = L;
+
+    Lx = xTy*L;
+    Ly =     L;
+
+    // Timing
+    Neq = (int) ceil(eqT/dT);
+    Nsimul = (int) ceil(simulT/dT);
+    Nskip = (int) ceil(DT/dT);
+    logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
+    logFile << "Volume fraction is phi = " << phi << endl;
+
+    // Initialize particles at random positions
+    for (int i=0 ; i<nPart ; i++) {
+        x[i] = Lx*uniDist(rnd_gen);
+        y[i] = Ly*uniDist(rnd_gen);
+        p[i] = 2.0*PI*uniDist(rnd_gen); 
+    }
+
+    // Save initial conditions
+    saveInitFrame(x,y,p,initposFile);
+
+    // Initialize lengthscales related to the cell list
+    lx = rl; 
+    ly = rl;
+    mx = (int)floor(Lx/lx);
+    my = (int)floor(Ly/ly);
+    lx = Lx/double(mx);
+    ly = Ly/double(my);
+    nCell = mx*my;
+
+    // Allocation of memory
+    allocateSRKmem();   
+
+    // Build map of cells
+    buildMap();
+
+    // Proceed to one-step energy minimization via FIRE
+    U = -1.0;
+    fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
+
+    // Save initial conditions
+    saveInitFrame(x,y,p,initposFile);
+    initposFile.close();
+
+    return; 
+}
+
+/////////////////////////////
+// initialConditionsFile //
+/////////////////////////////
+// Initialize positions of particles from file
+void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double>& p)
+{
+    double U;
+    double dTF = 0.1;
+
+    // Open file to read initial conditions
     initposFile.open("initpos",ios::out);
     if (initposFile.fail()) 
     {cerr << "Can't open initial positions file!" << endl; exit(1);}
