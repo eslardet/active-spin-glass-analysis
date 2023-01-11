@@ -1,9 +1,9 @@
 app = activeSpinGlass_2D
 
 srcExt = cpp
-srcDir = $(HOME)/Dropbox/ActiveMatter/codes/src/2D_ActiveSpinGlass/v1
-objDir = $(HOME)/Dropbox/ActiveMatter/codes/obj/2D_ActiveSpinGlass
-binDir = $(HOME)/Dropbox/ActiveMatter/codes/bin
+srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src
+objDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/obj
+binDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/bin
 inc = 
 
 debug = 0
