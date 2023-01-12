@@ -109,7 +109,7 @@ def get_theta_arr(inparFile, posFile, min_T=None, max_T=None):
         theta.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2])
     return theta
 
-def snapshot(mode, nPart, phi, K, seed, view_time):
+def snapshot(mode, nPart, phi, K, seed, view_time, quivers=False, color=True):
     """
     Get static snapshot at specified time from the positions file
     """
@@ -141,7 +141,8 @@ def snapshot(mode, nPart, phi, K, seed, view_time):
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /L *beta
 
-    norm = colors.Normalize(vmin=-1.0, vmax=1.0, clip=True)
+    norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
+    # norm = colors.Normalize(vmin=-1.0, vmax=1.0, clip=True)
     mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
     
     if mode == "T":
@@ -149,18 +150,24 @@ def snapshot(mode, nPart, phi, K, seed, view_time):
         ax.plot(x[:nA], y[:nA], 'o', ms=diameter, zorder=1)
         ax.plot(x[nA:], y[nA:], 'o', ms=diameter, zorder=1)
     else:
-        for i in range(nPart):
-            color = mapper.to_rgba(np.cos(theta[i]))
-            ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
-    ax.quiver(x, y, np.cos(theta), np.sin(theta), zorder=2)
+        if color == True:
+            for i in range(nPart):
+                color = mapper.to_rgba(theta[i]%(2*np.pi))
+                # color = mapper.to_rgba(np.cos(theta[i]))
+                ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
+        else:
+            ax.plot(x, y, 'o', ms=diameter, zorder=1)
+    if quivers == True:
+        ax.quiver(x, y, np.cos(theta), np.sin(theta), zorder=2)
     ax.set_xlim(-Lx/2,Lx/2)
     ax.set_ylim(-Ly/2,Ly/2)
     ax.set_aspect('equal')
     ax.set_title("t=" + str(view_time))
-    plt.colorbar(mappable=mapper, ax=ax)
+    cbar = plt.colorbar(mappable=mapper, ax=ax)
+    # cbar.ax.set_ylabel(r'$\cos(\theta_i)$', rotation=270)
     
     folder = os.path.abspath('../snapshots')
-    filename = mode + '_phi' + str(phi) + '_K' + str(K) + '.png'
+    filename = 'N' + str(nPart) + mode + '_phi' + str(phi) + '_K' + str(K) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
