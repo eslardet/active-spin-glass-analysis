@@ -138,7 +138,7 @@ def snapshot(mode, nPart, phi, K, seed, view_time):
     theta = np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2]
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
-    diameter = (ax.get_window_extent().width * 72/fig.dpi) /L *beta
+    diameter = (ax.get_window_extent().height * 72/fig.dpi) /L *beta
     
     if mode == "T":
         nA = nPart//2
@@ -186,7 +186,7 @@ def animate(mode, nPart, phi, K, seed, min_T=None, max_T=None):
     Ly = L
     Lx = L*xTy
     
-    diameter = (ax.get_window_extent().width * 72/fig.dpi) /L * beta
+    diameter = (ax.get_window_extent().height * 72/fig.dpi) /L * beta
 
     points_A, = plt.plot([], [], 'o', ms=diameter, zorder=1)
     points_B, = plt.plot([], [], 'o', ms=diameter, zorder=2)
