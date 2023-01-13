@@ -10,78 +10,61 @@
 # Directories #
 ###############
 
-# bd_dir=$HOME/Dropbox/ActiveMatter
-bd_dir=$HOME/Code/2D_ActiveSpinGlass_EL
-bin_dir=$bd_dir/bin
-
-# bin_dir=$HOME/bin
+bin_dir=$HOME/bin
 # matlab_dir=$bd_dir/codes/matlab
 
 ##############
 # Parameters #
 ##############
 
-nPart=5000
+nPart=$1
 phi=0.2
-seed=4
+seed=$2
 
 gx=1.0
-Pe=20.0
+Pe=$3
 Rr=1.0
 Rp=5.0
-xTy=1.0
+xTy=$4
 
 initMode='R'
-couplingMode='G' 
+couplingMode='C'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
 #    'G' for Gaussian distribution, 
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
-# K0=1.0
+K0=$5
 
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
 
-KAVG=1.0
-STDK=0.0
+#KAVG=$3
+#STDK=$4
 
 dT=2.e-5
 DT=0.01
 eqT=0
-simulT=0.02
+simulT=20
 
 savePos=1
 saveForce=0
 saveCoupling=0
 
-# Local
-if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Constant/N${nPart}/phi${phi}/K${K0}/s${seed}
-elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/TwoPopulations/N${nPart}/phi${phi}/K${KAA}/s${seed}
-elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
-elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Ferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
-elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
-fi
-
 # Cluster
-# if [ "${couplingMode}" == "C" ]; then
-#     run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Constant/N${nPart}/phi${phi}/K${K0}/s${seed}
-# elif [ "${couplingMode}" == "T" ]; then
-#     run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/TwoPopulations/N${nPart}/phi${phi}/K${KAA}/s${seed}
-# elif [ "${couplingMode}" == "G" ]; then
-#     run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
-# elif [ "${couplingMode}" == "F" ]; then
-#     run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Ferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
-# elif [ "${couplingMode}" == "A" ]; then
-#     run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}/K${KAVG}_${STDK}/s${seed}
-# fi
+if [ "${couplingMode}" == "C" ]; then
+    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Constant/N${nPart}/phi${phi}_Pe${Pe}/K${K0}/s${seed}
+elif [ "${couplingMode}" == "T" ]; then
+    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/TwoPopulations/N${nPart}/phi${phi}_Pe${Pe}/K${KAA}/s${seed}
+elif [ "${couplingMode}" == "G" ]; then
+    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
+elif [ "${couplingMode}" == "F" ]; then
+    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Ferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
+elif [ "${couplingMode}" == "A" ]; then
+    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
+fi
 
 
 ###################################

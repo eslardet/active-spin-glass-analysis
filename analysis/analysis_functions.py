@@ -7,7 +7,7 @@ import csv
 import os
 
 
-def get_sim_dir(mode, nPart, phi, K, seed):
+def get_sim_dir(mode, nPart, phi, K, seed, Pe=None):
     if mode == "C":
         mode_name = "Constant"
     elif mode == "T":
@@ -19,12 +19,15 @@ def get_sim_dir(mode, nPart, phi, K, seed):
     elif mode == "F":
         mode_name = "Ferromagnetic"
     
-    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '/K' + str(K) + '/s' + str(seed))
+    if Pe == None:
+        sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '/K' + str(K) + '/s' + str(seed))
+    else:
+        sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_Pe' + str(Pe) + '/K' + str(K) + '/s' + str(seed))
 
     return sim_dir
 
-def get_files(mode, nPart, phi, K, seed):
-    sim_dir = get_sim_dir(mode, nPart, phi, K, seed)
+def get_files(mode, nPart, phi, K, seed, Pe=None):
+    sim_dir = get_sim_dir(mode, nPart, phi, K, seed, Pe)
     inparFile = os.path.join(sim_dir, "inpar")
     posFile = os.path.join(sim_dir, "pos")
     return inparFile, posFile
@@ -40,6 +43,7 @@ def get_params(inparFile):
     inpar_dict["nPart"] = int(r[0][0])
     inpar_dict["phi"] = float(r[1][0])
     inpar_dict["seed"] = int(r[2][0])
+    inpar_dict["Pe"] = float(r[4][0])
     inpar_dict["xTy"] = float(r[7][0])
     inpar_dict["mode"] = r[9][0]
     
@@ -109,16 +113,17 @@ def get_theta_arr(inparFile, posFile, min_T=None, max_T=None):
         theta.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2])
     return theta
 
-def snapshot(mode, nPart, phi, K, seed, view_time, quivers=False, color=True):
+def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_color=True):
     """
     Get static snapshot at specified time from the positions file
     """
 
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, K=K, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
     inpar_dict = get_params(inparFile)
     
     nPart = inpar_dict["nPart"]
     phi = inpar_dict["phi"]
+    Pe = inpar_dict["Pe"]
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
     xTy = inpar_dict["xTy"]
@@ -150,14 +155,14 @@ def snapshot(mode, nPart, phi, K, seed, view_time, quivers=False, color=True):
         ax.plot(x[:nA], y[:nA], 'o', ms=diameter, zorder=1)
         ax.plot(x[nA:], y[nA:], 'o', ms=diameter, zorder=1)
     else:
-        if color == True:
+        if show_color == True:
             for i in range(nPart):
                 color = mapper.to_rgba(theta[i]%(2*np.pi))
                 # color = mapper.to_rgba(np.cos(theta[i]))
                 ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
         else:
             ax.plot(x, y, 'o', ms=diameter, zorder=1)
-    if quivers == True:
+    if show_quiver == True:
         ax.quiver(x, y, np.cos(theta), np.sin(theta), zorder=2)
     ax.set_xlim(-Lx/2,Lx/2)
     ax.set_ylim(-Ly/2,Ly/2)
@@ -167,16 +172,16 @@ def snapshot(mode, nPart, phi, K, seed, view_time, quivers=False, color=True):
     # cbar.ax.set_ylabel(r'$\cos(\theta_i)$', rotation=270)
     
     folder = os.path.abspath('../snapshots')
-    filename = 'N' + str(nPart) + mode + '_phi' + str(phi) + '_K' + str(K) + '.png'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def animate(mode, nPart, phi, K, seed, min_T=None, max_T=None):
+def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
     """
     Make animation from positions file
     """
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, K=K, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
     
     x_all, y_all, theta_all = get_pos_arr(inparFile, posFile, min_T, max_T)
     
@@ -184,6 +189,7 @@ def animate(mode, nPart, phi, K, seed, min_T=None, max_T=None):
     
     nPart = inpar_dict["nPart"]
     phi = inpar_dict["phi"]
+    Pe = inpar_dict['Pe']
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
     seed = inpar_dict["seed"]
@@ -238,7 +244,8 @@ def animate(mode, nPart, phi, K, seed, min_T=None, max_T=None):
             return arrows, points_A
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(x_all), interval=10, blit=True)
-    ani.save(os.path.abspath('../animations/' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_K' + str(K) + '_s' + str(seed) + '.mp4'))
+    ani.save(os.path.abspath('../animations/' + mode + '/' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) +
+                             '_K' + str(K) + '_s' + str(seed) + '.mp4'))
 
 
 def plot_vorder_time(mode, nPart, phi, K, seed, min_T=None, max_T=None):
