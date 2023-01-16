@@ -29,3 +29,4 @@ bash runASG2D.sh $N $seed $Pe $xTy $K_AVG
 
 cd $PBS_O_WORKDIR/analysis
 python3 main_snapshot.py $N $Pe $K_AVG $seed
+python3 main_ani.py $N $Pe $K_AVG $seed

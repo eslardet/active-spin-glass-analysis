@@ -244,7 +244,7 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
             return arrows, points_A
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(x_all), interval=10, blit=True)
-    ani.save(os.path.abspath('../animations/' + mode + '/' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) +
+    ani.save(os.path.abspath('../animations/' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) +
                              '_K' + str(K) + '_s' + str(seed) + '.mp4'))
 
 

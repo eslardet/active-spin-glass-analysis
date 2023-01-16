@@ -20,6 +20,4 @@ view_time=20
 
 fun.snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, view_time=view_time)
 
-# Add animate
-
 
