@@ -10,22 +10,22 @@
 # Directories #
 ###############
 
-bin_dir=$HOME/bin
+bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # matlab_dir=$bd_dir/codes/matlab
 
 ##############
 # Parameters #
 ##############
 
-nPart=$1
+nPart=100
 phi=0.2
-seed=$2
+seed=1
 
 gx=1.0
-Pe=$3
+Pe=20.0
 Rr=1.0
 Rp=5.0
-xTy=$4
+xTy=1.0
 
 initMode='R'
 potMode='H'
@@ -39,7 +39,7 @@ couplingMode='C'
 #    'G' for Gaussian distribution, 
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
-K0=$5
+K0=1.0
 
 # KAA=10.0
 # KAB=0.0
@@ -59,15 +59,15 @@ saveCoupling=0
 
 # Cluster
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Constant/N${nPart}/phi${phi}_Pe${Pe}/K${K0}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Constant/N${nPart}/phi${phi}_Pe${Pe}/K${K0}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/TwoPopulations/N${nPart}/phi${phi}_Pe${Pe}/K${KAA}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/TwoPopulations/N${nPart}/phi${phi}_Pe${Pe}/K${KAA}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Ferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Ferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/2D_ActiveSpinGlass_EL/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
 fi
 
 
@@ -132,6 +132,6 @@ echo ${savePos} >> 'inpar'
 echo ${saveForce} >> 'inpar'
 echo ${saveCoupling} >> 'inpar'
 
-time ${bin_dir}/activeSpinGlass_2D_soft inpar
+time ${bin_dir}/activeSpinGlass_2D inpar
 
 echo "2D Active Spin Glass run done."

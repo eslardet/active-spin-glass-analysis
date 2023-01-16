@@ -128,7 +128,7 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     DT = inpar_dict["DT"]
     xTy = inpar_dict["xTy"]
     
-    beta = 2**(1/6)
+    beta = 2
     L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
     Ly = L
     Lx = L*xTy
@@ -201,7 +201,7 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
 
     fig, ax = plt.subplots(figsize=(3*xTy,3))
     
-    beta = 2**(1/6)
+    beta = 2
     L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
     Ly = L
     Lx = L*xTy

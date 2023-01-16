@@ -122,7 +122,7 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     rnd_gen.seed (seed);
 
     // Initialize particle hard-core radius
-    beta = pow(2.0,double(1.0)/double(6.0));
+    beta = 2.0;
     betasq = beta*beta;
 
     // Initialize Lennard-Jones potential lengthscale
@@ -627,11 +627,11 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
 
                 rijsq = SQR(xij)+SQR(yij);
 
-                // Truncated LJ potential
+                // Truncated Harmonic potential
                 if (rijsq <= rrsq) {
                     rij = sqrt(rijsq);
 
-                    ff  = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
+                    ff  = gx*(2-rij);
 
                     ffx[i] += ff*xij/rij;
                     ffy[i] += ff*yij/rij;

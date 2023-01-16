@@ -72,6 +72,24 @@ void checkParameters()
 
     }
 
+    switch(potMode)
+    {
+
+        case 'W' : // WCA Potential
+            logFile << "Initializing repulsion potential in mode 'W', WCA potential" << endl;
+            break;
+
+        case 'H' : // WCA Potential
+            logFile << "Initializing repulsion potential in mode 'H', Harmonic potential" << endl;
+            break;
+
+        default :
+            cerr << "Invalid Potential Mode!" << endl;
+            cerr << " --> Valid modes are : 'W', 'H' ... " << endl;
+            ::exit(1);
+
+    }
+
     switch(couplingMode)
     {
         case 'C' : // Constant coupling
@@ -122,7 +140,20 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     rnd_gen.seed (seed);
 
     // Initialize particle hard-core radius
-    beta = pow(2.0,double(1.0)/double(6.0));
+    switch(potMode)
+    {
+        case 'W' :
+            beta = pow(2.0,double(1.0)/double(6.0));
+            break;
+
+        case 'H' :
+            beta = 2.0;
+            break;
+        
+        default :
+            cerr << "Invalid Potential Mode!" << endl;
+            ::exit(1);
+    }
     betasq = beta*beta;
 
     // Initialize Lennard-Jones potential lengthscale
@@ -631,7 +662,21 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
                 if (rijsq <= rrsq) {
                     rij = sqrt(rijsq);
 
-                    ff  = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
+                    switch(potMode)
+                    {
+                        case 'W':
+                            ff  = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
+                            break;
+                        
+                        case 'H':
+                            ff = ff  = gx*(2-rij);
+                            break;
+                        
+                        default:
+                            cerr << "Invalid Potential Mode!" << endl;
+                            ::exit(1);
+                        }
+                    
 
                     ffx[i] += ff*xij/rij;
                     ffy[i] += ff*yij/rij;

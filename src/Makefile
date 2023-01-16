@@ -1,4 +1,4 @@
-app = activeSpinGlass_2D
+app = activeSpinGlass_2D_soft
 
 srcExt = cpp
 srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src

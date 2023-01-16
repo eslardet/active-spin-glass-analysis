@@ -10,13 +10,20 @@ import sys
 
 # fun.snapshot(mode="C", nPart=5000, phi=0.2, Pe=2.0, K="1.0", seed=1, view_time=20)
 
-mode = "C"
-nPart = sys.argv[1]
-phi = 0.2
-Pe = sys.argv[2]
-K = str(sys.argv[3])
-seed = sys.argv[4]
+# mode = "C"
+# nPart = sys.argv[1]
+# phi = 0.2
+# Pe = sys.argv[2]
+# K = str(sys.argv[3])
+# seed = sys.argv[4]
 view_time=20
+
+mode = "C"
+nPart = 100
+phi = 0.2
+Pe = 20.0
+K = 1.0
+seed = 1
 
 fun.snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, view_time=view_time)
 
