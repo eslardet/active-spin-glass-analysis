@@ -104,8 +104,6 @@ echo ${xTy} >> 'inpar'
 
 echo ${initMode} >> 'inpar'
 
-echo ${potMode} >> 'inpar'
-
 echo ${couplingMode} >> 'inpar'
 if [ "${couplingMode}" == "C" ]; then
     echo ${K0} >> 'inpar'
@@ -132,6 +130,8 @@ echo ${simulT} >> 'inpar'
 echo ${savePos} >> 'inpar'
 echo ${saveForce} >> 'inpar'
 echo ${saveCoupling} >> 'inpar'
+
+echo ${potMode} >> 'inpar'
 
 time ${bin_dir}/activeSpinGlass_2D_soft inpar
 

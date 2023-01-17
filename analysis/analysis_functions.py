@@ -48,8 +48,8 @@ def get_params(inparFile):
     inpar_dict["mode"] = r[9][0]
     
     if inpar_dict["mode"] == 'C':
-        inpar_dict["DT"] = float(r[13][0]) ##
-        inpar_dict["simulT"] = float(r[15][0]) ##
+        inpar_dict["DT"] = float(r[12][0])
+        inpar_dict["simulT"] = float(r[14][0])
     elif inpar_dict["mode"] == 'T':
         inpar_dict["DT"] = float(r[14][0])
         inpar_dict["simulT"] = float(r[16][0])
@@ -841,5 +841,19 @@ def rij_avg(mode, nPart, phi, Pe, K, seed, avg_over):
 
     return rij_sum/avg_over
 
-# def plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed):
-#     for 
+def plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed, avg_over):
+    K = str(KAVG) + '_' + str(KSTD)
+    couplings = read_couplings(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
+    rij = rij_avg(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, avg_over=avg_over)
+
+    fig, ax = plt.subplots(figsize=(5,5))
+    ax.plot(couplings, rij, 'o', alpha=0.2, ms=1)
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(r"$K_{ij}$")
+    ax.set_ylabel(r"$\langle r_{ij}\rangle_t$")
+
+    folder = os.path.abspath('../plots/dist_coupling/')
+    filename = mode + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
