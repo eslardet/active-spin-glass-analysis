@@ -28,10 +28,6 @@ Rp=5.0
 xTy=$4
 
 initMode='R'
-potMode='H'
-# can be:
-#    'W' WCA potential,
-#    'H' Harmonic potential
 couplingMode='C'
 # can be:
 #    'C' constant, 
@@ -56,6 +52,11 @@ simulT=20
 savePos=1
 saveForce=0
 saveCoupling=0
+
+potMode='H'
+# can be:
+#    'W' WCA potential,
+#    'H' Harmonic potential
 
 # Cluster
 if [ "${couplingMode}" == "C" ]; then

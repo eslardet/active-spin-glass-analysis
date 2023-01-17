@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import sys
 
 mode = "C"
-nPart = sys.argv[1]
+nPart = int(sys.argv[1])
 phi = 0.2
-Pe = sys.argv[2]
+Pe = float(sys.argv[2])
 K = str(sys.argv[3])
-seed = sys.argv[4]
+seed = int(sys.argv[4])
 view_time = float(sys.argv[5])
 
 # fun.snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, view_time=view_time)

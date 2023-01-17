@@ -45,17 +45,17 @@ def get_params(inparFile):
     inpar_dict["seed"] = int(r[2][0])
     inpar_dict["Pe"] = float(r[4][0])
     inpar_dict["xTy"] = float(r[7][0])
-    inpar_dict["mode"] = r[10][0]
+    inpar_dict["mode"] = r[9][0]
     
     if inpar_dict["mode"] == 'C':
-        inpar_dict["DT"] = float(r[13][0])
-        inpar_dict["simulT"] = float(r[15][0])
+        inpar_dict["DT"] = float(r[12][0])
+        inpar_dict["simulT"] = float(r[14][0])
     elif inpar_dict["mode"] == 'T':
-        inpar_dict["DT"] = float(r[15][0])
-        inpar_dict["simulT"] = float(r[17][0])
-    else:
         inpar_dict["DT"] = float(r[14][0])
         inpar_dict["simulT"] = float(r[16][0])
+    else:
+        inpar_dict["DT"] = float(r[13][0])
+        inpar_dict["simulT"] = float(r[15][0])
     return inpar_dict
 
 def pbc_wrap(x, L):
@@ -341,7 +341,7 @@ def pos_lowres(mode, nPart, phi, Pe, K, seed, DT_new=1.0, delete=True):
     with open(posFile) as pf:
         line_count = 1
         for line in pf:
-            if (line_count - 7) % 101 == 0:
+            if (line_count - 7) % (nPart+1) == 0:
                 time = float(line)
             if line_count < 7:
                 lrf.write(line)
@@ -356,11 +356,11 @@ def pos_lowres(mode, nPart, phi, Pe, K, seed, DT_new=1.0, delete=True):
     inpar_data = ifile.readlines()
     
     if mode == 'C':
-        inpar_data[13] = str(DT_new) + '\n'
+        inpar_data[12] = str(DT_new) + '\n'
     elif mode == 'T':
-        inpar_data[15] = str(DT_new) + '\n'
-    else:
         inpar_data[14] = str(DT_new) + '\n'
+    else:
+        inpar_data[13] = str(DT_new) + '\n'
     ifile = open(inparFile, 'w')
     ifile.writelines(inpar_data)
     ifile.close()

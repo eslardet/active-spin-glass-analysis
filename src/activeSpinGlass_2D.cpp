@@ -117,11 +117,6 @@ for (sig=1; sig<=32; sig++)
 
     logFile << "------------------------------------------------------------" << endl;
 
-    inputFile >> potMode; 
-    logFile << " --> Repulsion Potential Mode = " << potMode << endl; 
-
-    logFile << "------------------------------------------------------------" << endl;
-
     inputFile >> couplingMode; 
     logFile << " --> Coupling Constants Mode = " << couplingMode << endl; 
 
@@ -188,6 +183,11 @@ for (sig=1; sig<=32; sig++)
 
     inputFile >> saveCoupling; 
     logFile << " --> saveCoupling = " << saveCoupling << endl;
+
+    logFile << "------------------------------------------------------------" << endl;
+
+    inputFile >> potMode; 
+    logFile << " --> Repulsion Potential Mode = " << potMode << endl; 
 
     logFile << "------------------------------------------------------------" << endl;
     logFile << '\n';
