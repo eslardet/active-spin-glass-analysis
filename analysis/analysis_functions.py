@@ -48,8 +48,8 @@ def get_params(inparFile):
     inpar_dict["mode"] = r[9][0]
     
     if inpar_dict["mode"] == 'C':
-        inpar_dict["DT"] = float(r[12][0])
-        inpar_dict["simulT"] = float(r[14][0])
+        inpar_dict["DT"] = float(r[13][0]) ##
+        inpar_dict["simulT"] = float(r[15][0]) ##
     elif inpar_dict["mode"] == 'T':
         inpar_dict["DT"] = float(r[14][0])
         inpar_dict["simulT"] = float(r[16][0])
@@ -806,7 +806,7 @@ def read_couplings(mode, nPart, phi, Pe, K, seed):
     return couplings
 
 
-def dist_coupling(mode, nPart, phi, Pe, K, seed, avg_over):
+def rij_avg(mode, nPart, phi, Pe, K, seed, avg_over):
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
@@ -815,6 +815,7 @@ def dist_coupling(mode, nPart, phi, Pe, K, seed, avg_over):
     min_T = simulT - avg_over*DT
 
     x_all, y_all, theta_all = get_pos_arr(inparFile, posFile, min_T, max_T)
+    avg_over = len(x_all)
 
     beta = 2
     xTy = inpar_dict["xTy"]
@@ -822,15 +823,23 @@ def dist_coupling(mode, nPart, phi, Pe, K, seed, avg_over):
     Ly = L
     Lx = L*xTy
 
-    x = pbc_wrap(x_all, Lx)
-    y = pbc_wrap(y_all, Ly)
+    rij_sum = np.zeros(int(nPart*(nPart-1)/2))
 
-    rij_sum = np.zeros(nPart*(nPart-1)/2)
+    for t in range(avg_over):
+        x = x_all[t]
+        y = y_all[t]
+        rij_t = []
+        for i in range(nPart):
+            for j in range(i+1, nPart):
+                xij = x[i] - x[j]
+                xij = xij - Lx*round(xij/Lx)
+                yij = y[i] - y[j]
+                yij = yij - Ly*round(yij/Ly)
+                rij = np.sqrt(xij**2 + yij**2)
+                rij_t.append(rij)
+        rij_sum += np.asarray(rij_t)
 
-    for i in range(nPart):
-        for j in range(i+1, nPart):
-            rij_sum += 2
-
+    return rij_sum/avg_over
 
 # def plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed):
 #     for 

@@ -14,6 +14,11 @@ avg_over=1000
 
 # fun.dist_coupling(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, avg_over=avg_over)
 
-K = fun.read_couplings(mode, nPart, phi, Pe, K, seed)
+couplings = fun.read_couplings(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
 
-print(len(K))
+print(len(couplings))
+
+rij = fun.rij_avg(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, avg_over=avg_over)
+
+print(len(rij))
+print(rij)
