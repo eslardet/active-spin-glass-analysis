@@ -45,17 +45,17 @@ def get_params(inparFile):
     inpar_dict["seed"] = int(r[2][0])
     inpar_dict["Pe"] = float(r[4][0])
     inpar_dict["xTy"] = float(r[7][0])
-    inpar_dict["mode"] = r[9][0]
+    inpar_dict["mode"] = r[10][0]
     
     if inpar_dict["mode"] == 'C':
-        inpar_dict["DT"] = float(r[12][0])
-        inpar_dict["simulT"] = float(r[14][0])
-    elif inpar_dict["mode"] == 'T':
-        inpar_dict["DT"] = float(r[14][0])
-        inpar_dict["simulT"] = float(r[16][0])
-    else:
         inpar_dict["DT"] = float(r[13][0])
         inpar_dict["simulT"] = float(r[15][0])
+    elif inpar_dict["mode"] == 'T':
+        inpar_dict["DT"] = float(r[15][0])
+        inpar_dict["simulT"] = float(r[17][0])
+    else:
+        inpar_dict["DT"] = float(r[14][0])
+        inpar_dict["simulT"] = float(r[16][0])
     return inpar_dict
 
 def pbc_wrap(x, L):
@@ -244,8 +244,12 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
             return arrows, points_A
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(x_all), interval=10, blit=True)
-    ani.save(os.path.abspath('../animations/' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) +
-                             '_K' + str(K) + '_s' + str(seed) + '.mp4'))
+
+    folder = os.path.abspath('../animations')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '.mp4'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    ani.save(os.path.join(folder, filename))
 
 
 def plot_vorder_time(mode, nPart, phi, K, seed, min_T=None, max_T=None):
@@ -326,20 +330,51 @@ def v_order_sd(mode, nPart, phi, K, seed, avg_over):
     v_sd = np.std(v_order)
     return v_sd
 
-def write_pos_lowres(mode, nPart, phi, K, seed):
-    sim_dir = get_sim_dir(mode, nPart, phi, K, seed)
+def pos_lowres(mode, nPart, phi, Pe, K, seed, DT_new=1.0, delete=True):
+    """
+    Write a file with lower resolution, delete old position file and modify inpar file with new resolution
+    """
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
     posFile = os.path.join(sim_dir, "pos")
-    lowresFile = open(os.path.join(sim_dir, "pos_low_res"), "w")
+    lowresFile = os.path.join(sim_dir, "pos_low_res")
+    lrf = open(lowresFile, "w")
     with open(posFile) as pf:
         line_count = 1
         for line in pf:
             if (line_count - 7) % 101 == 0:
                 time = float(line)
-            if line_count > 6:
-                if time % 1.0 == 0:
-                    lowresFile.write(line)
+            if line_count < 7:
+                lrf.write(line)
+            else:
+                if time % DT_new == 0:
+                    lrf.write(line)
             line_count += 1
-    lowresFile.close()
+    lrf.close()
+
+    inparFile = os.path.join(sim_dir, "inpar")
+    ifile = open(inparFile, 'r')
+    inpar_data = ifile.readlines()
+    
+    if mode == 'C':
+        inpar_data[13] = str(DT_new) + '\n'
+    elif mode == 'T':
+        inpar_data[15] = str(DT_new) + '\n'
+    else:
+        inpar_data[14] = str(DT_new) + '\n'
+    ifile = open(inparFile, 'w')
+    ifile.writelines(inpar_data)
+    ifile.close()
+    
+    if delete == True:
+        os.remove(posFile)
+        os.rename(lowresFile, posFile)
+
+def del_pos(mode, nPart, phi, Pe, K, seed):
+    """
+    Delete position file to save space
+    """
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
+    os.remove(os.path.join(sim_dir, "pos"))
 
 def write_stats(mode, nPart, phi, K, seed, avg_over, remove_pos=False):
     """
@@ -757,3 +792,45 @@ def plot_vorder_kratio_ax(mode, nPart_range, phi, KAVG_range, KSTD_range, seed_r
     ax.legend()
 
     return fig, ax
+
+def read_couplings(mode, nPart, phi, Pe, K, seed):
+    sim_dir = get_sim_dir(mode, nPart, phi, K, seed, Pe)
+    couplingFile = os.path.join(sim_dir, "coupling")
+
+    with open(couplingFile) as f:
+        reader = csv.reader(f, delimiter="\t")
+        r = list(reader)
+
+    couplings = np.array(r).astype('float')
+
+    return couplings
+
+
+def dist_coupling(mode, nPart, phi, Pe, K, seed, avg_over):
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
+    inpar_dict = get_params(inparFile)
+    DT = inpar_dict["DT"]
+    simulT = inpar_dict["simulT"]
+    max_T = simulT
+    min_T = simulT - avg_over*DT
+
+    x_all, y_all, theta_all = get_pos_arr(inparFile, posFile, min_T, max_T)
+
+    beta = 2
+    xTy = inpar_dict["xTy"]
+    L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    x = pbc_wrap(x_all, Lx)
+    y = pbc_wrap(y_all, Ly)
+
+    rij_sum = np.zeros(nPart*(nPart-1)/2)
+
+    for i in range(nPart):
+        for j in range(i+1, nPart):
+            rij_sum += 2
+
+
+# def plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed):
+#     for 

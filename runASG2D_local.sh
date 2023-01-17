@@ -32,21 +32,21 @@ potMode='H'
 # can be:
 #    'W' WCA potential,
 #    'H' Harmonic potential
-couplingMode='C'
+couplingMode='G'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
 #    'G' for Gaussian distribution, 
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
-K0=1.0
+# K0=1.0
 
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
 
-#KAVG=$3
-#STDK=$4
+KAVG=1.0
+STDK=1.0
 
 dT=2.e-5
 DT=0.01
@@ -55,7 +55,7 @@ simulT=20
 
 savePos=1
 saveForce=0
-saveCoupling=0
+saveCoupling=1
 
 # Cluster
 if [ "${couplingMode}" == "C" ]; then
