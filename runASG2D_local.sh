@@ -28,10 +28,7 @@ Rp=5.0
 xTy=1.0
 
 initMode='R'
-potMode='H'
-# can be:
-#    'W' WCA potential,
-#    'H' Harmonic potential
+
 couplingMode='G'
 # can be:
 #    'C' constant, 
@@ -48,14 +45,19 @@ couplingMode='G'
 KAVG=1.0
 STDK=1.0
 
-dT=2.e-5
+dT=5.e-5
 DT=0.01
 eqT=0
-simulT=20
+simulT=10
 
 savePos=1
-saveForce=0
+saveForce=1
 saveCoupling=1
+
+potMode='H'
+# can be:
+#    'W' WCA potential,
+#    'H' Harmonic potential
 
 # Cluster
 if [ "${couplingMode}" == "C" ]; then
@@ -103,8 +105,6 @@ echo ${xTy} >> 'inpar'
 
 echo ${initMode} >> 'inpar'
 
-echo ${potMode} >> 'inpar'
-
 echo ${couplingMode} >> 'inpar'
 if [ "${couplingMode}" == "C" ]; then
     echo ${K0} >> 'inpar'
@@ -132,6 +132,8 @@ echo ${savePos} >> 'inpar'
 echo ${saveForce} >> 'inpar'
 echo ${saveCoupling} >> 'inpar'
 
-time ${bin_dir}/activeSpinGlass_2D inpar
+echo ${potMode} >> 'inpar'
+
+time ${bin_dir}/activeSpinGlass_2D_soft inpar
 
 echo "2D Active Spin Glass run done."
