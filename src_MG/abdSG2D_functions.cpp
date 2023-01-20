@@ -86,7 +86,7 @@ void checkParameters()
         case 'C' : // Continuous Potential (repulsive part of WCA)
             logFile << "Initializing repulsion potential in mode 'C', Continuous potential" << endl;
             break;
-            
+
         default :
             cerr << "Invalid Potential Mode!" << endl;
             cerr << " --> Valid modes are : 'W', 'H' ... " << endl;
@@ -723,7 +723,7 @@ void activeBrownianDynamicsCIL(vector<double>& x, vector<double>& y, vector<doub
                                double& t)
 {
     // Force Balance equation
-    EM(x,fx,y,fy,p,fp);
+    SRK2(x,fx,y,fy,p,fp);
     t += dT;
     return;
 }
