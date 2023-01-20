@@ -79,10 +79,14 @@ void checkParameters()
             logFile << "Initializing repulsion potential in mode 'W', WCA potential" << endl;
             break;
 
-        case 'H' : // WCA Potential
+        case 'H' : // Harmonic Potential
             logFile << "Initializing repulsion potential in mode 'H', Harmonic potential" << endl;
             break;
 
+        case 'C' : // Continuous Potential (repulsive part of WCA)
+            logFile << "Initializing repulsion potential in mode 'C', Continuous potential" << endl;
+            break;
+            
         default :
             cerr << "Invalid Potential Mode!" << endl;
             cerr << " --> Valid modes are : 'W', 'H' ... " << endl;
