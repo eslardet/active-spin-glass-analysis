@@ -64,7 +64,7 @@ def pbc_wrap(x, L):
     """
     Wrap points into periodic box with length L
     """
-    return x - L*np.round(x/L)
+    return x - L*np.round(x/L) + L/2
 
 def get_pos_arr(inparFile, posFile, min_T=None, max_T=None):
     """
@@ -178,8 +178,8 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
             ax.plot(x, y, 'o', ms=diameter, zorder=1)
     if show_quiver == True:
         ax.quiver(x, y, np.cos(theta), np.sin(theta), zorder=2)
-    ax.set_xlim(-Lx/2,Lx/2)
-    ax.set_ylim(-Ly/2,Ly/2)
+    ax.set_xlim(0,Lx)
+    ax.set_ylim(0,Ly)
     ax.set_aspect('equal')
     ax.set_title("t=" + str(view_time))
     cbar = plt.colorbar(mappable=mapper, ax=ax)
@@ -242,8 +242,8 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
     arrows = plt.quiver(x, y, np.cos(theta), np.sin(theta), zorder=3)
 
     def init():
-        ax.set_xlim(-Lx/2, Lx/2)
-        ax.set_ylim(-Ly/2, Ly/2)
+        ax.set_xlim(0, Lx)
+        ax.set_ylim(0, Ly)
         if mode == "T":
             return arrows, points_A, points_B,
         else:
