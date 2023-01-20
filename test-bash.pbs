@@ -2,7 +2,7 @@
 #PBS -m abe
 #PBS -N ASG2D_N5000_C_Pe
 #PBS -q standard
-#PBS -t 0-9
+##PBS -t 0-9
 
 #PBS -o output/$PBS_JOBNAME.o$PBS_JOBID
 #PBS -e output/$PBS_JOBNAME.e$PBS_JOBID
@@ -10,23 +10,27 @@
 num_Pe=10
 num_s=1
 
+mode='C'
+
 N=50
 
 ##seed_arr=($(seq 1 1 10))
 ##seed=${seed_arr[$(($PBS_ARRAYID / $num_Pe % $num_s))]}
 seed=1
 
-Pe_arr=($(seq 2 2.0 20))
-Pe=${Pe_arr[$(($PBS_ARRAYID / $num_Pe))]}
+phi=0.1
 
-xTy=3.0
+##Pe_arr=($(seq 2 2.0 20))
+##Pe=${Pe_arr[$(($PBS_ARRAYID / $num_Pe))]}
+Pe=20.0
+
+xTy=1.0
 
 K_AVG=1.0
 
 cd $PBS_O_WORKDIR
 
-bash runASG2D.sh $N $seed $Pe $xTy $K_AVG
+bash runASG2D.sh $N $phi $seed $Pe $xTy $mode $K_AVG
 
 cd $PBS_O_WORKDIR/analysis
-python3 main_snapshot.py $N $Pe $K_AVG $seed
-python3 main_ani.py $N $Pe $K_AVG $seed
+python3 main.py $mode $N $phi $Pe $K_AVG $seed

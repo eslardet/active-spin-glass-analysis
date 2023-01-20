@@ -10,11 +10,11 @@ import sys
 
 
 mode = "C"
-nPart = sys.argv[1]
+nPart = 50
 phi = 0.2
-Pe = sys.argv[2]
-K = str(sys.argv[3])
-seed = sys.argv[4]
+Pe = 20.0
+K = "1.0"
+seed = 1
 
 fun.animate(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
 

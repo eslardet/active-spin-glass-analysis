@@ -25,4 +25,9 @@ avg_over=100
 # print(len(rij))
 # print(rij)
 
-fun.plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed, avg_over)
+# fun.plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed, avg_over)
+
+inparFile, posFile = fun.get_files(mode="C", nPart=100, phi=0.2, K="1.0", seed=1, Pe=20.0)
+inpar_dict = fun.get_params(inparFile)
+
+print(inpar_dict["repulsion"])

@@ -665,11 +665,11 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
                     switch(potMode)
                     {
                         case 'W':
-                            ff  = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
+                            ff = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
                             break;
                         
                         case 'H':
-                            ff = ff  = gx*(2-rij);
+                            ff = gx*(2-rij);
                             break;
                         
                         default:

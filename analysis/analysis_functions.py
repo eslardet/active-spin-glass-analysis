@@ -44,8 +44,10 @@ def get_params(inparFile):
     inpar_dict["phi"] = float(r[1][0])
     inpar_dict["seed"] = int(r[2][0])
     inpar_dict["Pe"] = float(r[4][0])
+    inpar_dict["Rp"] = float(r[6][0])
     inpar_dict["xTy"] = float(r[7][0])
     inpar_dict["mode"] = r[9][0]
+    inpar_dict["repulsion"] = r[-1][0]
     
     if inpar_dict["mode"] == 'C':
         inpar_dict["DT"] = float(r[12][0])
@@ -126,10 +128,19 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     Pe = inpar_dict["Pe"]
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
+    Rp = inpar_dict["Rp"]
     xTy = inpar_dict["xTy"]
+    repulsion = inpar_dict["repulsion"]
+
+    if repulsion == 'W':
+        beta = 2**(1/6)
+    if repulsion == 'H':
+        beta = 2
+    if repulsion == 'C':
+        beta = 1
+    else:
+        beta = 2**(1/6)
     
-    # TO DO: Code automatic way of getting beta/ potential type
-    beta = 2 ## Need to change for WCA/ Harmonic
     L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
     Ly = L
     Lx = L*xTy
@@ -146,6 +157,8 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /L *beta
+    if repulsion == 'C':
+        diameter = diameter * 1.6
 
     norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
     # norm = colors.Normalize(vmin=-1.0, vmax=1.0, clip=True)
@@ -173,7 +186,7 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     # cbar.ax.set_ylabel(r'$\cos(\theta_i)$', rotation=270)
     
     folder = os.path.abspath('../snapshots')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '.png'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
@@ -194,7 +207,9 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
     seed = inpar_dict["seed"]
+    Rp = inpar_dict["Rp"]
     xTy = inpar_dict["xTy"]
+    repulsion = inpar_dict["repulsion"]
 
     plt.rcParams["animation.html"] = "jshtml"
     plt.ioff()
@@ -202,12 +217,21 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
 
     fig, ax = plt.subplots(figsize=(3*xTy,3))
     
-    beta = 2 ## Need to change for WCA/ Harmonic
+    if repulsion == 'W':
+        beta = 2**(1/6)
+    if repulsion == 'H':
+        beta = 2
+    if repulsion == 'C':
+        beta = 1
+    else:
+        beta = 2**(1/6)
     L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
     Ly = L
     Lx = L*xTy
     
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /L * beta
+    if repulsion == 'C':
+        diameter = diameter * 1.6
 
     points_A, = plt.plot([], [], 'o', ms=diameter, zorder=1)
     points_B, = plt.plot([], [], 'o', ms=diameter, zorder=2)
@@ -247,7 +271,7 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
     ani = FuncAnimation(fig, update, init_func=init, frames=len(x_all), interval=10, blit=True)
 
     folder = os.path.abspath('../animations')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '.mp4'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))

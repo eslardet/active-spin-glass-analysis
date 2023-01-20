@@ -149,6 +149,10 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
         case 'H' :
             beta = 2.0;
             break;
+
+        case 'C' : // New //
+            beta = 1;
+            break;
         
         default :
             cerr << "Invalid Potential Mode!" << endl;
@@ -567,8 +571,8 @@ void SRK2(vector<double>& x, vector<double>& fx,
           vector<double>& y, vector<double>& fy, 
           vector<double>& p, vector<double>& fp)
 {
-    double sig_T = sqrt(2.0*dT);
-    double sig_R = sqrt(6.0*dT);
+    double sig_T = 0; // New // For no translational diffusion
+    double sig_R = sqrt(2.0*dT); // New // Different timescale
 
     // Check the neighbor list and update if necessary
     if ( checkNL(x,y) ) {
@@ -606,8 +610,8 @@ void EM(vector<double>& x, vector<double>& fx,
         vector<double>& y, vector<double>& fy, 
         vector<double>& p, vector<double>& fp)
 {
-    double sig_T = sqrt(2.0*dT);
-    double sig_R = sqrt(6.0*dT);
+    double sig_T = 0; // New //
+    double sig_R = sqrt(1.0*dT); // New //
 
     // Check the neighbor list and update if necessary
     if ( checkNL(x,y) ) {
@@ -658,18 +662,22 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
 
                 rijsq = SQR(xij)+SQR(yij);
 
-                // Truncated LJ potential
+                // Potential
                 if (rijsq <= rrsq) {
                     rij = sqrt(rijsq);
 
                     switch(potMode)
                     {
                         case 'W':
-                            ff  = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
+                            ff = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
                             break;
                         
+                        case 'C': // New // Continuous potential //
+                            ff = gx*12.0*pow(rij,-13.0);
+                            break;
+
                         case 'H':
-                            ff = ff  = gx*(2-rij);
+                            ff = gx*(2-rij);
                             break;
                         
                         default:
@@ -678,11 +686,11 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
                         }
                     
 
-                    ffx[i] += ff*xij/rij;
-                    ffy[i] += ff*yij/rij;
+                    ffx[i] += 20*Pe*ff*xij/rij;  // New // Extra coeffs in front of force from non-dim
+                    ffy[i] += 20*Pe*ff*yij/rij;  // New // Extra coeffs in front of force from non-dim
 
-                    ffx[nl[j]] -= ff*xij/rij;
-                    ffy[nl[j]] -= ff*yij/rij;
+                    ffx[nl[j]] -= 20*Pe*ff*xij/rij; // New //
+                    ffy[nl[j]] -= 20*Pe*ff*yij/rij; // New //
                 }
 
                 // Vicsek alignment
@@ -711,7 +719,7 @@ void activeBrownianDynamicsCIL(vector<double>& x, vector<double>& y, vector<doub
                                double& t)
 {
     // Force Balance equation
-    SRK2(x,fx,y,fy,p,fp);
+    EM(x,fx,y,fy,p,fp);
     t += dT;
     return;
 }
