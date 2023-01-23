@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import cm, colors
+from decimal import Decimal
 
 import csv
 import os
@@ -370,9 +371,8 @@ def pos_lowres(mode, nPart, phi, Pe, K, seed, DT_new=1.0, delete=True):
                 time = float(line)
             if line_count < 7:
                 lrf.write(line)
-            else:
-                if time % DT_new == 0:
-                    lrf.write(line)
+            elif Decimal(str(time)) % Decimal(str(DT_new)) == 0: # Need to use Decimal because of Python floating point arithmetic being silly
+                lrf.write(line)
             line_count += 1
     lrf.close()
 
