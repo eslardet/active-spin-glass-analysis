@@ -90,7 +90,7 @@ void checkParameters()
 
         default :
             cerr << "Invalid Potential Mode!" << endl;
-            cerr << " --> Valid modes are : 'W', 'H' ... " << endl;
+            cerr << " --> Valid modes are : 'W', 'H', 'C' " << endl;
             ::exit(1);
 
     }
@@ -311,6 +311,7 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     Neq = (int) ceil(eqT/dT);
     Nsimul = (int) ceil(simulT/dT);
     Nskip = (int) ceil(DT/dT);
+    Nskipexact = (int) ceil(DTex/dT);
     logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
     logFile << "Volume fraction is phi = " << phi << endl;
 

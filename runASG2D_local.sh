@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=50
+nPart=100
 phi=0.2
 seed=1
 
@@ -45,19 +45,21 @@ K0=1.0
 # KAVG=1.0
 # STDK=1.0
 
-dT=5.e-5
-DT=0.0001
+dT=2.e-5
+DT=0.01
+DTex=0.1
 eqT=0
-simulT=0.01
+simulT=1.0
 
 savePos=1
 saveForce=0
 saveCoupling=0
 
-potMode='H'
+potMode='C'
 # can be:
 #    'W' WCA potential,
 #    'H' Harmonic potential
+#    'C' Continuous potential (repulsive part of WCA) with set cutoff
 
 # Cluster
 if [ "${couplingMode}" == "C" ]; then
@@ -125,6 +127,7 @@ fi
 
 echo ${dT} >> 'inpar'
 echo ${DT} >> 'inpar'
+echo ${DTex} >> 'inpar'
 echo ${eqT} >> 'inpar'
 echo ${simulT} >> 'inpar'
 
@@ -134,6 +137,6 @@ echo ${saveCoupling} >> 'inpar'
 
 echo ${potMode} >> 'inpar'
 
-time ${bin_dir}/activeSpinGlass_2D inpar
+time ${bin_dir}/activeSpinGlass_2D_MG inpar
 
 echo "2D Active Spin Glass run done."

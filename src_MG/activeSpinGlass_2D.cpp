@@ -167,6 +167,9 @@ for (sig=1; sig<=32; sig++)
     inputFile >> DT; 
     logFile << " --> Recording Timestep, DT = "  << DT << endl;
 
+    inputFile >> DTex;
+    logFile << " --> Recording Timestep (precise) = " << DT << endl;
+
 	inputFile >> eqT; 
 	logFile << " --> Equilibration Time = " << eqT << endl;   
 
@@ -255,6 +258,7 @@ for (sig=1; sig<=32; sig++)
     t0 = t;
     if (savePos) {
 		saveFrame(x,y,p,t-t0,posFile);
+        saveFrame(x,y,p,t,posExactFile);
     }
     if (saveForce) {
         saveFrame(fx,fy,fp,t-t0,forceFile);
@@ -274,6 +278,16 @@ for (sig=1; sig<=32; sig++)
             if (saveForce) {
                 saveFrame(fx,fy,fp,t-t0,forceFile);
             }     
+        }
+        if ((ns+1)%Nskipexact == 0 ){
+            if (savePos) {
+                posExactFile.open("pos_exact", ios::out);
+                if(posExactFile.fail())
+                {cerr<<"Failed to open exact positions file!"<<ns<<endl; exit(1);}
+                posExactFile.precision(17);
+                saveFrame(x,y,p,t,posExactFile);
+                posExactFile.close();
+            }
         }
         if ( (ns+1) % int(floor(Nsimul/10)) == 0) {
             cout << "|" << flush;

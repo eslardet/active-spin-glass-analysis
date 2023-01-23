@@ -45,8 +45,9 @@ K0=$7
 
 dT=1.e-3
 DT=0.01
+DTex=0.1
 eqT=0
-simulT=20
+simulT=1
 
 savePos=1
 saveForce=0
@@ -124,6 +125,7 @@ fi
 
 echo ${dT} >> 'inpar'
 echo ${DT} >> 'inpar'
+echo ${DTex} >> 'inpar'
 echo ${eqT} >> 'inpar'
 echo ${simulT} >> 'inpar'
 

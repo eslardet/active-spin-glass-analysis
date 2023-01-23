@@ -52,13 +52,13 @@ def get_params(inparFile):
     
     if inpar_dict["mode"] == 'C':
         inpar_dict["DT"] = float(r[12][0])
-        inpar_dict["simulT"] = float(r[14][0])
+        inpar_dict["simulT"] = float(r[15][0])
     elif inpar_dict["mode"] == 'T':
         inpar_dict["DT"] = float(r[14][0])
-        inpar_dict["simulT"] = float(r[16][0])
+        inpar_dict["simulT"] = float(r[17][0])
     else:
         inpar_dict["DT"] = float(r[13][0])
-        inpar_dict["simulT"] = float(r[15][0])
+        inpar_dict["simulT"] = float(r[16][0])
     return inpar_dict
 
 def pbc_wrap(x, L):
