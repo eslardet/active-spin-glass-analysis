@@ -24,6 +24,6 @@ seed = 1
 
 # fun.plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed, avg_over)
 
-# fun.snapshot_pos_ex(mode=mode,nPart=nPart,phi=phi,Pe=Pe,K=K,seed=seed)
-fun.snapshot(mode,nPart,phi,Pe,K,seed,view_time=6)
+fun.snapshot_pos_ex(mode=mode,nPart=nPart,phi=phi,Pe=Pe,K=K,seed=seed)
+# fun.snapshot(mode,nPart,phi,Pe,K,seed,view_time=6)
 # fun.animate(mode,nPart,phi,Pe,K,seed,max_T=100)
