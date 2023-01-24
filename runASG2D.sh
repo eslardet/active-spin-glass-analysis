@@ -27,6 +27,10 @@ Rp=2.0
 xTy=$5
 
 initMode='R'
+# can be:
+#    'R' random, 
+#    'S' restart from previous simulation
+
 couplingMode=$6
 # can be:
 #    'C' constant, 
@@ -34,6 +38,7 @@ couplingMode=$6
 #    'G' for Gaussian distribution, 
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
+
 K0=$7
 
 # KAA=10.0
@@ -88,52 +93,69 @@ fi
 echo "Starting 2D Active Spin Glass run..."
 
 cd $run_dir
-if [ -e "inpar" ]; then
-    rm 'inpar'
+
+if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
+    sed -i "9s/.*/${initMode}/" 'inpar' # extra '' required on MacOS after -i for sed (not on Linux)
+    if [ "${couplingMode}" == "C" ]; then
+        sed -i "16s/.*/${simulT}/" 'inpar'
+    elif [ "${couplingMode}" == "T" ]; then
+        sed -i "18s/.*/${simulT}/" 'inpar'
+    elif [ "${couplingMode}" == "G" ]; then
+        sed -i "17s/.*/${simulT}/" 'inpar'
+    elif [ "${couplingMode}" == "F" ]; then
+        sed -i "17s/.*/${simulT}/" 'inpar'
+    elif [ "${couplingMode}" == "A" ]; then
+        sed -i "17s/.*/${simulT}/" 'inpar'
+    fi
+
+else
+    if [ -e "inpar" ]; then
+        rm 'inpar'
+    fi
+    touch 'inpar'
+
+    echo ${nPart} > 'inpar'
+    echo ${phi} >> 'inpar'
+    echo ${seed} >> 'inpar'
+
+    echo ${gx} >> 'inpar'
+    echo ${Pe} >> 'inpar'
+    echo ${Rr} >> 'inpar'
+    echo ${Rp} >> 'inpar'
+    echo ${xTy} >> 'inpar'
+
+    echo ${initMode} >> 'inpar'
+
+    echo ${couplingMode} >> 'inpar'
+    if [ "${couplingMode}" == "C" ]; then
+        echo ${K0} >> 'inpar'
+    elif [ "${couplingMode}" == "T" ]; then
+        echo ${KAA} >> 'inpar'
+        echo ${KAB} >> 'inpar'
+        echo ${KBB} >> 'inpar'
+    elif [ "${couplingMode}" == "G" ]; then
+        echo ${KAVG} >> 'inpar'
+        echo ${STDK} >> 'inpar'
+    elif [ "${couplingMode}" == "F" ]; then
+        echo ${KAVG} >> 'inpar'
+        echo ${STDK} >> 'inpar'
+    elif [ "${couplingMode}" == "A" ]; then
+        echo ${KAVG} >> 'inpar'
+        echo ${STDK} >> 'inpar'
+    fi
+
+    echo ${dT} >> 'inpar'
+    echo ${DT} >> 'inpar'
+    echo ${DTex} >> 'inpar'
+    echo ${eqT} >> 'inpar'
+    echo ${simulT} >> 'inpar'
+
+    echo ${savePos} >> 'inpar'
+    echo ${saveForce} >> 'inpar'
+    echo ${saveCoupling} >> 'inpar'
+
+    echo ${potMode} >> 'inpar'
 fi
-touch 'inpar'
-
-echo ${nPart} > 'inpar'
-echo ${phi} >> 'inpar'
-echo ${seed} >> 'inpar'
-
-echo ${gx} >> 'inpar'
-echo ${Pe} >> 'inpar'
-echo ${Rr} >> 'inpar'
-echo ${Rp} >> 'inpar'
-echo ${xTy} >> 'inpar'
-
-echo ${initMode} >> 'inpar'
-
-echo ${couplingMode} >> 'inpar'
-if [ "${couplingMode}" == "C" ]; then
-    echo ${K0} >> 'inpar'
-elif [ "${couplingMode}" == "T" ]; then
-    echo ${KAA} >> 'inpar'
-    echo ${KAB} >> 'inpar'
-    echo ${KBB} >> 'inpar'
-elif [ "${couplingMode}" == "G" ]; then
-    echo ${KAVG} >> 'inpar'
-    echo ${STDK} >> 'inpar'
-elif [ "${couplingMode}" == "F" ]; then
-    echo ${KAVG} >> 'inpar'
-    echo ${STDK} >> 'inpar'
-elif [ "${couplingMode}" == "A" ]; then
-    echo ${KAVG} >> 'inpar'
-    echo ${STDK} >> 'inpar'
-fi
-
-echo ${dT} >> 'inpar'
-echo ${DT} >> 'inpar'
-echo ${DTex} >> 'inpar'
-echo ${eqT} >> 'inpar'
-echo ${simulT} >> 'inpar'
-
-echo ${savePos} >> 'inpar'
-echo ${saveForce} >> 'inpar'
-echo ${saveCoupling} >> 'inpar'
-
-echo ${potMode} >> 'inpar'
 
 time ${bin_dir}/activeSpinGlass_2D_MG inpar
 

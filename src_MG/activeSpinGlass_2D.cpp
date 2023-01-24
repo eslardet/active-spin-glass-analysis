@@ -247,21 +247,21 @@ for (sig=1; sig<=32; sig++)
     ////////////////
     // Time loop  //
     ////////////////
-    t = 0.0;
+    t = startT;
 
 	// (1) Equilibration
     for(int ne=0 ; ne<Neq ; ne++) {
         // full equilibration
-        activeBrownianDynamicsCIL(x,y,p,fx,fy,fp,t);
+        activeBrownianDynamics(x,y,p,fx,fy,fp,t);
     }
 
-    t0 = t;
+    // t0 = t;
     if (savePos) {
-		saveFrame(x,y,p,t-t0,posFile);
+		saveFrame(x,y,p,t,posFile);
         saveFrame(x,y,p,t,posExactFile);
     }
     if (saveForce) {
-        saveFrame(fx,fy,fp,t-t0,forceFile);
+        saveFrame(fx,fy,fp,t,forceFile);
     }     
     
     // (2) Recording
@@ -269,14 +269,14 @@ for (sig=1; sig<=32; sig++)
     cout << " --> " << flush;
     for(int ns=0 ; ns<Nsimul ; ns++) {
         // Move to the next timestep
-        activeBrownianDynamicsCIL(x,y,p,fx,fy,fp,t);
+        activeBrownianDynamics(x,y,p,fx,fy,fp,t);
         // Save data if necessary                
         if ( (ns+1)%Nskip == 0 ) {
             if (savePos) {
-                saveFrame(x,y,p,t-t0,posFile);
+                saveFrame(x,y,p,t,posFile);
             }
             if (saveForce) {
-                saveFrame(fx,fy,fp,t-t0,forceFile);
+                saveFrame(fx,fy,fp,t,forceFile);
             }     
         }
         if ((ns+1)%Nskipexact == 0 ){

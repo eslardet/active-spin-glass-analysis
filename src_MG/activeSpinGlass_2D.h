@@ -1,6 +1,6 @@
 // activeSpinGlass_2D.h
 // ====================
-// Declaration of all global variables necessary to run activeBrownianDynamicsCIL_2D.cpp
+// Declaration of all global variables necessary to run activeSpinGlass_2D.cpp
 // Created by Thibault Bertrand on 2022-04-19
 // Last update by TB 2022-04-19
 
@@ -17,7 +17,7 @@ double phi;
 double gx,Pe,Rr,Rp;
 bool savePos,saveForce,saveCoupling;
 char initMode,potMode,couplingMode;
-double dT,DT,DTex,eqT,simulT;
+double dT,DT,DTex,eqT,simulT,startT;
 int Nsimul,Neq,Nskip,Nskipexact;
 double xmin,xmax;
 double ymin,ymax;

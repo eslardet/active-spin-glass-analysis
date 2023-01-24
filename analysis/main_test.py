@@ -7,7 +7,7 @@ import sys
 mode = 'C'
 nPart = 6000
 phi = 0.1
-Pe = 10.0
+Pe = 50.0
 K = '10.0'
 seed = 1
 
@@ -25,4 +25,5 @@ seed = 1
 # fun.plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed, avg_over)
 
 # fun.snapshot_pos_ex(mode=mode,nPart=nPart,phi=phi,Pe=Pe,K=K,seed=seed)
-fun.animate(mode,nPart,phi,Pe,K,seed,max_T=100)
+fun.snapshot(mode,nPart,phi,Pe,K,seed,view_time=6)
+# fun.animate(mode,nPart,phi,Pe,K,seed,max_T=100)
