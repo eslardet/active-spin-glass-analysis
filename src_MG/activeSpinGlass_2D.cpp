@@ -168,7 +168,7 @@ for (sig=1; sig<=32; sig++)
     logFile << " --> Recording Timestep, DT = "  << DT << endl;
 
     inputFile >> DTex;
-    logFile << " --> Recording Timestep (precise) = " << DT << endl;
+    logFile << " --> Recording Timestep (precise) = " << DTex << endl;
 
 	inputFile >> eqT; 
 	logFile << " --> Equilibration Time = " << eqT << endl;   
