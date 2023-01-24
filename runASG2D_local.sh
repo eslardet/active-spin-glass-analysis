@@ -50,14 +50,14 @@ KAVG=1.0
 STDK=1.0
 
 dT=2.e-5
-DT=0.01
-DTex=0.1
+DT=0.1
+DTex=0.5
 eqT=0
 simulT=2.0
 
 savePos=1
 saveForce=0
-saveCoupling=1
+saveCoupling=1 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
 potMode='C'
 # can be:

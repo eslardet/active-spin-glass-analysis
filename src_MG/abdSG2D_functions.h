@@ -116,6 +116,7 @@ std::string currentDateTime(void);
 void checkParameters(void);
 void initialize(std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void initialConditionsRandom(std::vector<double>&,std::vector<double>&,std::vector<double>&);
+void initialConditionsSim(std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void allocateSRKmem(void);
 bool checkOverlap(std::vector<double>,std::vector<double>);
 double volumeFraction(void);
