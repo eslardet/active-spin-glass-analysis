@@ -28,10 +28,21 @@ def get_sim_dir(mode, nPart, phi, K, seed, Pe=None):
     return sim_dir
 
 def get_files(mode, nPart, phi, K, seed, Pe=None):
+    """
+    Get file paths for the input parameters and position files
+    """
     sim_dir = get_sim_dir(mode, nPart, phi, K, seed, Pe)
     inparFile = os.path.join(sim_dir, "inpar")
     posFile = os.path.join(sim_dir, "pos")
     return inparFile, posFile
+
+def get_file_path(mode, nPart, phi, K, seed, file_name, Pe=None):
+    """
+    Get the file path for a certain file name in the simulation data directory
+    """
+    sim_dir = get_sim_dir(mode, nPart, phi, K, seed, Pe)
+    file_path = os.path.join(sim_dir, file_name)
+    return file_path
 
 def get_params(inparFile):
     """
@@ -155,6 +166,82 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     x = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0], Lx)
     y = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1], Ly)
     theta = np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2]
+    
+    fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
+    diameter = (ax.get_window_extent().height * 72/fig.dpi) /L *beta
+    if repulsion == 'C':
+        diameter = diameter * 1.6
+
+    norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
+    # norm = colors.Normalize(vmin=-1.0, vmax=1.0, clip=True)
+    mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
+    
+    if mode == "T":
+        nA = nPart//2
+        ax.plot(x[:nA], y[:nA], 'o', ms=diameter, zorder=1)
+        ax.plot(x[nA:], y[nA:], 'o', ms=diameter, zorder=1)
+    else:
+        if show_color == True:
+            for i in range(nPart):
+                color = mapper.to_rgba(theta[i]%(2*np.pi))
+                # color = mapper.to_rgba(np.cos(theta[i]))
+                ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
+        else:
+            ax.plot(x, y, 'o', ms=diameter, zorder=1)
+    if show_quiver == True:
+        ax.quiver(x, y, np.cos(theta), np.sin(theta), zorder=2)
+    ax.set_xlim(0,Lx)
+    ax.set_ylim(0,Ly)
+    ax.set_aspect('equal')
+    ax.set_title("t=" + str(view_time))
+    cbar = plt.colorbar(mappable=mapper, ax=ax)
+    # cbar.ax.set_ylabel(r'$\cos(\theta_i)$', rotation=270)
+    
+    folder = os.path.abspath('../snapshots')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+def snapshot_pos_ex(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_color=True):
+    """
+    Get static snapshot at specified time from the exact positions file
+    """
+    inparFile, = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, file_name="pos_exact")
+    inpar_dict = get_params(inparFile)
+    
+    nPart = inpar_dict["nPart"]
+    phi = inpar_dict["phi"]
+    Pe = inpar_dict["Pe"]
+    mode = inpar_dict["mode"]
+    DT = inpar_dict["DT"]
+    Rp = inpar_dict["Rp"]
+    xTy = inpar_dict["xTy"]
+    repulsion = inpar_dict["repulsion"]
+
+    if repulsion == 'W':
+        beta = 2**(1/6)
+    if repulsion == 'H':
+        beta = 2
+    if repulsion == 'C':
+        beta = 1
+    else:
+        beta = 2**(1/6)
+    
+    L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
+    Ly = L
+    Lx = L*xTy
+    
+    with open(posFileExact) as f:
+        reader = csv.reader(f, delimiter="\t")
+        r = list(reader)
+    
+    view_time = round(float(r[0]), 2)
+    x = pbc_wrap(np.array(r[1:nPart+1]).astype('float')[:,0], Lx)
+    y = pbc_wrap(np.array(r[1:nPart+1]).astype('float')[:,1], Ly)
+    theta = np.array(r[1:nPart+1]).astype('float')[:,2]
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /L *beta
