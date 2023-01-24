@@ -4,15 +4,12 @@ import os
 import matplotlib.pyplot as plt
 import sys
 
-mode = 'G'
-nPart = 100
-phi = 0.2
-Pe = 20.0
-K = '1.0_1.0'
-KAVG=1.0
-KSTD=1.0
+mode = 'C'
+nPart = 6000
+phi = 0.1
+Pe = 10.0
+K = '10.0'
 seed = 1
-avg_over=100
 
 # fun.dist_coupling(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, avg_over=avg_over)
 
@@ -27,7 +24,5 @@ avg_over=100
 
 # fun.plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed, avg_over)
 
-inparFile, posFile = fun.get_files(mode="C", nPart=100, phi=0.2, K="1.0", seed=1, Pe=20.0)
-inpar_dict = fun.get_params(inparFile)
-
-print(inpar_dict["repulsion"])
+# fun.snapshot_pos_ex(mode=mode,nPart=nPart,phi=phi,Pe=Pe,K=K,seed=seed)
+fun.animate(mode,nPart,phi,Pe,K,seed,max_T=100)

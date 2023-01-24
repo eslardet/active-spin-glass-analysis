@@ -204,11 +204,13 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     plt.savefig(os.path.join(folder, filename))
 
 
-def snapshot_pos_ex(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_color=True):
+def snapshot_pos_ex(mode, nPart, phi, Pe, K, seed, show_quiver=False, show_color=True):
     """
     Get static snapshot at specified time from the exact positions file
+    The file structure must have the time on the first line and the x,y,theta coordinates for the N particles on each
+    of the following lines
     """
-    inparFile, = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
     posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, file_name="pos_exact")
     inpar_dict = get_params(inparFile)
     
@@ -238,7 +240,7 @@ def snapshot_pos_ex(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False,
         reader = csv.reader(f, delimiter="\t")
         r = list(reader)
     
-    view_time = round(float(r[0]), 2)
+    view_time = round(float(r[0][0]), 2)
     x = pbc_wrap(np.array(r[1:nPart+1]).astype('float')[:,0], Lx)
     y = pbc_wrap(np.array(r[1:nPart+1]).astype('float')[:,1], Ly)
     theta = np.array(r[1:nPart+1]).astype('float')[:,2]

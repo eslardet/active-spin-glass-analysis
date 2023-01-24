@@ -30,7 +30,7 @@ mt19937 rnd_gen;
 
 uniform_real_distribution<double> uniDist(0.0,1.0);
 normal_distribution<double> normDist(0.0,1.0);
-uniform_real_distribution<double> whiteNoise(0.0,1.0);
+uniform_real_distribution<double> whiteNoise(-1.0,1.0);
 
 /////////////////////
 // currentDateTime //
@@ -578,7 +578,7 @@ void SRK2(vector<double>& x, vector<double>& fx,
           vector<double>& p, vector<double>& fp)
 {
     double sig_T = 0; // New // For no translational diffusion
-    double sig_R = sqrt(2.0*dT); // New // Different timescale
+    double sig_R = sqrt(1.0*dT); // New // Different timescale
 
     // Check the neighbor list and update if necessary
     if ( checkNL(x,y) ) {
