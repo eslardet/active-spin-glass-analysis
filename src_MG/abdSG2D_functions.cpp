@@ -285,7 +285,7 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
         case 'S' : // Particles configured starting from previous simulation
             // initial condition stuff (inc reading pos_exact file and coupling file)
 
-            initialConditionsRandom(x,y,p);
+            initialConditionsSim(x,y,p);
 
             allocateSRKmem();
 

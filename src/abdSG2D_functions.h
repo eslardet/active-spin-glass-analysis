@@ -10,15 +10,15 @@
 ///////////////////////////////
 // Define external variables //
 ///////////////////////////////
-extern std::fstream initposFile,logFile,couplingFile;
+extern std::fstream initposFile,logFile,couplingFile, posExactFile;
 
 extern int nPart;
 extern unsigned int seed;
 extern double phi;
 extern bool saveCoupling;
 extern char initMode,potMode,couplingMode;
-extern double dT,DT,eqT,simulT;
-extern int Nsimul,Neq,Nskip;
+extern double dT,DT,DTex,eqT,simulT,startT;
+extern int Nsimul,Neq,Nskip,Nskipexact;
 extern double Lx,xmin,xmax;
 extern double Ly,ymin,ymax;
 extern double xTy;
@@ -125,7 +125,7 @@ void updateNL(std::vector<double>,std::vector<double>);
 void SRK2(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void EM(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void force(std::vector<double>,std::vector<double>,std::vector<double>,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void activeBrownianDynamicsCIL(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,double&);
+void activeBrownianDynamics(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,double&);
 double fHarmonic(std::vector<double>&,std::vector<double>&);
 void dfHarmonic(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void fire(std::vector<double> &px, std::vector<double> &py, const double dT0, const double ftol, 
@@ -152,6 +152,19 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
     }
 }
 
+///////////////
+// readFrame //
+///////////////
+// Reads frame from file
+inline void readFrame(std::vector<double> xx, std::vector<double> yy, std::vector<double> pp, double tt, std::fstream& File)
+{
+    File >> tt;
+    for(int i=0 ; i<nPart ; i++)
+    {
+        File >> xx[i] >> yy[i] >> pp[i];
+    }
+}
+
 ///////////////////
 // saveCouplings //
 ///////////////////
@@ -163,6 +176,21 @@ inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& Fi
     {
         for(int j=i+1 ; j<nPart ; j++){
             File << k[i][j] << std::endl;        
+        }
+    }
+}
+
+///////////////////
+// readCouplings //
+///////////////////
+// Reads the coupling constants from file
+inline void readCouplings(std::vector< std::vector<double> > k, std::fstream& File) 
+{
+
+    for(int i=0 ; i<nPart ; i++)
+    {
+        for(int j=i+1 ; j<nPart ; j++){
+            File >> k[i][j];        
         }
     }
 }

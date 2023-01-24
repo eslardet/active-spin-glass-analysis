@@ -167,6 +167,9 @@ for (sig=1; sig<=32; sig++)
     inputFile >> DT; 
     logFile << " --> Recording Timestep, DT = "  << DT << endl;
 
+    inputFile >> DTex;
+    logFile << " --> Recording Timestep (precise) = " << DTex << endl;
+
 	inputFile >> eqT; 
 	logFile << " --> Equilibration Time = " << eqT << endl;   
 
@@ -244,20 +247,21 @@ for (sig=1; sig<=32; sig++)
     ////////////////
     // Time loop  //
     ////////////////
-    t = 0.0;
+    t = startT;
 
 	// (1) Equilibration
     for(int ne=0 ; ne<Neq ; ne++) {
         // full equilibration
-        activeBrownianDynamicsCIL(x,y,p,fx,fy,fp,t);
+        activeBrownianDynamics(x,y,p,fx,fy,fp,t);
     }
 
-    t0 = t;
+    // t0 = t;
     if (savePos) {
-		saveFrame(x,y,p,t-t0,posFile);
+		saveFrame(x,y,p,t,posFile);
+        saveFrame(x,y,p,t,posExactFile);
     }
     if (saveForce) {
-        saveFrame(fx,fy,fp,t-t0,forceFile);
+        saveFrame(fx,fy,fp,t,forceFile);
     }     
     
     // (2) Recording
@@ -265,14 +269,24 @@ for (sig=1; sig<=32; sig++)
     cout << " --> " << flush;
     for(int ns=0 ; ns<Nsimul ; ns++) {
         // Move to the next timestep
-        activeBrownianDynamicsCIL(x,y,p,fx,fy,fp,t);
+        activeBrownianDynamics(x,y,p,fx,fy,fp,t);
         // Save data if necessary                
         if ( (ns+1)%Nskip == 0 ) {
             if (savePos) {
-                saveFrame(x,y,p,t-t0,posFile);
+                saveFrame(x,y,p,t,posFile);
             }
             if (saveForce) {
-                saveFrame(fx,fy,fp,t-t0,forceFile);
+                saveFrame(fx,fy,fp,t,forceFile);
+            }     
+        }
+        if ((ns+1)%Nskipexact == 0 ){
+            if (savePos) {
+                posExactFile.open("pos_exact", ios::out);
+                if(posExactFile.fail())
+                {cerr<<"Failed to open exact positions file!"<<ns<<endl; exit(1);}
+                posExactFile.precision(17);
+                saveFrame(x,y,p,t,posExactFile);
+                posExactFile.close();
             }     
         }
         if ( (ns+1) % int(floor(Nsimul/10)) == 0) {
