@@ -306,6 +306,10 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
     xTy = inpar_dict["xTy"]
     repulsion = inpar_dict["repulsion"]
 
+    with open(posFile) as f:
+        reader = csv.reader(f, delimiter="\t")
+        startT = float(list(reader)[6][0])
+
     plt.rcParams["animation.html"] = "jshtml"
     plt.ioff()
     plt.rcParams['animation.embed_limit'] = 2**128
@@ -356,7 +360,7 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
             points_A.set_data(x, y)
         arrows.set_offsets(np.c_[x, y])
         arrows.set_UVC(np.cos(theta), np.sin(theta))
-        ax.set_title("t = " + str(round(n*DT, 1)), fontsize=10, loc='left')
+        ax.set_title("t = " + str(round(n*DT+startT, 1)), fontsize=10, loc='left')
         
         if mode == "T":
             return arrows, points_A, points_B
