@@ -153,18 +153,6 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
     }
 }
 
-///////////////
-// readFrame //
-///////////////
-// Reads frame from file
-inline void readFrame(std::vector<double> xx, std::vector<double> yy, std::vector<double> pp, double tt, std::fstream& File)
-{
-    File >> tt;
-    for(int i=0 ; i<nPart ; i++)
-    {
-        File >> xx[i] >> yy[i] >> pp[i];
-    }
-}
 
 ///////////////////
 // saveCouplings //
@@ -181,19 +169,6 @@ inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& Fi
     }
 }
 
-///////////////////
-// readCouplings //
-///////////////////
-// Reads the coupling constants from file
-inline void readCouplings(std::vector< std::vector<double> > k, std::fstream& File) 
-{
 
-    for(int i=0 ; i<nPart ; i++)
-    {
-        for(int j=i+1 ; j<nPart ; j++){
-            File >> k[i][j];        
-        }
-    }
-}
 
 #endif

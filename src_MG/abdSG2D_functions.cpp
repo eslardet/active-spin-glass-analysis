@@ -326,7 +326,12 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                     couplingFile.open("coupling", ios::in);
                     if(couplingFile.fail())
                     {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-                    readCouplings(K, couplingFile);
+                    for(int i=0 ; i<nPart ; i++)
+                    {
+                        for(int j=i+1 ; j<nPart ; j++){
+                            couplingFile >> K[i][j];        
+                        }
+                    }
                     couplingFile.close();
                     break;
 
@@ -430,7 +435,11 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
     {cerr << "Can't open exact positions file!" << endl; ::exit(1);}
 
     // Initialize particles by reading file
-    readFrame(x,y,p,startT,posExactFile);
+    posExactFile >> startT;
+    for(int i=0 ; i<nPart ; i++)
+    {
+        posExactFile >> x[i] >> y[i] >> p[i];
+    }
 
     if (startT>simulT)
     {cerr << "Already simulated up to simulT! Exact position file time is " << startT << endl; ::exit(1);}
@@ -438,7 +447,7 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
     posExactFile.close();
 
 
-    // Timing // TO DO // Need to read time and change values based on that
+    // Timing
     Neq = (int) ceil(eqT/dT);
     Nsimul = (int) ceil((simulT-startT)/dT);
     Nskip = (int) ceil(DT/dT);

@@ -53,7 +53,7 @@ dT=2.e-5
 DT=0.1
 DTex=0.5
 eqT=0
-simulT=2.0
+simulT=1.0
 
 savePos=1
 saveForce=0
