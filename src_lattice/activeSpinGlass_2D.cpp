@@ -287,7 +287,7 @@ for (sig=1; sig<=32; sig++)
                 posExactFile.precision(17);
                 saveFrame(x,y,p,t,posExactFile);
                 posExactFile.close();
-            }
+            }     
         }
         if ( (ns+1) % int(floor(Nsimul/10)) == 0) {
             cout << "|" << flush;
@@ -305,22 +305,32 @@ for (sig=1; sig<=32; sig++)
     switch(couplingMode)
     {
         case 'C' : // Constant coupling
+            inputFile >> K0; 
             cout << " ----> Coupling Constant K0 = " << K0 << endl; 
             break;
 
         case 'T' : // Two-populations
+            inputFile >> KAA; 
+            inputFile >> KAB;
+            inputFile >> KBB;
             cout << " ----> Coupling Constants, KAA = " << KAA << ", KAB = " << KAB << ", KBB = " << KBB << endl; 
             break;
 
-        case 'G' : // Gaussian distributed couplings         
+        case 'G' : // Gaussian distributed couplings
+            inputFile >> KAVG; 
+            inputFile >> STDK;            
             cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
             break;
 
-        case 'F' : // Normally distributed ferromagnetic couplings         
+        case 'F' : // Normally distributed ferromagnetic couplings
+            inputFile >> KAVG; 
+            inputFile >> STDK;            
             cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
             break;
 
-        case 'A' : // Normally distributed antiferromagnetic couplings         
+        case 'A' : // Normally distributed antiferromagnetic couplings
+            inputFile >> KAVG; 
+            inputFile >> STDK;            
             cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
             break;
         
