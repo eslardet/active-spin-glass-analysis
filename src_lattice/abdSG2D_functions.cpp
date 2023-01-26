@@ -67,7 +67,11 @@ void checkParameters()
             break;
 
         case 'S' : // Starting from previous simulation
-            logFile << "Initializing in mode 'S', strating off from previous simulation" << endl;
+            logFile << "Initializing in mode 'S', starting off from previous simulation" << endl;
+            break;
+
+        case 'L' : // Lattice configuration (hexagonal)
+            logFile << "Initializing in mode 'L', hexagonal lattice" << endl;
             break;
 
         default :
@@ -197,11 +201,21 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     {
         case 'R' : // Particles placed randomly in the box
             initialConditionsRandom(x,y,p);
+            break;
+        case 'S' : // Particles configured starting from previous simulation
+            initialConditionsSim(x,y,p);
+            break;
+        case 'L' : // Particles placed on a hexagonal lattice
+            initialConditionsLattice(x,y,p);
+            break;
+    }
+    // Allocation of memory
+    allocateSRKmem();
 
-            // Allocation of memory
-            allocateSRKmem();
-
-            // Initialize the coupling array
+    // Initialize the coupling array
+    switch(initMode)
+    {
+        case 'R' : case 'L' :
             switch(couplingMode)
             {
                 case 'C' : // Constant coupling
@@ -282,14 +296,8 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             }
             break;
 
-        case 'S' : // Particles configured starting from previous simulation
-            // initial condition stuff (inc reading pos_exact file and coupling file)
-
-            initialConditionsSim(x,y,p);
-
-            allocateSRKmem();
-
-            // read coupling file (not necessary for constant mode)
+        case 'S' :
+            // read coupling file (not necessary for constant modes)
             switch(couplingMode)
             {
                 case 'C' : // Constant coupling
@@ -336,7 +344,8 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                     break;
 
             }
-    }
+            break;
+    }       
 }
 
 /////////////////////////////
@@ -473,7 +482,80 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
     return; 
 }
 
+/////////////////////////////
+// initialConditionsLattice //
+/////////////////////////////
+// Initialize positions of particles on a hexagonal lattice (filled up completely)
+void initialConditionsLattice(vector<double>& x, vector<double>& y, vector<double>& p)
+{
+    int Nx, Ny;
+    startT = 0.0;
 
+    // Open file to write initial conditions
+    initposFile.open("initpos",ios::out);
+    if (initposFile.fail()) 
+    {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
+    initposFile.precision(8);
+
+    Nx = ceil(sqrt(nPart));
+    Ny = Nx;
+    nPart = SQR(Nx);
+
+    // Calculate size of the box
+    Lx = Nx*beta;
+    Ly = sqrt(3)/2 * Ny*beta;
+    xTy = Lx/Ly;
+
+    
+    xmin = 0.0;
+    xmax = Lx;
+    ymin = 0.0;
+    ymax = Ly;
+
+    // Timing
+    Neq = (int) ceil(eqT/dT);
+    Nsimul = (int) ceil(simulT/dT);
+    Nskip = (int) ceil(DT/dT);
+    Nskipexact = (int) ceil(DTex/dT);
+    logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
+    logFile << "Volume fraction is phi = " << phi << endl;
+
+    // Initialize particles on a hexagonal lattice and random orientations
+    for (int i=0 ; i<Ny ; i++) {
+        for (int j=0 ; j<Nx ; j++) {
+            y[i*Nx+j] = i*sqrt(3)/2 * beta + beta/2;
+            x[i*Nx+j] = j*beta;
+            if (i%2==1) {
+                x[i*Nx+j] += beta/2;
+            }
+        }
+    }
+
+    for (int i=0 ; i<nPart ; i++) {
+        p[i] = 2.0*PI*uniDist(rnd_gen); 
+    }
+
+    // Initialize lengthscales related to the cell list
+    lx = rl; 
+    ly = rl;
+    mx = (int)floor(Lx/lx);
+    my = (int)floor(Ly/ly);
+    lx = Lx/double(mx);
+    ly = Ly/double(my);
+    nCell = mx*my;
+
+    // Allocation of memory
+    allocateSRKmem();   
+
+    // Build map of cells
+    buildMap();
+
+    // Save initial conditions
+    saveInitFrame(x,y,p,initposFile);
+    initposFile.close();
+
+    return; 
+}
 
 ////////////////////
 // allocateSRKmem //
@@ -744,17 +826,17 @@ void EM(vector<double>& x, vector<double>& fx,
     double sig_R = sqrt(6.0*dT);
 
     // Check the neighbor list and update if necessary
-    if ( checkNL(x,y) ) {
-        updateNL(x,y);
-    }
+    // if ( checkNL(x,y) ) {
+    //     updateNL(x,y);
+    // }
 
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
     force(x,y,p,fx,fy,fp);
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
-        x[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
-        y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
+        // x[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
+        // y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
         p[i] = p[i] + fp[i]*dT + sig_R*normDist(rnd_gen);
     }
 
@@ -796,31 +878,31 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
                 if (rijsq <= rrsq) {
                     rij = sqrt(rijsq);
 
-                    switch(potMode)
-                    {
-                        case 'W':
-                            ff = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
-                            break;
+                //     switch(potMode)
+                //     {
+                //         case 'W':
+                //             ff = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
+                //             break;
                         
-                        case 'C': // Continuous potential
-                            ff = gx*12.0*pow(rij,-13.0);
-                            break;
+                //         case 'C': // Continuous potential
+                //             ff = gx*12.0*pow(rij,-13.0);
+                //             break;
 
-                        case 'H':
-                            ff = gx*(2-rij);
-                            break;
+                //         case 'H':
+                //             ff = gx*(2-rij);
+                //             break;
                         
-                        default:
-                            cerr << "Invalid Potential Mode!" << endl;
-                            ::exit(1);
-                        }
+                //         default:
+                //             cerr << "Invalid Potential Mode!" << endl;
+                //             ::exit(1);
+                //         }
                     
 
-                    ffx[i] += ff*xij/rij;
-                    ffy[i] += ff*yij/rij;
+                //     ffx[i] += ff*xij/rij;
+                //     ffy[i] += ff*yij/rij;
 
-                    ffx[nl[j]] -= ff*xij/rij;
-                    ffy[nl[j]] -= ff*yij/rij;
+                //     ffx[nl[j]] -= ff*xij/rij;
+                //     ffy[nl[j]] -= ff*yij/rij;
                 }
 
                 // Vicsek alignment
@@ -849,7 +931,7 @@ void activeBrownianDynamics(vector<double>& x, vector<double>& y, vector<double>
                                double& t)
 {
     // Force Balance equation
-    SRK2(x,fx,y,fy,p,fp);
+    EM(x,fx,y,fy,p,fp);
     t += dT;
     return;
 }

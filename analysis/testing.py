@@ -31,7 +31,7 @@ for i in range(Ny):
 
 fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
 
-diameter = (ax.get_window_extent().width * 72/fig.dpi) /Lx *sigma
+diameter = (ax.get_window_extent().height * 72/fig.dpi) /Ly *sigma
 ax.set_xlim(0,Lx)
 ax.set_ylim(0,Ly)
 ax.plot(x, y, 'o', ms=diameter)

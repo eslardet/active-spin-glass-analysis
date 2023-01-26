@@ -2,7 +2,8 @@
     "files.associations": {
         "*.tex": "bibtex",
         "ostream": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "vector": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
