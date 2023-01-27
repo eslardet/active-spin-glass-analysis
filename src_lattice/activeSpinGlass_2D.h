@@ -35,12 +35,12 @@ double KAVG,STDK; // mode 'G', 'F', 'A': KAVG: Average coupling constant
 // saveFrame //
 ///////////////
 // Saves to file a frame
-inline void saveFrame(std::vector<double> xx, std::vector<double> yy, std::vector<double> pp, double tt, std::fstream& File)
+inline void saveFrame(std::vector<double> pp, double tt, std::fstream& File)
 {
     File << tt << std::endl;
     for(int i=0 ; i<nPart ; i++)
     {
-        File << xx[i] << '\t' << yy[i] << '\t' << pp[i] << std::endl;
+        File << pp[i] << std::endl;
     }
 }
 

@@ -550,6 +550,9 @@ void initialConditionsLattice(vector<double>& x, vector<double>& y, vector<doubl
     // Build map of cells
     buildMap();
 
+    // Create neighbour lists (no need to reupdate later as particles are stationary)
+    updateNL(x,y);
+
     // Save initial conditions
     saveInitFrame(x,y,p,initposFile);
     initposFile.close();

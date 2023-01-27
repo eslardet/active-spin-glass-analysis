@@ -4,11 +4,11 @@ import os
 import matplotlib.pyplot as plt
 import sys
 
-mode = 'G'
-nPart = 100
+mode = 'C'
+nPart = 6000
 phi = 0.1
-Pe = 20.0
-K = '1.0_1.0'
+Pe = 50.0
+K = '10.0'
 seed = 1
 
 # fun.dist_coupling(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, avg_over=avg_over)
@@ -24,9 +24,9 @@ seed = 1
 
 # fun.plot_dist_coupling(mode, nPart, phi, Pe, KAVG, KSTD, seed, avg_over)
 
-# fun.snapshot_pos_ex(mode=mode,nPart=nPart,phi=phi,Pe=Pe,K=K,seed=seed)
-inparFile, posFile = fun.get_files(mode=mode,nPart=nPart,phi=phi,Pe=Pe,K=K,seed=seed)
-fun.get_pos_arr(inparFile, posFile, min_T=None, max_T=None)
+fun.snapshot_pos_ex(mode=mode,nPart=nPart,phi=phi,Pe=Pe,K=K,seed=seed)
+# inparFile, posFile = fun.get_files(mode=mode,nPart=nPart,phi=phi,Pe=Pe,K=K,seed=seed)
+# fun.get_pos_arr(inparFile, posFile, min_T=None, max_T=None)
 
 # fun.snapshot(mode,nPart,phi,Pe,K,seed,view_time=6)
 # fun.animate(mode,nPart,phi,Pe,K,seed,max_T=100)

@@ -257,11 +257,11 @@ for (sig=1; sig<=32; sig++)
 
     // t0 = t;
     if (savePos) {
-		saveFrame(x,y,p,t,posFile);
-        saveFrame(x,y,p,t,posExactFile);
+		saveFrame(p,t,posFile);
+        saveFrame(p,t,posExactFile);
     }
     if (saveForce) {
-        saveFrame(fx,fy,fp,t,forceFile);
+        saveFrame(fp,t,forceFile);
     }     
     
     // (2) Recording
@@ -273,10 +273,10 @@ for (sig=1; sig<=32; sig++)
         // Save data if necessary                
         if ( (ns+1)%Nskip == 0 ) {
             if (savePos) {
-                saveFrame(x,y,p,t,posFile);
+                saveFrame(p,t,posFile);
             }
             if (saveForce) {
-                saveFrame(fx,fy,fp,t,forceFile);
+                saveFrame(fp,t,forceFile);
             }     
         }
         if ((ns+1)%Nskipexact == 0 ){
@@ -285,7 +285,7 @@ for (sig=1; sig<=32; sig++)
                 if(posExactFile.fail())
                 {cerr<<"Failed to open exact positions file!"<<ns<<endl; exit(1);}
                 posExactFile.precision(17);
-                saveFrame(x,y,p,t,posExactFile);
+                saveFrame(p,t,posExactFile);
                 posExactFile.close();
             }     
         }

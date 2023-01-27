@@ -8,7 +8,7 @@ import csv
 import os
 
 
-def get_sim_dir(mode, nPart, K, seed):
+def get_sim_dir(mode, nPart, K, Rp, seed):
     if mode == "C":
         mode_name = "Constant"
     elif mode == "T":
@@ -20,24 +20,24 @@ def get_sim_dir(mode, nPart, K, seed):
     elif mode == "F":
         mode_name = "Ferromagnetic"
 
-    sim_dir = os.path.abspath('../simulation_data_lattice/' + mode_name + '/N' + str(nPart) + '/K' + str(K) + '/s' + str(seed))
+    sim_dir = os.path.abspath('../simulation_data_lattice/' + mode_name + '/N' + str(nPart) + '/K' + str(K) + '/Rp' + str(Rp) + '/s' + str(seed))
 
     return sim_dir
 
-def get_files(mode, nPart, K, seed):
+def get_files(mode, nPart, K, Rp, seed):
     """
     Get file paths for the input parameters and position files
     """
-    sim_dir = get_sim_dir(mode, nPart, K, seed)
+    sim_dir = get_sim_dir(mode, nPart, K, Rp, seed)
     inparFile = os.path.join(sim_dir, "inpar")
     posFile = os.path.join(sim_dir, "pos")
     return inparFile, posFile
 
-def get_file_path(mode, nPart, K, seed, file_name):
+def get_file_path(mode, nPart, K, Rp, seed, file_name):
     """
     Get the file path for a certain file name in the simulation data directory
     """
-    sim_dir = get_sim_dir(mode, nPart, K, seed)
+    sim_dir = get_sim_dir(mode, nPart, K, Rp, seed)
     file_path = os.path.join(sim_dir, file_name)
     return file_path
 
@@ -98,9 +98,6 @@ def get_pos_arr(inparFile, posFile, min_T=None, max_T=None):
     y_all = []
     theta_all = []
 
-    print(startT)
-    print(max(int((min_T-startT)/DT),0))
-    print(int((max_T-startT)/DT))
     for i in range(max(int((min_T-startT)/DT),0), int((max_T-startT)/DT)+1):
         x_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0])
         y_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1])
@@ -126,15 +123,53 @@ def get_theta_arr(inparFile, posFile, min_T=None, max_T=None):
 
     theta = []
     for i in range(int(min_T/DT), int(max_T/DT)+1):
-        theta.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2])
+        theta.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float'))
     return theta
 
-def snapshot(mode, nPart, K, seed, view_time):
+def get_xy_lattice(nPart):
+    beta = 1
+    Nx = int(np.ceil(np.sqrt(nPart)))
+    Ny = Nx
+
+    Lx = Nx*beta
+    Ly = np.sqrt(3)/2*Ny*beta
+    xTy = Lx/Ly
+
+    Ntot = int(Nx*Ny)
+
+    y = np.zeros(Ntot)
+    x = np.zeros(Ntot)
+
+    for i in range(Ny):
+        for j in range(Nx):
+            y[i*Nx+j] = i*np.sqrt(3)/2*beta + beta/2
+            x[i*Nx+j] = j*beta
+            if i % 2 == 1:
+                x[i*Nx+j] += beta/2
+    return x, y
+
+
+def get_initpos_xy(mode, nPart, K, Rp, seed):
+    initposFile = get_file_path(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed, file_name="initpos")
+
+    Nx = int(np.ceil(np.sqrt(nPart)))
+    nPart = Nx*Nx
+
+    with open(initposFile) as f:
+        reader = csv.reader(f, delimiter="\t")
+        r = list(reader)[5:]
+
+    x = np.array(r[1:nPart+1]).astype('float')[:,0]
+    y = np.array(r[1:nPart+1]).astype('float')[:,1]
+
+    return x, y
+
+def snapshot(mode, nPart, K, Rp, seed, view_time):
     """
     Get static snapshot at specified time from the positions file
     """
 
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
     inpar_dict = get_params(inparFile)
     
     nPart = inpar_dict["nPart"]
@@ -155,10 +190,11 @@ def snapshot(mode, nPart, K, seed, view_time):
     else:
         beta = 2**(1/6)
     
-    Nx = np.ceil(np.sqrt(nPart))
+    Nx = int(np.ceil(np.sqrt(nPart)))
     Lx = Nx*beta
     Ly = np.sqrt(3)/2*Nx*beta
     xTy = Lx/Ly
+    nPart = Nx*Nx
     
     with open(posFile) as f:
         reader = csv.reader(f, delimiter="\t")
@@ -166,14 +202,13 @@ def snapshot(mode, nPart, K, seed, view_time):
     
     i = int(view_time/DT)
     view_time = i*DT
-    x = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0], Lx)
-    y = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1], Ly)
-    theta = np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2]
+
+    x, y = get_initpos_xy(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+
+    theta = np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /Ly *beta
-    if repulsion == 'C':
-        diameter = diameter * 1.6
 
     norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
     # norm = colors.Normalize(vmin=-1.0, vmax=1.0, clip=True)
@@ -192,27 +227,21 @@ def snapshot(mode, nPart, K, seed, view_time):
     ax.set_title("t=" + str(view_time))
     # cbar.ax.set_ylabel(r'$\cos(\theta_i)$', rotation=270)
     
-    # folder = os.path.abspath('../snapshots')
-    # # filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.png'
-    # if not os.path.exists(folder):
-    #     os.makedirs(folder)
-    # plt.savefig(os.path.join(folder, filename))
-    print(Nx)
-    print(Lx, Ly)
-    print(x)
-    print(y)
-
-    plt.show()
+    folder = os.path.abspath('../snapshots_lattice')
+    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
 
-def snapshot_pos_ex(mode, nPart, phi, Pe, K, seed, show_quiver=False, show_color=True):
+def snapshot_pos_ex(mode, nPart, K, Rp, seed, show_quiver=False, show_color=True):
     """
     Get static snapshot at specified time from the exact positions file
     The file structure must have the time on the first line and the x,y,theta coordinates for the N particles on each
     of the following lines
     """
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
-    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, file_name="pos_exact")
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+    posFileExact = get_file_path(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed, file_name="pos_exact")
     inpar_dict = get_params(inparFile)
     
     nPart = inpar_dict["nPart"]
@@ -242,8 +271,8 @@ def snapshot_pos_ex(mode, nPart, phi, Pe, K, seed, show_quiver=False, show_color
         r = list(reader)
     
     view_time = round(float(r[0][0]), 2)
-    x = pbc_wrap(np.array(r[1:nPart+1]).astype('float')[:,0], Lx)
-    y = pbc_wrap(np.array(r[1:nPart+1]).astype('float')[:,1], Ly)
+    x = np.array(r[1:nPart+1]).astype('float')[:,0]
+    y = np.array(r[1:nPart+1]).astype('float')[:,1]
     theta = np.array(r[1:nPart+1]).astype('float')[:,2]
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
@@ -273,34 +302,35 @@ def snapshot_pos_ex(mode, nPart, phi, Pe, K, seed, show_quiver=False, show_color
     ax.set_ylim(0,Ly)
     ax.set_aspect('equal')
     ax.set_title("t=" + str(view_time))
-    cbar = plt.colorbar(mappable=mapper, ax=ax)
+    if show_color == True:
+        cbar = plt.colorbar(mappable=mapper, ax=ax)
     # cbar.ax.set_ylabel(r'$\cos(\theta_i)$', rotation=270)
     
-    folder = os.path.abspath('../snapshots')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.png'
+    folder = os.path.abspath('../snapshots_lattice')
+    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
+def animate(mode, nPart, K, Rp, seed, min_T=None, max_T=None):
     """
     Make animation from positions file
     """
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+
+    # x, y = get_xy_lattice(nPart) # could get from initpos file instead
+    x, y = get_initpos_xy(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
     
-    x_all, y_all, theta_all = get_pos_arr(inparFile, posFile, min_T, max_T)
+    theta_all = get_theta_arr(inparFile, posFile, min_T, max_T)
     
     inpar_dict = get_params(inparFile)
     
     nPart = inpar_dict["nPart"]
-    phi = inpar_dict["phi"]
-    Pe = inpar_dict['Pe']
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
     seed = inpar_dict["seed"]
     Rp = inpar_dict["Rp"]
     xTy = inpar_dict["xTy"]
-    repulsion = inpar_dict["repulsion"]
 
     with open(posFile) as f:
         reader = csv.reader(f, delimiter="\t")
@@ -309,30 +339,21 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
     plt.rcParams["animation.html"] = "jshtml"
     plt.ioff()
     plt.rcParams['animation.embed_limit'] = 2**128
-
-    fig, ax = plt.subplots(figsize=(3*xTy,3))
     
-    if repulsion == 'W':
-        beta = 2**(1/6)
-    if repulsion == 'H':
-        beta = 2
-    if repulsion == 'C':
-        beta = 1
-    else:
-        beta = 2**(1/6)
-    L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
-    Ly = L
-    Lx = L*xTy
+    beta = 1.0
+
+    Nx = np.ceil(np.sqrt(nPart))
+    Lx = Nx*beta
+    Ly = np.sqrt(3)/2*Nx*beta
+    xTy = Lx/Ly
     
-    diameter = (ax.get_window_extent().height * 72/fig.dpi) /L * beta
-    if repulsion == 'C':
-        diameter = diameter * 1.6
+    fig, ax = plt.subplots(figsize=(5*xTy,5))
 
-    points_A, = plt.plot([], [], 'o', ms=diameter, zorder=1)
-    points_B, = plt.plot([], [], 'o', ms=diameter, zorder=2)
+    diameter = (ax.get_window_extent().height * 72/fig.dpi) /Ly * beta
 
-    x = pbc_wrap(x_all[0], Lx)
-    y = pbc_wrap(y_all[0], Ly)
+    points_A, = plt.plot([], [], 'o', zorder=1)
+    points_B, = plt.plot([], [], 'o', zorder=2)
+
     theta = theta_all[0]
     arrows = plt.quiver(x, y, np.cos(theta), np.sin(theta), zorder=3)
 
@@ -345,8 +366,6 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
             return arrows, points_A
 
     def update(n):
-        x = pbc_wrap(x_all[n], Lx)
-        y = pbc_wrap(y_all[n], Ly)
         theta = theta_all[n]
         if mode == "T":
             nA = nPart//2
@@ -363,10 +382,10 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
         else: 
             return arrows, points_A
 
-    ani = FuncAnimation(fig, update, init_func=init, frames=len(x_all), interval=10, blit=True)
+    ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=10, blit=True)
 
-    folder = os.path.abspath('../animations')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.mp4'
+    folder = os.path.abspath('../animations_lattice')
+    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))

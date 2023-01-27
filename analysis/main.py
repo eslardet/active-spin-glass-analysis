@@ -1,16 +1,15 @@
 import numpy as np
-import analysis_functions as fun
+import analysis_functions_lattice as fun
 import os
 import matplotlib.pyplot as plt
 import sys
 
 mode = sys.argv[1]
 nPart = int(sys.argv[2])
-phi = float(sys.argv[3])
-Pe = float(sys.argv[4])
-K = str(sys.argv[5])
-seed = int(sys.argv[6])
-view_time = float(sys.argv[7])
+K = str(sys.argv[3])
+Rp = float(sys.argv[4])
+seed = int(sys.argv[5])
+view_time = float(sys.argv[6])
 
 # mode = "C"
 # nPart = 5000
@@ -19,8 +18,7 @@ view_time = float(sys.argv[7])
 # seed = 1
 
 # fun.snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, view_time=view_time)
-# fun.animate(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
-fun.pos_lowres(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, DT_new=0.05, delete=False)
+fun.animate(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
 
 # Pe_range = np.concatenate((np.arange(2.0, 22.0, 2.0), np.arange(25.0, 55.0, 5.0)))
 

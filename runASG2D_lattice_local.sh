@@ -24,7 +24,7 @@ seed=1
 gx=1.0
 Pe=0.0
 Rr=1.0
-Rp=1.0
+Rp=2.0
 xTy=1.0
 
 initMode='L'
@@ -68,15 +68,15 @@ potMode='C'
 
 # Local
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Constant/N${nPart}/K${K0}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Constant/N${nPart}/K${K0}/Rp${Rp}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/TwoPopulations/N${nPart}/K${KAA}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/TwoPopulations/N${nPart}/K${KAA}/Rp${Rp}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Gaussian/N${nPart}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Gaussian/N${nPart}/K${KAVG}_${STDK}/Rp${Rp}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Ferromagnetic/N${nPart}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Ferromagnetic/N${nPart}/K${KAVG}_${STDK}/Rp${Rp}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Antiferromagnetic/N${nPart}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Antiferromagnetic/N${nPart}/K${KAVG}_${STDK}/Rp${Rp}/s${seed}
 fi
 
 
