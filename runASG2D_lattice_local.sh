@@ -18,19 +18,14 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 ##############
 
 nPart=100
-phi=0.78
 seed=1
 
-gx=1.0
-Pe=0.0
-Rr=1.0
+rotD=1.0
+
 Rp=2.0
-xTy=1.0
 
 initMode='L'
 # can be:
-#    'R' random, 
-#    'S' restart from previous simulation,
 #    'L' hexagonal lattice
 
 couplingMode='C'
@@ -59,12 +54,6 @@ simulT=1.0
 savePos=1
 saveForce=0
 saveCoupling=1 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
-
-potMode='C'
-# can be:
-#    'W' WCA potential,
-#    'H' Harmonic potential
-#    'C' Continuous potential (repulsive part of WCA) with set cutoff
 
 # Local
 if [ "${couplingMode}" == "C" ]; then
@@ -96,68 +85,47 @@ echo "Starting 2D Active Spin Glass run..."
 
 cd $run_dir
 
-if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
-    sed -i '' "9s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
-    if [ "${couplingMode}" == "C" ]; then
-        sed -i '' "16s/.*/${simulT}/" 'inpar'
-    elif [ "${couplingMode}" == "T" ]; then
-        sed -i '' "18s/.*/${simulT}/" 'inpar'
-    elif [ "${couplingMode}" == "G" ]; then
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
-    elif [ "${couplingMode}" == "F" ]; then
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
-    elif [ "${couplingMode}" == "A" ]; then
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
-    fi
-
-else
-    if [ -e "inpar" ]; then
-        rm 'inpar'
-    fi
-    touch 'inpar'
-
-    echo ${nPart} > 'inpar'
-    echo ${phi} >> 'inpar'
-    echo ${seed} >> 'inpar'
-
-    echo ${gx} >> 'inpar'
-    echo ${Pe} >> 'inpar'
-    echo ${Rr} >> 'inpar'
-    echo ${Rp} >> 'inpar'
-    echo ${xTy} >> 'inpar'
-
-    echo ${initMode} >> 'inpar'
-
-    echo ${couplingMode} >> 'inpar'
-    if [ "${couplingMode}" == "C" ]; then
-        echo ${K0} >> 'inpar'
-    elif [ "${couplingMode}" == "T" ]; then
-        echo ${KAA} >> 'inpar'
-        echo ${KAB} >> 'inpar'
-        echo ${KBB} >> 'inpar'
-    elif [ "${couplingMode}" == "G" ]; then
-        echo ${KAVG} >> 'inpar'
-        echo ${STDK} >> 'inpar'
-    elif [ "${couplingMode}" == "F" ]; then
-        echo ${KAVG} >> 'inpar'
-        echo ${STDK} >> 'inpar'
-    elif [ "${couplingMode}" == "A" ]; then
-        echo ${KAVG} >> 'inpar'
-        echo ${STDK} >> 'inpar'
-    fi
-
-    echo ${dT} >> 'inpar'
-    echo ${DT} >> 'inpar'
-    echo ${DTex} >> 'inpar'
-    echo ${eqT} >> 'inpar'
-    echo ${simulT} >> 'inpar'
-
-    echo ${savePos} >> 'inpar'
-    echo ${saveForce} >> 'inpar'
-    echo ${saveCoupling} >> 'inpar'
-
-    echo ${potMode} >> 'inpar'
+if [ -e "inpar" ]; then
+    rm 'inpar'
 fi
+touch 'inpar'
+
+echo ${nPart} > 'inpar'
+echo ${seed} >> 'inpar'
+
+echo ${rotD} >> 'inpar'
+
+echo ${Rp} >> 'inpar'
+
+echo ${initMode} >> 'inpar'
+
+echo ${couplingMode} >> 'inpar'
+if [ "${couplingMode}" == "C" ]; then
+    echo ${K0} >> 'inpar'
+elif [ "${couplingMode}" == "T" ]; then
+    echo ${KAA} >> 'inpar'
+    echo ${KAB} >> 'inpar'
+    echo ${KBB} >> 'inpar'
+elif [ "${couplingMode}" == "G" ]; then
+    echo ${KAVG} >> 'inpar'
+    echo ${STDK} >> 'inpar'
+elif [ "${couplingMode}" == "F" ]; then
+    echo ${KAVG} >> 'inpar'
+    echo ${STDK} >> 'inpar'
+elif [ "${couplingMode}" == "A" ]; then
+    echo ${KAVG} >> 'inpar'
+    echo ${STDK} >> 'inpar'
+fi
+
+echo ${dT} >> 'inpar'
+echo ${DT} >> 'inpar'
+echo ${DTex} >> 'inpar'
+echo ${eqT} >> 'inpar'
+echo ${simulT} >> 'inpar'
+
+echo ${savePos} >> 'inpar'
+echo ${saveForce} >> 'inpar'
+echo ${saveCoupling} >> 'inpar'
 
 time ${bin_dir}/activeSpinGlass_2D_lattice inpar
 

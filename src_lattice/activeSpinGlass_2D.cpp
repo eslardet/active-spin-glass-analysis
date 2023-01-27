@@ -89,26 +89,14 @@ for (sig=1; sig<=32; sig++)
     inputFile >> nPart;
     logFile << " --> Total Number of particles = " << nPart << endl;
 
-    inputFile >> phi;
-    logFile << " --> Volume fraction, phi = " << phi << endl;
-
     inputFile >> seed;
-    logFile << " --> Seed = " << seed << endl;
+    logFile << " --> Seed = " << seed << endl; 
 
-    inputFile >> gx;
-    logFile << " --> Gamma_x = " << gx << endl;  
-
-    inputFile >> Pe;
-    logFile << " --> Peclet number = " << Pe << endl;
-
-    inputFile >> Rr;
-    logFile << " --> Ratio of LJ interaction radius to particle size = " << Rr << endl;    
+    inputFile >> rotD;
+    logFile << " --> Rotational diffusion = " << rotD << endl;
 
     inputFile >> Rp;
     logFile << " --> Ratio of Vicsek interaction radius to particle size = " << Rp << endl;    
-
-    inputFile >> xTy;
-    logFile << " --> Ratio of Lx/Ly = " << xTy << endl;
 
     logFile << "------------------------------------------------------------" << endl;
 
@@ -188,11 +176,6 @@ for (sig=1; sig<=32; sig++)
     logFile << " --> saveCoupling = " << saveCoupling << endl;
 
     logFile << "------------------------------------------------------------" << endl;
-
-    inputFile >> potMode; 
-    logFile << " --> Repulsion Potential Mode = " << potMode << endl; 
-
-    logFile << "------------------------------------------------------------" << endl;
     logFile << '\n';
     
     inputFile.close();
@@ -218,8 +201,6 @@ for (sig=1; sig<=32; sig++)
     vector<double> y(nPart); // y-positions
     vector<double> p(nPart); // heading 
     
-    vector<double> fx(nPart); // x-force
-    vector<double> fy(nPart); // y-force
     vector<double> fp(nPart); // torque 
 
     double t,t0;
@@ -231,11 +212,6 @@ for (sig=1; sig<=32; sig++)
     // Initialize
     checkParameters(); // Check validity of the parameters combination
     initialize(x,y,p); // Initialize configuration
-
-    // Checks
-    tphi = volumeFraction();
-    logFile << "Check on the simulation after initialization: " << endl;
-    logFile << " --> Volume fraction = " << tphi << endl;
 
     if (savePos) {
         saveHeader(posFile);
@@ -252,7 +228,7 @@ for (sig=1; sig<=32; sig++)
 	// (1) Equilibration
     for(int ne=0 ; ne<Neq ; ne++) {
         // full equilibration
-        activeBrownianDynamics(x,y,p,fx,fy,fp,t);
+        activeBrownianDynamics(x,y,p,fp,t);
     }
 
     // t0 = t;
@@ -269,7 +245,7 @@ for (sig=1; sig<=32; sig++)
     cout << " --> " << flush;
     for(int ns=0 ; ns<Nsimul ; ns++) {
         // Move to the next timestep
-        activeBrownianDynamics(x,y,p,fx,fy,fp,t);
+        activeBrownianDynamics(x,y,p,fp,t);
         // Save data if necessary                
         if ( (ns+1)%Nskip == 0 ) {
             if (savePos) {
@@ -301,7 +277,7 @@ for (sig=1; sig<=32; sig++)
     if (savePos) { posFile.close(); }
     if (saveForce) { forceFile.close(); }
     
-    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", Pe = " << Pe << ", couplingMode = " << couplingMode << endl;
+    cout << endl << "Simulation successful, with nPart = " << nPart << ", rotD = " << rotD << ", seed = " << seed << ", couplingMode = " << couplingMode << endl;
     switch(couplingMode)
     {
         case 'C' : // Constant coupling

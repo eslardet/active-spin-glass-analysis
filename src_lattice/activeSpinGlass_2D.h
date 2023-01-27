@@ -13,15 +13,15 @@ std::fstream logFile,posFile,posExactFile,forceFile,couplingFile;
 // Input parameters
 int nPart;
 unsigned int seed;
-double phi;
-double gx,Pe,Rr,Rp;
+double Rp;
+double rotD;
 bool savePos,saveForce,saveCoupling;
-char initMode,potMode,couplingMode;
+char initMode,couplingMode;
 double dT,DT,DTex,eqT,simulT,startT;
 int Nsimul,Neq,Nskip,Nskipexact;
 double xmin,xmax;
 double ymin,ymax;
-double xTy,Lx,Ly;
+double Lx,Ly;
 
 // Coupling constant parameters
 double K0; // mode 'C': K0: Coupling constant
@@ -51,9 +51,9 @@ inline void saveFrame(std::vector<double> pp, double tt, std::fstream& File)
 inline void saveHeader(std::fstream& File)
 {
 	File << nPart << std::endl;
-    File << phi << std::endl;
     File << seed << std::endl;
-    File << Rr << '\t' << Rp << std::endl;
+    File << rotD << std::endl;
+    File << Rp << std::endl;
     File << xmin << '\t' << xmax << std::endl;
     File << ymin << '\t' << ymax << std::endl;
 }

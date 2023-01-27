@@ -13,16 +13,14 @@
 extern std::fstream initposFile,logFile,couplingFile, posExactFile;
 
 extern int nPart;
+extern double rotD; // Rotational diffusion
 extern unsigned int seed;
-extern double phi;
 extern bool saveCoupling;
-extern char initMode,potMode,couplingMode;
+extern char initMode,couplingMode;
 extern double dT,DT,DTex,eqT,simulT,startT;
 extern int Nsimul,Neq,Nskip,Nskipexact;
 extern double Lx,xmin,xmax;
 extern double Ly,ymin,ymax;
-extern double xTy;
-extern double gx,Pe,Rr;
 
 extern double K0; // mode 'C': K0: Coupling constant
 extern double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
@@ -40,8 +38,8 @@ static int nCell,mx,my; // number of cells on each direction
 
 // Interaction radii
 static double beta,betasq;
-extern double Rr,Rp;
-static double rr,rrsq,rp,rpsq;
+extern double Rp;
+static double rp,rpsq;
 
 // Define variables needed for the SRK
 static std::vector<double> X,Fx;
@@ -115,24 +113,16 @@ inline int lCellIndex(int ii, int jj)
 std::string currentDateTime(void);
 void checkParameters(void);
 void initialize(std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void initialConditionsRandom(std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void initialConditionsSim(std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void initialConditionsLattice(std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void allocateSRKmem(void);
 bool checkOverlap(std::vector<double>,std::vector<double>);
-double volumeFraction(void);
 void buildMap(void);
 bool checkNL(std::vector<double>,std::vector<double>);
 void updateNL(std::vector<double>,std::vector<double>);
-void SRK2(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void EM(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void force(std::vector<double>,std::vector<double>,std::vector<double>,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void activeBrownianDynamics(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,double&);
-double fHarmonic(std::vector<double>&,std::vector<double>&);
-void dfHarmonic(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void fire(std::vector<double> &px, std::vector<double> &py, const double dT0, const double ftol, 
-		  double &fret, double func(std::vector<double> &,std::vector<double> &), 
-		  void dfunc(std::vector<double> &, std::vector<double> &, std::vector<double> &, std::vector<double> &));
+void SRK2(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
+void EM(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
+void force(std::vector<double>,std::vector<double>,std::vector<double>,std::vector<double>&);
+void activeBrownianDynamics(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,double&);
 
 ///////////////////
 // saveInitFrame //
@@ -142,9 +132,9 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
 {
 
     File << nPart << std::endl;
-    File << phi << std::endl;
     File << seed << std::endl;
-    File << Rr << '\t' << Rp << std::endl; 
+    File << rotD << std::endl;
+    File << Rp << std::endl; 
     File << xmin << '\t' << xmax << std::endl;
     File << ymin << '\t' << ymax << std::endl;
 

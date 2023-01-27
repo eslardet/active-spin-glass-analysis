@@ -54,10 +54,6 @@ string currentDateTime() {
 // This function checks the parameters combination
 void checkParameters()
 {
-    if(Rr<1.0) {
-        cerr << "Invalid value of Rr, must be >= 1.0!" << endl;
-        ::exit(1);
-    }
     
     switch(initMode)
     {
@@ -77,28 +73,6 @@ void checkParameters()
         default :
             cerr << "Invalid Initialization Mode!" << endl;
             cerr << " --> Valid modes are : 'R' ... " << endl;
-            ::exit(1);
-
-    }
-
-    switch(potMode)
-    {
-
-        case 'W' : // WCA Potential
-            logFile << "Initializing repulsion potential in mode 'W', WCA potential" << endl;
-            break;
-
-        case 'H' : // Harmonic Potential
-            logFile << "Initializing repulsion potential in mode 'H', Harmonic potential" << endl;
-            break;
-
-        case 'C' : // Continuous Potential (repulsive part of WCA)
-            logFile << "Initializing repulsion potential in mode 'C', Continuous potential" << endl;
-            break;
-
-        default :
-            cerr << "Invalid Potential Mode!" << endl;
-            cerr << " --> Valid modes are : 'W', 'H', 'C' " << endl;
             ::exit(1);
 
     }
@@ -153,34 +127,8 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     rnd_gen.seed (seed);
 
     // Initialize particle hard-core radius
-    switch(potMode)
-    {
-        case 'W' :
-            beta = pow(2.0,double(1.0)/double(6.0));
-            break;
-
-        case 'H' :
-            beta = 2.0;
-            break;
-
-        case 'C' : // New //
-            beta = 1;
-            break;
-        
-        default :
-            cerr << "Invalid Potential Mode!" << endl;
-            ::exit(1);
-    }
+    beta = 1.0;
     betasq = beta*beta;
-
-    // Initialize Lennard-Jones potential lengthscale
-    if( Rr > 1.0 ){
-        rr = Rr*beta;
-        rrsq = rr*rr;
-    }else{
-        rr = beta;
-        rrsq = betasq;
-    }
 
     // Initialize Vicsek interaction
     if( Rp > 1.0 ){
@@ -192,19 +140,14 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     }
 
     // Neighbor list radius
-    rc = MAX(rr,rp);
-    rl = rc+0.5*beta;
+    // rc=rl=rp as particles do not move
+    rc = rp;
+    rl = rc;
     rlsq = rl*rl;
 
     // initialize particles positions & polarities
     switch(initMode)
     {
-        case 'R' : // Particles placed randomly in the box
-            initialConditionsRandom(x,y,p);
-            break;
-        case 'S' : // Particles configured starting from previous simulation
-            initialConditionsSim(x,y,p);
-            break;
         case 'L' : // Particles placed on a hexagonal lattice
             initialConditionsLattice(x,y,p);
             break;
@@ -215,7 +158,7 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     // Initialize the coupling array
     switch(initMode)
     {
-        case 'R' : case 'L' :
+        case 'L' :
             switch(couplingMode)
             {
                 case 'C' : // Constant coupling
@@ -295,192 +238,9 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                 couplingFile.close();
             }
             break;
-
-        case 'S' :
-            // read coupling file (not necessary for constant modes)
-            switch(couplingMode)
-            {
-                case 'C' : // Constant coupling
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            K[i][j] = K0; 
-                            K[j][i] = K0; 
-                        }
-                    }
-                    break;
-
-                case 'T' : // Two-populations
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            if(i<nPart/2.0){
-                                if(j<nPart/2.0){
-                                    K[i][j] = KAA;
-                                    K[j][i] = KAA;
-                                }else{
-                                    K[i][j] = KAB;
-                                    K[j][i] = KAB;
-                                }
-                            }else{
-                                K[i][j] = KBB;
-                                K[j][i] = KBB;
-                            }
-                        }
-                    }
-                    break;
-
-                default : // Other random coupling modes
-                    couplingFile.open("coupling", ios::in);
-                    if(couplingFile.fail())
-                    {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-                    for(int i=0 ; i<nPart ; i++)
-                    {
-                        for(int j=i+1 ; j<nPart ; j++){
-                            couplingFile >> K[i][j];        
-                        }
-                    }
-                    couplingFile.close();
-                    break;
-
-            }
-            break;
     }       
 }
 
-/////////////////////////////
-// initialConditionsRandom //
-/////////////////////////////
-// Initialize positions of particles at random location using FIRE
-void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double>& p)
-{
-    double U;
-    double dTF = 0.1;
-
-    startT = 0.0;
-
-    // Open file to write initial conditions
-    initposFile.open("initpos",ios::out);
-    if (initposFile.fail()) 
-    {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
-    initposFile.precision(8);
-
-    // Calculate size of the box
-    L = sqrt(double(nPart)*PI*SQR(beta/2.0)/(phi*xTy));
-    
-    xmin = 0.0;
-    xmax = xTy*L;
-    ymin = 0.0;
-    ymax = L;
-
-    Lx = xTy*L;
-    Ly =     L;
-
-    // Timing
-    Neq = (int) ceil(eqT/dT);
-    Nsimul = (int) ceil(simulT/dT);
-    Nskip = (int) ceil(DT/dT);
-    Nskipexact = (int) ceil(DTex/dT);
-    logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
-    logFile << "Volume fraction is phi = " << phi << endl;
-
-    // Initialize particles at random positions
-    for (int i=0 ; i<nPart ; i++) {
-        x[i] = Lx*uniDist(rnd_gen);
-        y[i] = Ly*uniDist(rnd_gen);
-        p[i] = 2.0*PI*uniDist(rnd_gen); 
-    }
-
-    // Save initial conditions
-    saveInitFrame(x,y,p,initposFile);
-
-    // Initialize lengthscales related to the cell list
-    lx = rl; 
-    ly = rl;
-    mx = (int)floor(Lx/lx);
-    my = (int)floor(Ly/ly);
-    lx = Lx/double(mx);
-    ly = Ly/double(my);
-    nCell = mx*my;
-
-    // Allocation of memory
-    allocateSRKmem();   
-
-    // Build map of cells
-    buildMap();
-
-    // Proceed to one-step energy minimization via FIRE
-    U = -1.0;
-    fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
-
-    // Save initial conditions
-    saveInitFrame(x,y,p,initposFile);
-    initposFile.close();
-
-    return; 
-}
-
-/////////////////////////////
-// initialConditionsSim //
-/////////////////////////////
-// Initialize positions of particles from exact positions file of previous simulation
-void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& p)
-{
-
-    // Calculate size of the box
-    L = sqrt(double(nPart)*PI*SQR(beta/2.0)/(phi*xTy));
-    
-    xmin = 0.0;
-    xmax = xTy*L;
-    ymin = 0.0;
-    ymax = L;
-
-    Lx = xTy*L;
-    Ly =     L;
-
-    // Open file to read initial conditions
-    posExactFile.open("pos_exact",ios::in);
-    if (posExactFile.fail()) 
-    {cerr << "Can't open exact positions file!" << endl; ::exit(1);}
-
-    // Initialize particles by reading file
-    posExactFile >> startT;
-    for(int i=0 ; i<nPart ; i++)
-    {
-        posExactFile >> x[i] >> y[i] >> p[i];
-    }
-
-    if (startT>simulT)
-    {cerr << "Already simulated up to simulT! Exact position file time is " << startT << endl; ::exit(1);}
-
-    posExactFile.close();
-
-
-    // Timing
-    Neq = (int) ceil(eqT/dT);
-    Nsimul = (int) ceil((simulT-startT)/dT);
-    Nskip = (int) ceil(DT/dT);
-    Nskipexact = (int) ceil(DTex/dT);
-    logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
-    logFile << "Volume fraction is phi = " << phi << endl;
-
-    // Initialize lengthscales related to the cell list
-    lx = rl; 
-    ly = rl;
-    mx = (int)floor(Lx/lx);
-    my = (int)floor(Ly/ly);
-    lx = Lx/double(mx);
-    ly = Ly/double(my);
-    nCell = mx*my;
-
-    // Allocation of memory
-    allocateSRKmem();   
-
-    // Build map of cells
-    buildMap();
-
-    return; 
-}
 
 /////////////////////////////
 // initialConditionsLattice //
@@ -504,7 +264,6 @@ void initialConditionsLattice(vector<double>& x, vector<double>& y, vector<doubl
     // Calculate size of the box
     Lx = Nx*beta;
     Ly = sqrt(3)/2 * Ny*beta;
-    xTy = Lx/Ly;
 
     
     xmin = 0.0;
@@ -518,7 +277,6 @@ void initialConditionsLattice(vector<double>& x, vector<double>& y, vector<doubl
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);
     logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
-    logFile << "Volume fraction is phi = " << phi << endl;
 
     // Initialize particles on a hexagonal lattice and random orientations
     for (int i=0 ; i<Ny ; i++) {
@@ -616,19 +374,6 @@ bool checkOverlap(vector<double> x, vector<double> y)
         }
     }
     return overlap;
-}
-
-//// Change to 2D //////
-////////////////////
-// volumeFraction //
-////////////////////
-// Calculates volume fraction 
-double volumeFraction(void)
-{
-    double phi;
-    double boxsize = Lx*Ly;
-    phi = nPart*PI*pow(beta/2, 2) / boxsize;
-    return phi;
 }
 
 //////////////
@@ -782,35 +527,23 @@ void updateNL(vector<double> x, vector<double> y)
 // SRK2 //
 //////////
 // Integrator for overdamped Langevin equation -- Stochastic Runge-Kutta 2nd order
-void SRK2(vector<double>& x, vector<double>& fx,
-          vector<double>& y, vector<double>& fy, 
-          vector<double>& p, vector<double>& fp)
+void SRK2(vector<double>& x, vector<double>& y, vector<double>& p, vector<double>& fp)
 {
-    double sig_T = sqrt(2.0*dT);
-    double sig_R = sqrt(6.0*dT);
-
-    // Check the neighbor list and update if necessary
-    if ( checkNL(x,y) ) {
-        updateNL(x,y);
-    }
+    double sig_R = sqrt(2.0*rotD*dT);
 
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
-    force(x,y,p,fx,fy,fp);
+    force(x,y,p,fp);
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
-        X[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
-        Y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
         P[i] = p[i] + fp[i]*dT + sig_R*normDist(rnd_gen);
     }
 
     // Calculate Forces on particle i at positions {R_i}, F_i({R_i(t)})
-    force(X,Y,P,Fx,Fy,Fp);
+    force(x,y,P,Fp);
 
     // Calculate Final updated positions
     for (int i=0 ; i<nPart ; i++ ) {
-        x[i] += (fx[i]+Fx[i])/2.0*dT + sig_T*normDist(rnd_gen);
-        y[i] += (fy[i]+Fy[i])/2.0*dT + sig_T*normDist(rnd_gen);
         p[i] += (fp[i]+Fp[i])/2.0*dT + sig_R*normDist(rnd_gen);
     }
 
@@ -821,25 +554,15 @@ void SRK2(vector<double>& x, vector<double>& fx,
 // EM //
 ////////
 // Integrator for Force Balance equation -- Euler-Mayurama
-void EM(vector<double>& x, vector<double>& fx,
-        vector<double>& y, vector<double>& fy, 
-        vector<double>& p, vector<double>& fp)
+void EM(vector<double>& x, vector<double>& y, vector<double>& p, vector<double>& fp)
 {
-    double sig_T = sqrt(2.0*dT);
-    double sig_R = sqrt(6.0*dT);
-
-    // Check the neighbor list and update if necessary
-    // if ( checkNL(x,y) ) {
-    //     updateNL(x,y);
-    // }
+    double sig_R = sqrt(2.0*rotD*dT);
 
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
-    force(x,y,p,fx,fy,fp);
+    force(x,y,p,fp);
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
-        // x[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
-        // y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
         p[i] = p[i] + fp[i]*dT + sig_R*normDist(rnd_gen);
     }
 
@@ -850,8 +573,7 @@ void EM(vector<double>& x, vector<double>& fx,
 // force //
 ///////////
 // consists in : Lennard-Jones potential between particles, active propulsion and alignment interactions
-void force(vector<double> xx, vector<double> yy, vector<double> pp,
-           vector<double>& ffx, vector<double>& ffy, vector<double>& ffp)
+void force(vector<double> xx, vector<double> yy, vector<double> pp, vector<double>& ffp)
 {
     double xij,yij,rij,rijsq;
     double pi,pj,pij,Kij;
@@ -862,8 +584,6 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
 
         pi = pp[i];
         // Self-propelling force
-        ffx[i] = Pe*cos(pi);
-        ffy[i] = Pe*sin(pi);
         ffp[i] = 0.0;
 
         for (int j=cl[i] ; j<cl[i+1] ; j++) {
@@ -871,42 +591,11 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
             xij = xx[i]-xx[nl[j]];
             xij = xij - Lx*rint(xij/Lx);
 
-            if (fabs(xij) <= rc) { // rc = MAX(rr,rp)
+            if (fabs(xij) <= rc) {
                 yij = yy[i]-yy[nl[j]];
                 yij = yij - Ly*rint(yij/Ly);
 
                 rijsq = SQR(xij)+SQR(yij);
-
-                // Potential
-                if (rijsq <= rrsq) {
-                    rij = sqrt(rijsq);
-
-                //     switch(potMode)
-                //     {
-                //         case 'W':
-                //             ff = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
-                //             break;
-                        
-                //         case 'C': // Continuous potential
-                //             ff = gx*12.0*pow(rij,-13.0);
-                //             break;
-
-                //         case 'H':
-                //             ff = gx*(2-rij);
-                //             break;
-                        
-                //         default:
-                //             cerr << "Invalid Potential Mode!" << endl;
-                //             ::exit(1);
-                //         }
-                    
-
-                //     ffx[i] += ff*xij/rij;
-                //     ffy[i] += ff*yij/rij;
-
-                //     ffx[nl[j]] -= ff*xij/rij;
-                //     ffy[nl[j]] -= ff*yij/rij;
-                }
 
                 // Vicsek alignment
                 if (rijsq <= rpsq){
@@ -929,198 +618,11 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
 // brownianDynamics //
 //////////////////////
 // Proceeds to one timestep integration of the equation of motion
-void activeBrownianDynamics(vector<double>& x, vector<double>& y, vector<double>& p, 
-                               vector<double>& fx, vector<double>& fy, vector<double>& fp, 
-                               double& t)
+void activeBrownianDynamics(vector<double>& x, vector<double>& y, vector<double>& p, vector<double>& fp, double& t)
 {
     // Force Balance equation
-    EM(x,fx,y,fy,p,fp);
+    EM(x,y,p,fp);
     t += dT;
     return;
 }
 
-///////////////
-// fHarmonic //
-///////////////
-// Contains the core of the function to minimize - Harmonic potential
-// r is a 2N vector which N first entries correspond to x-axis coordinates of the particles and the following N entries to the y-coordinates
-double fHarmonic(vector<double>& rx, vector<double>& ry)
-{
-    double xij,yij,rij,rijsq;
-    double fp=0.0;
-
-    for (int i=0 ; i<nPart ; i++) {
-        for (int j=cl[i] ; j<cl[i+1] ; j++) {
-            xij = rx[i]-rx[nl[j]];
-            xij = xij - Lx*rint(xij/Lx);
-            if(fabs(xij)<beta){
-                yij = ry[i]-ry[nl[j]];
-                yij = yij - Ly*rint(yij/Ly);
-                if(fabs(yij)<beta){
-                    rijsq = SQR(xij)+SQR(yij);
-
-                    if (rijsq < betasq){
-                        rij = sqrt(rijsq);
-                        fp += pow((1.0-rij/beta),2.0)/2.0;
-                    }
-                }
-            }
-        }
-    }
-
-    return fp;             
-}
-
-////////////////
-// dfHarmonic //
-////////////////
-// gradient function - Harmonic potential
-// r is a 2N vector which N first entries correspond to x-axis coordinates of the particles and the following N entries to the y-coordinates
-// f is a 2N vector which N first entries correspond to x-components of the forces and the following N entries to the y-components
-void dfHarmonic(vector<double>& rx, vector<double>& ry, vector<double>& fx, vector<double>& fy)
-{
-    double xij,yij,rij,rijsq;
-    double fp;
-
-    for (int i=0 ; i<nPart ; i++) {
-        fx[i] = 0.0;
-        fy[i] = 0.0;
-    }
-
-    for (int i=0 ; i<nPart ; i++) {
-        for (int j=cl[i] ; j<cl[i+1] ; j++) {
-            xij = rx[i]-rx[nl[j]];
-            xij = xij - Lx*rint(xij/Lx);
-            if(fabs(xij)<beta){
-                yij = ry[i]-ry[nl[j]];
-                yij = yij - Ly*rint(yij/Ly);
-                if(fabs(yij)<beta){
-                    rijsq = SQR(xij)+SQR(yij);
-
-                    if (rijsq < betasq){
-                        
-                        rij = sqrt(rijsq);
-                        fp = (1.0-rij/beta)/beta;
-
-                        fx[i]     += fp*xij/rij;
-                        fx[nl[j]] -= fp*xij/rij;
-
-                        fy[i]     += fp*yij/rij;
-                        fy[nl[j]] -= fp*yij/rij;
-
-                    }
-                }
-            }
-        }
-    }
-    
-    return;
-}
-
-
-//////////
-// fire //
-//////////
-// Fast Inertial Relaxation Engine
-void fire(vector<double> &px, vector<double> &py, const double dT0, const double ftol, double &fret, double func(vector<double> &,vector<double> &), void dfunc(vector<double> &, vector<double> &, vector<double> &, vector<double> &))
-{
-
-    // Local variables - FIRE Algorithm parameters
-    const int Nmin = 5; // Minimal number of steps since last P<0
-    const double finc = 1.1; // Increase factor in the timestepping
-    const double fdec = 0.5; // Decrease factor in the timestepping
-    const double astart = 0.1;
-    const double fa = 0.99;
-    const double dTmax = 0.1;
-    const int nStepMax = 1.e6;
-
-    bool notConverged = true;
-    double dt = dT0;
-    double P;
-    double alph = astart; 
-    int nStep,nStop;
-    double normV,normF;
-    double Fmax;
-
-    vector<double> vx (nPart,0.0); 
-    vector<double> vy (nPart,0.0); 
-    vector<double> ax (nPart,0.0); 
-    vector<double> ay (nPart,0.0); 
-    vector<double> fx (nPart,0.0); 
-    vector<double> fy (nPart,0.0); 
-
-    nStop = 0;
-    nStep = 0;
-
-    while(notConverged && nStep < nStepMax){
-
-        nStep++;
-
-        // Step 0: Check the neighbor list and update if necessary
-        if ( checkNL(px,py) ) {
-            updateNL(px,py);
-        }
-
-        // Step 1: Update the positions
-        for(int i=0 ; i<nPart ; i++){
-            px[i] += vx[i]*dt + 0.5*SQR(dt)*fx[i];
-            py[i] += vy[i]*dt + 0.5*SQR(dt)*fy[i];
-            ax[i] = fx[i];
-            ay[i] = fy[i];
-        }
-
-        // Step 2: Compute new forces
-        dfunc(px,py,fx,fy);
-
-        // Step 3: Update the velocities
-        normV = 0.0;
-        normF = 0.0;
-        Fmax = 0.0;
-        for(int i=0 ; i<nPart ; i++){
-            vx[i] += 0.5*(fx[i]+ax[i])*dt;
-            vy[i] += 0.5*(fy[i]+ay[i])*dt;
-            normV += SQR(vx[i]) + SQR(vy[i]);
-            normF += SQR(fx[i]) + SQR(fy[i]);
-            Fmax = MAX(Fmax,sqrt(SQR(fx[i]) + SQR(fy[i])));
-        }
-        normV = sqrt(normV);
-        normF = sqrt(normF);
-
-        // Step 4: Check for convergence
-        if(Fmax < ftol){
-            cout << "Done with FIRE, Fmax = " << Fmax << " and ftol = " << ftol << endl;
-            fret = func(px,py);
-            return; 
-        }
-
-        // Step 5: FIRE algorithm
-        P = 0.0;
-        for(int i=0 ; i<nPart ; i++){
-            P += fx[i]*vx[i] + fy[i]*vy[i];
-        }
-
-        for(int i=0 ; i<nPart ; i++){
-            vx[i] = (1-alph)*vx[i] + alph*fx[i]*normV/normF;
-            vy[i] = (1-alph)*vy[i] + alph*fy[i]*normV/normF;
-        }
-
-        if( P < 0.0 ){
-            nStop = nStep;
-            for(int i = 0 ; i<nPart ; i++){
-                vx[i] = 0.0;    
-                vy[i] = 0.0;    
-            } 
-            dt *= fdec;
-            alph = astart;
-        }else if( P >= 0.0 && nStep-nStop > Nmin ){
-            dt = MIN(dt*finc,dTmax);
-            alph *= fa;
-        }
-
-    }
-
-    cerr << "Maximum number of iterations exceeded in FIRE!"<< endl;
-    ::exit(1);
-
-    return;
-}
