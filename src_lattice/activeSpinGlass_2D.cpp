@@ -2,14 +2,14 @@
 //  ======================
 //  Code performing 2D active brownian dynamics 
 //	This code includes: 
-//		-overdamped langevin dynamics for both position and orientations
-//      -Purely repulsive Lennard-Jones interactions between particles
+//		-overdamped langevin dynamics for orientations (fully dimensionalized)
+//      -Particles on a hexagonal lattice
 //      -Vicsek interactions with generalized coupling constants
-//      -self-propelled particles via a constant peclet Pe (constant velocity)
 //      -Hybrid cell-linked list and Verlet neighbor lists
 //
 //  Created by Thibault Bertrand on 2022-04-19
-//  Last update by TB 2022-04-19
+//  Modified by Eloise Lardet on 2023-01-27
+//  Last update by EL 2023-01-27
 
 #include <iostream>
 #include <fstream>
@@ -193,6 +193,8 @@ for (sig=1; sig<=32; sig++)
         {cerr<<"Failed to open forces file!"<<endl; exit(1);}
         forceFile.precision(8);
     }
+
+    nPart = SQR(ceil(sqrt(nPart)));
 
 	///////////////////////
     // Declare Variables //

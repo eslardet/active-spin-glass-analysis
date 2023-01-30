@@ -17,7 +17,7 @@ import csv
 # Pe = sys.argv[2]
 # K = str(sys.argv[3])
 # seed = sys.argv[4]
-view_time=0
+view_time=1
 
 mode = "C"
 nPart = 100

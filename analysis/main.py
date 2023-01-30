@@ -4,23 +4,24 @@ import os
 import matplotlib.pyplot as plt
 import sys
 
-mode = sys.argv[1]
-nPart = int(sys.argv[2])
-K = str(sys.argv[3])
-Rp = float(sys.argv[4])
-seed = int(sys.argv[5])
-view_time = float(sys.argv[6])
+# mode = sys.argv[1]
+# nPart = int(sys.argv[2])
+# K = str(sys.argv[3])
+# Rp = float(sys.argv[4])
+# seed = int(sys.argv[5])
+# view_time = float(sys.argv[6])
 
-# mode = "C"
-# nPart = 5000
-# phi = 0.2
-# K = 1.0
-# seed = 1
+mode = "C"
+nPart = 1000
+Rp=2.0
+K = 1.0
+seed = 1
 
 # fun.snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, view_time=view_time)
 fun.animate(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+# x, y = fun.get_initpos_xy(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
 
-
+# fun.plot_vorder_time(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
 
 # Pe_range = np.concatenate((np.arange(2.0, 22.0, 2.0), np.arange(25.0, 55.0, 5.0)))
 

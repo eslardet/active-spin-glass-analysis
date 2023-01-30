@@ -72,7 +72,7 @@ void checkParameters()
 
         default :
             cerr << "Invalid Initialization Mode!" << endl;
-            cerr << " --> Valid modes are : 'R' ... " << endl;
+            cerr << " --> Valid modes are : 'R', 'S', 'L' ... " << endl;
             ::exit(1);
 
     }
