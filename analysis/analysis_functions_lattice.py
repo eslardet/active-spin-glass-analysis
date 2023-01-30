@@ -8,7 +8,7 @@ import csv
 import os
 
 
-def get_sim_dir(mode, nPart, K, Rp, seed):
+def get_sim_dir(mode, nPart, K, Rp, rotD, seed):
     if mode == "C":
         mode_name = "Constant"
     elif mode == "T":
@@ -20,24 +20,25 @@ def get_sim_dir(mode, nPart, K, Rp, seed):
     elif mode == "F":
         mode_name = "Ferromagnetic"
 
-    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/K' + str(K) + '/Rp' + str(Rp) + '/s' + str(seed))
+    # sim_dir = os.path.abspath('../simulation_data_lattice/' + mode_name + '/N' + str(nPart) + '/K' + str(K) + '/Rp' + str(Rp) + '/rotD' + str(rotD) + '/s' + str(seed))
+    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/K' + str(K) + '/Rp' + str(Rp) + '/rotD' + str(rotD) + '/s' + str(seed))
 
     return sim_dir
 
-def get_files(mode, nPart, K, Rp, seed):
+def get_files(mode, nPart, K, Rp, rotD, seed):
     """
     Get file paths for the input parameters and position files
     """
-    sim_dir = get_sim_dir(mode, nPart, K, Rp, seed)
+    sim_dir = get_sim_dir(mode, nPart, K, Rp, rotD, seed)
     inparFile = os.path.join(sim_dir, "inpar")
     posFile = os.path.join(sim_dir, "pos")
     return inparFile, posFile
 
-def get_file_path(mode, nPart, K, Rp, seed, file_name):
+def get_file_path(mode, nPart, K, Rp, rotD, seed, file_name):
     """
     Get the file path for a certain file name in the simulation data directory
     """
-    sim_dir = get_sim_dir(mode, nPart, K, Rp, seed)
+    sim_dir = get_sim_dir(mode, nPart, K, Rp, rotD, seed)
     file_path = os.path.join(sim_dir, file_name)
     return file_path
 
@@ -105,7 +106,6 @@ def get_xy_lattice(nPart):
 
     Lx = Nx*beta
     Ly = np.sqrt(3)/2*Ny*beta
-    xTy = Lx/Ly
 
     Ntot = int(Nx*Ny)
 
@@ -121,8 +121,8 @@ def get_xy_lattice(nPart):
     return x, y
 
 
-def get_initpos_xy(mode, nPart, K, Rp, seed):
-    initposFile = get_file_path(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed, file_name="initpos")
+def get_initpos_xy(mode, nPart, K, Rp, rotD, seed):
+    initposFile = get_file_path(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed, file_name="initpos")
 
     Nx = int(np.ceil(np.sqrt(nPart)))
     nPart = Nx*Nx
@@ -136,12 +136,12 @@ def get_initpos_xy(mode, nPart, K, Rp, seed):
 
     return x, y
 
-def snapshot(mode, nPart, K, Rp, seed, view_time):
+def snapshot(mode, nPart, K, Rp, rotD, seed, view_time):
     """
     Get static snapshot at specified time from the positions file
     """
 
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
     inpar_dict = get_params(inparFile)
     
     nPart = inpar_dict["nPart"]
@@ -164,7 +164,7 @@ def snapshot(mode, nPart, K, Rp, seed, view_time):
     i = int(view_time/DT)
     view_time = i*DT
 
-    x, y = get_initpos_xy(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+    x, y = get_initpos_xy(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
 
     theta = np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')
     
@@ -188,20 +188,20 @@ def snapshot(mode, nPart, K, Rp, seed, view_time):
     # cbar.ax.set_ylabel(r'$\cos(\theta_i)$', rotation=270)
     
     folder = os.path.abspath('../snapshots_lattice')
-    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '.png'
+    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_rotD' + str(rotD) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
 
-def animate(mode, nPart, K, Rp, seed, min_T=None, max_T=None):
+def animate(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
     """
     Make animation from positions file
     """
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
 
     # x, y = get_xy_lattice(nPart) # could get from initpos file instead
-    x, y = get_initpos_xy(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+    x, y = get_initpos_xy(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
     
     theta_all = get_theta_arr(inparFile, posFile, min_T, max_T)
     
@@ -212,6 +212,7 @@ def animate(mode, nPart, K, Rp, seed, min_T=None, max_T=None):
     DT = inpar_dict["DT"]
     seed = inpar_dict["seed"]
     Rp = inpar_dict["Rp"]
+    rotD = inpar_dict["rotD"]
 
     with open(posFile) as f:
         reader = csv.reader(f, delimiter="\t")
@@ -264,17 +265,17 @@ def animate(mode, nPart, K, Rp, seed, min_T=None, max_T=None):
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=10, blit=True)
 
     folder = os.path.abspath('../animations_lattice')
-    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '.mp4'
+    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_rotD' + str(rotD) + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))
 
 
-def plot_vorder_time(mode, nPart, K, Rp, seed, min_T=None, max_T=None):
+def plot_vorder_time(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
     """
     Plot Vicsek order parameter against time for one simulation
     """
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
     simulT = inpar_dict["simulT"]
@@ -284,6 +285,8 @@ def plot_vorder_time(mode, nPart, K, Rp, seed, min_T=None, max_T=None):
         max_T = simulT
     
     theta_all = get_theta_arr(inparFile=inparFile, posFile=posFile, min_T=min_T, max_T=max_T)
+    Nx = int(np.ceil(np.sqrt(nPart)))
+    nPart = Nx*Nx
     v_order = []
     for theta_t in theta_all:
         cos_sum = 0
@@ -299,7 +302,84 @@ def plot_vorder_time(mode, nPart, K, Rp, seed, min_T=None, max_T=None):
     ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
     
     folder = os.path.abspath('../plots/v_order_vs_time/')
-    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '.png'
+    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_rotD' + str(rotD) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def write_stats(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None, remove_pos=False):
+    """
+    Write a file with various statistics from the simulation data (Vicsek order parameter mean, standard deviation, susceptibility)
+    """
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
+    inpar_dict = get_params(inparFile)
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
+    
+    theta_all = get_theta_arr(inparFile, posFile, min_T, max_T)
+    Nx = int(np.ceil(np.sqrt(nPart)))
+    nPart = Nx*Nx
+    v_order = []
+    for theta_t in theta_all:
+        cos_sum = 0
+        sin_sum = 0
+        for i in theta_t:
+            cos_sum += np.cos(i)
+            sin_sum += np.sin(i)
+        v_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
+    v_mean = np.mean(v_order)
+    v_sd = np.std(v_order)
+    v_sus = nPart*v_sd**2
+
+
+    statsFile = open(os.path.join(sim_dir, "stats"), "w")
+    statsFile.write(str(v_mean) + '\n')
+    statsFile.write(str(v_sus))
+    statsFile.close()
+
+    ## Write file with lower resolution than pos
+
+    if remove_pos == True:
+        ## Remove position files to save space
+        os.remove(os.path.join(sim_dir, "pos"))
+
+def read_stats(mode, nPart, K, Rp, rotD, seed):
+    """
+    Read stats file and create dictionary with those statistics
+    """
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
+
+    with open(os.path.join(sim_dir, "stats")) as file:
+        reader = csv.reader(file, delimiter="\n")
+        r = list(reader)
+    stats_dict = {}
+    stats_dict["v_mean"] = float(r[0][0])
+    stats_dict["v_sus"] = float(r[1][0])
+    return stats_dict
+
+def plot_vorder_k(mode, nPart_range, K_range, Rp, rotD, seed_range):
+    """
+    Plot steady state Vicsek order parameter against K
+    Averaged over a number of realizations
+    Superimposed plots for various N and KSTD
+    """
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for K in K_range:
+            v_ss = []
+            v_ss_sum = 0
+            for seed in seed_range:
+                sim_dir = get_sim_dir(mode=mode, nPart=nPart, K=str(K), Rp=Rp, rotD=rotD, seed=seed)
+                if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                    write_stats(mode=mode, nPart=nPart, K=str(K), Rp=Rp, rotD=rotD, seed=seed, min_T=10.0)
+                v_ss_sum += read_stats(mode=mode, nPart=nPart,  K=str(K), Rp=Rp, rotD=rotD, seed=seed)["v_mean"]
+            v_ss.append(v_ss_sum/(len(seed_range)))
+        ax.plot(K_range, v_ss, 'o-', label="N=" + str(nPart) + ", K=" + str(K))
+    ax.set_xlabel("KAVG")
+    ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/v_order_vs_K/')
+    filename = mode + '_Rp' + str(Rp) + 'rotD' + str(rotD) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))

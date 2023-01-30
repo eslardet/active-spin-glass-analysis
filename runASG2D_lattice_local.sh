@@ -17,10 +17,10 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=1000
+nPart=1024
 seed=1
 
-rotD=1.0
+rotD=0.0
 
 Rp=2.0
 
@@ -46,10 +46,10 @@ K0=1.0
 # STDK=1.0
 
 dT=2.e-5
-DT=0.1
+DT=0.01
 DTex=0.5
 eqT=0
-simulT=1.0
+simulT=20.0
 
 savePos=1
 saveForce=0
@@ -57,15 +57,15 @@ saveCoupling=1 # Need to save couplings to be able to restart sim later for e.g.
 
 # Local
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Constant/N${nPart}/K${K0}/Rp${Rp}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Constant/N${nPart}/K${K0}/Rp${Rp}/rotD${rotD}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/TwoPopulations/N${nPart}/K${KAA}/Rp${Rp}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/TwoPopulations/N${nPart}/K${KAA}/Rp${Rp}/rotD${rotD}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Gaussian/N${nPart}/K${KAVG}_${STDK}/Rp${Rp}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Gaussian/N${nPart}/K${KAVG}_${STDK}/Rp${Rp}/rotD${rotD}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Ferromagnetic/N${nPart}/K${KAVG}_${STDK}/Rp${Rp}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Ferromagnetic/N${nPart}/K${KAVG}_${STDK}/Rp${Rp}/rotD${rotD}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Antiferromagnetic/N${nPart}/K${KAVG}_${STDK}/Rp${Rp}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_lattice/Antiferromagnetic/N${nPart}/K${KAVG}_${STDK}/Rp${Rp}/rotD${rotD}/s${seed}
 fi
 
 

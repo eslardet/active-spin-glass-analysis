@@ -12,13 +12,16 @@ import sys
 # view_time = float(sys.argv[6])
 
 mode = "C"
-nPart = 1000
-Rp=2.0
+nPart = 1024
+Rp = 2.0
 K = 1.0
 seed = 1
 
+fun.plot_vorder_time(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+# fun.write_stats(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed, min_T=10.0, remove_pos=True)
+
 # fun.snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, view_time=view_time)
-fun.animate(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+# fun.animate(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
 # x, y = fun.get_initpos_xy(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
 
 # fun.plot_vorder_time(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
