@@ -20,6 +20,8 @@ view_time = float(sys.argv[6])
 # fun.snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, view_time=view_time)
 fun.animate(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
 
+
+
 # Pe_range = np.concatenate((np.arange(2.0, 22.0, 2.0), np.arange(25.0, 55.0, 5.0)))
 
 # for Pe in Pe_range:
