@@ -14,13 +14,15 @@ import sys
 mode = "C"
 nPart = 1024
 Rp = 2.0
-K = 1.0
+rotD = 0.0
+K = -10.0
 seed = 1
 
-fun.plot_vorder_time(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
+# fun.plot_porder_time(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
+# fun.plot_norder_time(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
 # fun.write_stats(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed, min_T=10.0, remove_pos=True)
 
-# fun.snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed, view_time=view_time)
+fun.snapshot(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed, view_time=20.0)
 # fun.animate(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
 # x, y = fun.get_initpos_xy(mode=mode, nPart=nPart, K=K, Rp=Rp, seed=seed)
 

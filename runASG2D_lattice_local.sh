@@ -22,7 +22,7 @@ seed=1
 
 rotD=0.0
 
-Rp=2.0
+Rp=1.0
 
 initMode='L'
 # can be:
@@ -36,7 +36,7 @@ couplingMode='C'
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
 
-K0=1.0
+K0=-10.0
 
 # KAA=10.0
 # KAB=0.0
@@ -45,7 +45,7 @@ K0=1.0
 # KAVG=1.0
 # STDK=1.0
 
-dT=2.e-5
+dT=1.e-3
 DT=0.01
 DTex=0.5
 eqT=0

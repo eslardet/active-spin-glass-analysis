@@ -20,8 +20,8 @@ def get_sim_dir(mode, nPart, K, Rp, rotD, seed):
     elif mode == "F":
         mode_name = "Ferromagnetic"
 
-    # sim_dir = os.path.abspath('../simulation_data_lattice/' + mode_name + '/N' + str(nPart) + '/K' + str(K) + '/Rp' + str(Rp) + '/rotD' + str(rotD) + '/s' + str(seed))
-    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/K' + str(K) + '/Rp' + str(Rp) + '/rotD' + str(rotD) + '/s' + str(seed))
+    sim_dir = os.path.abspath('../simulation_data_lattice/' + mode_name + '/N' + str(nPart) + '/K' + str(K) + '/Rp' + str(Rp) + '/rotD' + str(rotD) + '/s' + str(seed))
+    # sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/K' + str(K) + '/Rp' + str(Rp) + '/rotD' + str(rotD) + '/s' + str(seed))
 
     return sim_dir
 
@@ -271,9 +271,9 @@ def animate(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
     ani.save(os.path.join(folder, filename))
 
 
-def plot_vorder_time(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
+def plot_porder_time(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
     """
-    Plot Vicsek order parameter against time for one simulation
+    Plot polar order parameter against time for one simulation
     """
     inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
     inpar_dict = get_params(inparFile)
@@ -287,21 +287,57 @@ def plot_vorder_time(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
     theta_all = get_theta_arr(inparFile=inparFile, posFile=posFile, min_T=min_T, max_T=max_T)
     Nx = int(np.ceil(np.sqrt(nPart)))
     nPart = Nx*Nx
-    v_order = []
+    p_order = []
     for theta_t in theta_all:
         cos_sum = 0
         sin_sum = 0
         for i in theta_t:
             cos_sum += np.cos(i)
             sin_sum += np.sin(i)
-        v_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
+        p_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
     fig, ax = plt.subplots()
     t_plot = np.arange(0, max_T+DT/4, DT)
-    ax.plot(t_plot, v_order)
+    ax.plot(t_plot, p_order)
     ax.set_xlabel("time")
-    ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
     
-    folder = os.path.abspath('../plots/v_order_vs_time/')
+    folder = os.path.abspath('../plots/p_order_vs_time/')
+    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_rotD' + str(rotD) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def plot_norder_time(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
+    """
+    Plot nematic order parameter against time for one simulation
+    """
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
+    inpar_dict = get_params(inparFile)
+    DT = inpar_dict["DT"]
+    simulT = inpar_dict["simulT"]
+    if min_T == None:
+        min_T = 0
+    if max_T == None:
+        max_T = simulT
+    
+    theta_all = get_theta_arr(inparFile=inparFile, posFile=posFile, min_T=min_T, max_T=max_T)
+    Nx = int(np.ceil(np.sqrt(nPart)))
+    nPart = Nx*Nx
+    n_order = []
+    for theta_t in theta_all:
+        cos_sq_sum = 0
+        cos_sin_sum = 0
+        for i in theta_t:
+            cos_sq_sum += np.cos(i)**2
+            cos_sin_sum += np.sin(i)*np.cos(i)
+        n_order.append(2*np.sqrt((cos_sq_sum/nPart - 1/2)**2+(cos_sin_sum/nPart)**2))
+    fig, ax = plt.subplots()
+    t_plot = np.arange(0, max_T+DT/4, DT)
+    ax.plot(t_plot, n_order)
+    ax.set_xlabel("time")
+    ax.set_ylabel(r"Nematic order parameter, $\Psi$")
+    
+    folder = os.path.abspath('../plots/n_order_vs_time/')
     filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_rotD' + str(rotD) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
