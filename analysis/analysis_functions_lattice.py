@@ -278,44 +278,6 @@ def plot_porder_time(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
     inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
-    simulT = inpar_dict["simulT"]
-    if min_T == None:
-        min_T = 0
-    if max_T == None:
-        max_T = simulT
-    
-    theta_all = get_theta_arr(inparFile=inparFile, posFile=posFile, min_T=min_T, max_T=max_T)
-    Nx = int(np.ceil(np.sqrt(nPart)))
-    nPart = Nx*Nx
-    p_order = []
-    for theta_t in theta_all:
-        cos_sum = 0
-        sin_sum = 0
-        for i in theta_t:
-            cos_sum += np.cos(i[0])
-            sin_sum += np.sin(i[0])
-        p_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
-
-    fig, ax = plt.subplots()
-    t_plot = np.arange(0, max_T+DT/4, DT)
-    ax.plot(t_plot, p_order)
-    ax.set_xlabel("time")
-    ax.set_ylabel(r"Polar order parameter, $\Psi$")
-    
-    folder = os.path.abspath('../plots/p_order_vs_time/')
-    filename = mode + '_N' + str(nPart) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_rotD' + str(rotD) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
-
-
-def plot_porder_time_large(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
-    """
-    Plot polar order parameter against time for one simulation
-    """
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
-    inpar_dict = get_params(inparFile)
-    DT = inpar_dict["DT"]
     print(DT)
     simulT = inpar_dict["simulT"]
     if min_T == None:
@@ -355,6 +317,7 @@ def plot_porder_time_large(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=Non
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
+
 def plot_norder_time(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
     """
     Plot nematic order parameter against time for one simulation
@@ -367,18 +330,28 @@ def plot_norder_time(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
         min_T = 0
     if max_T == None:
         max_T = simulT
-    
-    theta_all = get_theta_arr(inparFile=inparFile, posFile=posFile, min_T=min_T, max_T=max_T)
+
     Nx = int(np.ceil(np.sqrt(nPart)))
     nPart = Nx*Nx
+
     n_order = []
-    for theta_t in theta_all:
-        cos_sq_sum = 0
-        cos_sin_sum = 0
-        for i in theta_t:
-            cos_sq_sum += np.cos(i)**2
-            cos_sin_sum += np.sin(i)*np.cos(i)
-        n_order.append(2*np.sqrt((cos_sq_sum/nPart - 1/2)**2+(cos_sin_sum/nPart)**2))
+    with open(posFile) as f:
+        line_count = 1
+        timestep = int(min_T//DT)
+        for line in f:
+            if 8 + timestep*(nPart + 1) <= line_count <= 7 + timestep*(nPart + 1) + nPart:
+                if line_count == 8 + timestep*(nPart+1):
+                    cos_sq_sum = 0
+                    cos_sin_sum = 0
+                cos_sq_sum += np.cos(float(line))**2
+                cos_sin_sum += np.sin(float(line))*np.cos(float(line))
+                if line_count == 7 + timestep*(nPart + 1) + nPart:
+                    n_order.append(2*np.sqrt((cos_sq_sum/nPart - 1/2)**2+(cos_sin_sum/nPart)**2))
+                    timestep += 1
+            line_count += 1
+            if timestep*DT > max_T:
+                break
+
     fig, ax = plt.subplots()
     t_plot = np.arange(0, max_T+DT/4, DT)
     ax.plot(t_plot, n_order)
