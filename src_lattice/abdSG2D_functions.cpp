@@ -140,9 +140,8 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     }
 
     // Neighbor list radius
-    // rc=rl=rp as particles do not move
     rc = rp;
-    rl = rc;
+    rl = rc+0.1*beta; // to allow for rounding errors
     rlsq = rl*rl;
 
     // initialize particles positions & polarities

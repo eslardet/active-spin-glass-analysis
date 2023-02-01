@@ -85,6 +85,10 @@ echo "Starting 2D Active Spin Glass run..."
 
 cd $run_dir
 
+if [ -e "stats" ]; then
+    rm 'stats'
+fi
+
 if [ -e "inpar" ]; then
     rm 'inpar'
 fi

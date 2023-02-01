@@ -94,6 +94,10 @@ echo "Starting 2D Active Spin Glass run..."
 
 cd $run_dir
 
+if [ -e "stats" ]; then
+    rm 'stats'
+fi
+
 if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
     sed -i "9s/.*/${initMode}/" 'inpar' # extra '' required on MacOS after -i for sed (not on Linux)
     if [ "${couplingMode}" == "C" ]; then
