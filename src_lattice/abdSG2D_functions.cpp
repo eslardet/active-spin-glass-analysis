@@ -131,17 +131,14 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     betasq = beta*beta;
 
     // Initialize Vicsek interaction
-    if( Rp > 1.0 ){
-        rp = Rp*beta;
-        rpsq = rp*rp;
-    }else{
-        rp = beta;
-        rpsq = betasq;
-    }
+    rp = (Rp+0.1)*beta; // to allow for rounding errors
+    rpsq = rp*rp;
+
 
     // Neighbor list radius
+    // rc=rp as particles do not move
     rc = rp;
-    rl = rc+0.1*beta; // to allow for rounding errors
+    rl = rc; 
     rlsq = rl*rl;
 
     // initialize particles positions & polarities
@@ -571,7 +568,7 @@ void EM(vector<double>& x, vector<double>& y, vector<double>& p, vector<double>&
 ///////////
 // force //
 ///////////
-// consists in : Lennard-Jones potential between particles, active propulsion and alignment interactions
+// consists of : alignment interactions
 void force(vector<double> xx, vector<double> yy, vector<double> pp, vector<double>& ffp)
 {
     double xij,yij,rij,rijsq;
