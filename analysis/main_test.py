@@ -29,16 +29,6 @@ seed = 1
 # inparFile, posFile = fun.get_files(mode=mode,nPart=nPart,phi=phi,Pe=Pe,K=K,seed=seed)
 # fun.get_pos_arr(inparFile, posFile, min_T=None, max_T=None)
 
-# fun.snapshot(mode,nPart,phi,Pe,K,seed,view_time=6)
-# fun.animate(mode,nPart,phi,Pe,K,seed,max_T=100)
+# fun.snapshot(mode, nPart, K, Rp, rotD, seed, view_time=1)
 
-t0 = time.time()
-p1 = fun.plot_porder_time(mode, nPart, K, Rp, rotD, seed, min_T=0, max_T=10)
-print(time.time() - t0)
-
-
-t1 = time.time()
-p2 = fun.plot_porder_time_large(mode, nPart, K, Rp, rotD, seed, min_T=0, max_T=10)
-print(time.time() - t1)
-
-print(p1 == p2)
+fun.write_stats(mode, nPart, K, Rp, rotD, seed, min_T=0, max_T=10, remove_pos=False)
