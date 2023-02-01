@@ -583,27 +583,13 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp, vector<doubl
         ffp[i] = 0.0;
 
         for (int j=cl[i] ; j<cl[i+1] ; j++) {
+            pj = pp[nl[j]];
+            Kij = K[i][nl[j]];
+            pij = pi-pj;
+            ff = -Kij*sin(pij);
 
-            xij = xx[i]-xx[nl[j]];
-            xij = xij - Lx*rint(xij/Lx);
-
-            if (fabs(xij) <= rc) {
-                yij = yy[i]-yy[nl[j]];
-                yij = yij - Ly*rint(yij/Ly);
-
-                rijsq = SQR(xij)+SQR(yij);
-
-                // Vicsek alignment
-                if (rijsq <= rpsq){
-                    pj = pp[nl[j]];
-                    Kij = K[i][nl[j]];
-                    pij = pi-pj;
-                    ff = -Kij*sin(pij);
-
-                    ffp[i]     += ff;
-                    ffp[nl[j]] -= ff;
-                }
-            }
+            ffp[i]     += ff;
+            ffp[nl[j]] -= ff;
         }
     }
 
