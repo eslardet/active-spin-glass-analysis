@@ -36,20 +36,20 @@ couplingMode=$5
 #    'G' for Gaussian distribution, 
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
-# K0=$6
+K0=$6
 
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
 
-KAVG=$6
-STDK=$7
+# KAVG=$6
+# STDK=$7
 
 dT=1.e-4
 DT=0.01
 DTex=1.0
 eqT=0
-simulT=$8
+simulT=$7
 
 savePos=1
 saveForce=0

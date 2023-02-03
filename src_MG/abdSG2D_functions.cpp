@@ -66,6 +66,10 @@ void checkParameters()
             logFile << "Initializing in mode 'R', particles placed uniformly in the box" << endl;
             break;
 
+        case 'U' : // Random configuration for x,y but theta are uniformly given the initial direction of 0
+            logFile << "Initializing in mode 'U', particles placed uniformly in the box with uniform initial orientations" << endl;
+            break;
+
         case 'S' : // Starting from previous simulation
             logFile << "Initializing in mode 'S', strating off from previous simulation" << endl;
             break;
@@ -195,7 +199,7 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     // initialize particles positions & polarities
     switch(initMode)
     {
-        case 'R' : // Particles placed randomly in the box
+        case 'R' : case 'U' : // Particles placed randomly in the box
             initialConditionsRandom(x,y,p);
 
             // Allocation of memory
@@ -379,7 +383,12 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     for (int i=0 ; i<nPart ; i++) {
         x[i] = Lx*uniDist(rnd_gen);
         y[i] = Ly*uniDist(rnd_gen);
-        p[i] = 2.0*PI*uniDist(rnd_gen); 
+        if (initMode == 'U') {
+            p[i] = 0;
+        }
+        else { 
+            p[i] = 2.0*PI*uniDist(rnd_gen); 
+        }    
     }
 
     // Save initial conditions
