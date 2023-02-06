@@ -14,9 +14,9 @@ std::fstream logFile,posFile,posExactFile,forceFile,couplingFile;
 int nPart;
 unsigned int seed;
 double phi;
-double gx,Pe,Rr,Rp;
+double noise,vp,Rp;
 bool savePos,saveForce,saveCoupling;
-char initMode,potMode,couplingMode;
+char initMode,couplingMode;
 double dT,DT,DTex,eqT,simulT,startT;
 int Nsimul,Neq,Nskip,Nskipexact;
 double xmin,xmax;
@@ -53,7 +53,7 @@ inline void saveHeader(std::fstream& File)
 	File << nPart << std::endl;
     File << phi << std::endl;
     File << seed << std::endl;
-    File << Rr << '\t' << Rp << std::endl;
+    File << Rp << std::endl;
     File << xmin << '\t' << xmax << std::endl;
     File << ymin << '\t' << ymax << std::endl;
 }

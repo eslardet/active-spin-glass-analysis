@@ -16,13 +16,13 @@ extern int nPart;
 extern unsigned int seed;
 extern double phi;
 extern bool saveCoupling;
-extern char initMode,potMode,couplingMode;
+extern char initMode,couplingMode;
 extern double dT,DT,DTex,eqT,simulT,startT;
 extern int Nsimul,Neq,Nskip,Nskipexact;
 extern double Lx,xmin,xmax;
 extern double Ly,ymin,ymax;
 extern double xTy;
-extern double gx,Pe,Rr;
+extern double noise,vp;
 
 extern double K0; // mode 'C': K0: Coupling constant
 extern double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
@@ -40,8 +40,8 @@ static int nCell,mx,my; // number of cells on each direction
 
 // Interaction radii
 static double beta,betasq;
-extern double Rr,Rp;
-static double rr,rrsq,rp,rpsq;
+extern double Rp;
+static double rp,rpsq;
 
 // Define variables needed for the SRK
 static std::vector<double> X,Fx;
@@ -125,7 +125,7 @@ bool checkNL(std::vector<double>,std::vector<double>);
 void updateNL(std::vector<double>,std::vector<double>);
 void SRK2(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void EM(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void force(std::vector<double>,std::vector<double>,std::vector<double>,std::vector<double>&,std::vector<double>&,std::vector<double>&);
+void force(std::vector<double>,std::vector<double>,std::vector<double>,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<int>);
 void activeBrownianDynamics(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,double&);
 double fHarmonic(std::vector<double>&,std::vector<double>&);
 void dfHarmonic(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
@@ -143,7 +143,7 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
     File << nPart << std::endl;
     File << phi << std::endl;
     File << seed << std::endl;
-    File << Rr << '\t' << Rp << std::endl; 
+    File << Rp << std::endl; 
     File << xmin << '\t' << xmax << std::endl;
     File << ymin << '\t' << ymax << std::endl;
 

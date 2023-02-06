@@ -95,14 +95,11 @@ for (sig=1; sig<=32; sig++)
     inputFile >> seed;
     logFile << " --> Seed = " << seed << endl;
 
-    inputFile >> gx;
-    logFile << " --> Gamma_x = " << gx << endl;  
+    inputFile >> noise;
+    logFile << " --> Noise strength = " << noise << endl;
 
-    inputFile >> Pe;
-    logFile << " --> Peclet number = " << Pe << endl;
-
-    inputFile >> Rr;
-    logFile << " --> Ratio of LJ interaction radius to particle size = " << Rr << endl;    
+    inputFile >> vp;
+    logFile << " --> Particle velocity = " << vp << endl;  
 
     inputFile >> Rp;
     logFile << " --> Ratio of Vicsek interaction radius to particle size = " << Rp << endl;    
@@ -189,10 +186,6 @@ for (sig=1; sig<=32; sig++)
 
     logFile << "------------------------------------------------------------" << endl;
 
-    inputFile >> potMode; 
-    logFile << " --> Repulsion Potential Mode = " << potMode << endl; 
-
-    logFile << "------------------------------------------------------------" << endl;
     logFile << '\n';
     
     inputFile.close();
@@ -301,7 +294,7 @@ for (sig=1; sig<=32; sig++)
     if (savePos) { posFile.close(); }
     if (saveForce) { forceFile.close(); }
     
-    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", Pe = " << Pe << ", couplingMode = " << couplingMode << endl;
+    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", noise = " << noise << ", couplingMode = " << couplingMode << endl;
     switch(couplingMode)
     {
         case 'C' : // Constant coupling

@@ -1,7 +1,7 @@
-app = activeSpinGlass_2D
+app = vicsek_2D
 
 srcExt = cpp
-srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src
+srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_vicsek
 objDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/obj
 binDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/bin
 inc = 
