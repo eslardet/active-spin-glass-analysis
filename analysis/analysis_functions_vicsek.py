@@ -194,7 +194,7 @@ def snapshot(mode, nPart, phi, noise, K, seed, view_time):
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     
-    ax.quiver(x, y, np.cos(theta), np.sin(theta))
+    ax.quiver(pbc_wrap(x,Lx), pbc_wrap(y,Ly), np.cos(theta), np.sin(theta))
     ax.set_xlim(0,Lx)
     ax.set_ylim(0,Ly)
     ax.set_aspect('equal')
@@ -239,8 +239,8 @@ def animate(mode, nPart, phi, noise, K, seed, min_T=None, max_T=None):
     
     fig, ax = plt.subplots(figsize=(5*xTy,5))
 
-    x = x_all[0]
-    y = y_all[0]
+    x = pbc_wrap(x_all[0],Lx)
+    y = pbc_wrap(y_all[0],Ly)
     theta = theta_all[0]
     arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta))
 
@@ -250,8 +250,8 @@ def animate(mode, nPart, phi, noise, K, seed, min_T=None, max_T=None):
         return arrows,
 
     def update(n):
-        x = x_all[n]
-        y = y_all[n]
+        x = pbc_wrap(x_all[n],Lx)
+        y = pbc_wrap(y_all[n],Ly)
         theta = theta_all[n]
         arrows.set_offsets(np.c_[x, y])
         arrows.set_UVC(np.cos(theta), np.sin(theta))

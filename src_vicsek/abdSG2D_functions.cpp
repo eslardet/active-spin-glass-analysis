@@ -30,7 +30,7 @@ mt19937 rnd_gen;
 
 uniform_real_distribution<double> uniDist(0.0,1.0);
 normal_distribution<double> normDist(0.0,1.0);
-uniform_real_distribution<double> whiteNoise(-1.0,1.0);
+uniform_real_distribution<double> whiteNoise(-PI,PI);
 
 /////////////////////
 // currentDateTime //

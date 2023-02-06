@@ -6,12 +6,12 @@ import sys
 import time
 
 mode = "C"
-nPart = 100
-phi = 0.1
-noise = 0.5
+nPart = 1000
+phi = 1.0
+noise = 0.1
 K = 1.0
 seed = 1
 
 
 
-fun.animate(mode, nPart, phi, noise, K, seed, max_T=0.5)
+fun.animate(mode, nPart, phi, noise, K, seed)
