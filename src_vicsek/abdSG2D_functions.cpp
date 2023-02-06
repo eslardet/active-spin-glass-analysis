@@ -617,31 +617,32 @@ void SRK2(vector<double>& x, vector<double>& fx,
 {
     double sig_T = 0.0;
     double sig_R = noise*sqrt(dT);
+    vector<float> nei(nPart); // number of neighbours
 
     // Check the neighbor list and update if necessary
     if ( checkNL(x,y) ) {
         updateNL(x,y);
     }
 
-    vector<int> nei(nPart); // number of neighbours
-
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
-    force(x,y,p,fx,fy,fp,nei);
+    std::vector<float> nnei = force(x,y,p,fx,fy,fp);
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
         X[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         Y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
-        if (nei[i] == 0) {
+        if (nnei[i] == 0) {
             P[i] = p[i] + sig_R*whiteNoise(rnd_gen);
         }
         else {
-            P[i] = p[i] + fp[i]*dT/nei[i] + sig_R*whiteNoise(rnd_gen);
+            P[i] = p[i] + fp[i]*dT/(nnei[i]) + sig_R*whiteNoise(rnd_gen);
         }
     }
 
+
+
     // Calculate Forces on particle i at positions {R_i}, F_i({R_i(t)})
-    force(X,Y,P,Fx,Fy,Fp,nei);
+    nnei = force(X,Y,P,Fx,Fy,Fp);
 
     // Calculate Final updated positions
     for (int i=0 ; i<nPart ; i++ ) {
@@ -652,7 +653,7 @@ void SRK2(vector<double>& x, vector<double>& fx,
             p[i] += whiteNoise(rnd_gen);
         }
         else {
-            p[i] += (fp[i]+Fp[i])/2.0*dT/nei[i] + sig_R*whiteNoise(rnd_gen);
+            p[i] += (fp[i]+Fp[i])/2.0*dT/(nnei[i]) + sig_R*whiteNoise(rnd_gen);
         }
     }
     return;
@@ -673,20 +674,19 @@ void EM(vector<double>& x, vector<double>& fx,
     if ( checkNL(x,y) ) {
         updateNL(x,y);
     }
-    vector<int> nei(nPart); // number of neighbours
 
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
-    force(x,y,p,fx,fy,fp,nei);
+    std::vector<float> nnei = force(x,y,p,fx,fy,fp);
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
         x[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
-        if (nei[i] == 0) {
+        if (nnei[i] == 0) {
             p[i] = p[i] + sig_R*normDist(rnd_gen);
         }
         else {
-            p[i] = p[i] + fp[i]*dT/nei[i] + sig_R*normDist(rnd_gen);
+            p[i] = p[i] + fp[i]*dT/nnei[i] + sig_R*normDist(rnd_gen);
         }
     }
 
@@ -697,16 +697,14 @@ void EM(vector<double>& x, vector<double>& fx,
 // force //
 ///////////
 // consists in : Lennard-Jones potential between particles, active propulsion and alignment interactions
-void force(vector<double> xx, vector<double> yy, vector<double> pp,
-           vector<double>& ffx, vector<double>& ffy, vector<double>& ffp, vector<int> nei)
+std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp,
+                        vector<double>& ffx, vector<double>& ffy, vector<double>& ffp)
 {
     double xij,yij,rij,rijsq;
     double pi,pj,pij,Kij;
     double ff;
 
-    for (int i=0 ; i<nPart; i++) {
-        nei[i] = 0;
-    }
+    std::vector<float> nei(nPart); // number of neighbours
     
     for (int i=0 ; i<nPart ; i++) {
 
@@ -737,14 +735,13 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
                     ffp[i]     += ff;
                     ffp[nl[j]] -= ff;
 
-                    nei[i] += 1;
-                    nei[nl[j]] += 1;
+                    nei[i] += 1.0;
+                    nei[nl[j]] += 1.0;
                 }
             }
         }
     }
-
-    return;
+    return nei;
 }
 
 //////////////////////
