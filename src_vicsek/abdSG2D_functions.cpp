@@ -632,7 +632,12 @@ void SRK2(vector<double>& x, vector<double>& fx,
     for (int i=0 ; i<nPart ; i++ ) {
         X[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         Y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
-        P[i] = p[i] + fp[i]*dT/nei[i] + sig_R*normDist(rnd_gen);
+        if (nei[i] == 0) {
+            P[i] = p[i] + sig_R*normDist(rnd_gen);
+        }
+        else {
+            P[i] = p[i] + fp[i]*dT/nei[i] + sig_R*normDist(rnd_gen);
+        }
     }
 
     // Calculate Forces on particle i at positions {R_i}, F_i({R_i(t)})
@@ -642,9 +647,14 @@ void SRK2(vector<double>& x, vector<double>& fx,
     for (int i=0 ; i<nPart ; i++ ) {
         x[i] += (fx[i]+Fx[i])/2.0*dT + sig_T*normDist(rnd_gen);
         y[i] += (fy[i]+Fy[i])/2.0*dT + sig_T*normDist(rnd_gen);
-        p[i] += (fp[i]+Fp[i])/2.0*dT/nei[i] + sig_R*normDist(rnd_gen);
-    }
 
+        if (nei[i] == 0) {
+            p[i] += sig_R*normDist(rnd_gen);
+        }
+        else {
+            p[i] += (fp[i]+Fp[i])/2.0*dT/nei[i] + sig_R*normDist(rnd_gen);
+        }
+    }
     return;
 }
 
@@ -672,7 +682,12 @@ void EM(vector<double>& x, vector<double>& fx,
     for (int i=0 ; i<nPart ; i++ ) {
         x[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
-        p[i] = p[i] + fp[i]*dT/nei[i] + sig_R*normDist(rnd_gen);
+        if (nei[i] == 0) {
+            p[i] = p[i] + sig_R*normDist(rnd_gen);
+        }
+        else {
+            p[i] = p[i] + fp[i]*dT/nei[i] + sig_R*normDist(rnd_gen);
+        }
     }
 
     return;

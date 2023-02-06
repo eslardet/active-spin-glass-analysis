@@ -24,7 +24,7 @@ seed=1
 vp=0.03
 noise=0.5
 
-Rp=2.0
+Rp=1.0
 xTy=1.0
 
 initMode='R'
@@ -90,17 +90,17 @@ echo "Starting Vicsek 2D run..."
 cd $run_dir
 
 if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
-    sed -i '' "9s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
+    sed -i '' "8s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
     if [ "${couplingMode}" == "C" ]; then
-        sed -i '' "16s/.*/${simulT}/" 'inpar'
+        sed -i '' "15s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "T" ]; then
-        sed -i '' "18s/.*/${simulT}/" 'inpar'
+        sed -i '' "17s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "G" ]; then
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
+        sed -i '' "16s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
+        sed -i '' "16s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
+        sed -i '' "16s/.*/${simulT}/" 'inpar'
     fi
 
 else
