@@ -101,9 +101,6 @@ def get_pos_arr(inparFile, posFile, min_T=None, max_T=None):
     y_all = []
     theta_all = []
 
-    print(startT)
-    print(max(int((min_T-startT)/DT),0))
-    print(int((max_T-startT)/DT))
     for i in range(max(int((min_T-startT)/DT),0), int((max_T-startT)/DT)+1):
         x_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0])
         y_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1])
