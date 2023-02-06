@@ -8,8 +8,8 @@ import time
 mode = "C"
 nPart = 1000
 phi = 1.0
-noise = 0.1
-K = 10.0
+noise = 0.3
+K = 1.0
 seed = 1
 
 

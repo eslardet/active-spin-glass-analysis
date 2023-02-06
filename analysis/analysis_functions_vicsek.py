@@ -56,7 +56,7 @@ def get_params(inparFile):
     inpar_dict["noise"] = float(r[3][0])
     inpar_dict["vp"] = float(r[4][0])
     inpar_dict["Rp"] = float(r[5][0])
-    inpar_dict["xTy"] = float(r[5][0])
+    inpar_dict["xTy"] = float(r[6][0])
     inpar_dict["mode"] = r[8][0]
     
     if inpar_dict["mode"] == 'C':
