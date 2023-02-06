@@ -630,13 +630,13 @@ void SRK2(vector<double>& x, vector<double>& fx,
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
-        X[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
+        X[i] = x[i] + fx[i]*dT + sig_T*normDit(rnd_gen);
         Y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
         if (nei[i] == 0) {
-            P[i] = p[i] + sig_R*normDist(rnd_gen);
+            P[i] = p[i] + sig_R*whiteNoise(rnd_gen);
         }
         else {
-            P[i] = p[i] + fp[i]*dT/nei[i] + sig_R*normDist(rnd_gen);
+            P[i] = p[i] + fp[i]*dT/nei[i] + sig_R*whiteNoise(rnd_gen);
         }
     }
 
@@ -649,10 +649,10 @@ void SRK2(vector<double>& x, vector<double>& fx,
         y[i] += (fy[i]+Fy[i])/2.0*dT + sig_T*normDist(rnd_gen);
 
         if (nei[i] == 0) {
-            p[i] += sig_R*normDist(rnd_gen);
+            p[i] += whiteNoise*normDist(rnd_gen);
         }
         else {
-            p[i] += (fp[i]+Fp[i])/2.0*dT/nei[i] + sig_R*normDist(rnd_gen);
+            p[i] += (fp[i]+Fp[i])/2.0*dT/nei[i] + sig_R*whiteNoise(rnd_gen);
         }
     }
     return;
