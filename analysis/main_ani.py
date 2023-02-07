@@ -10,11 +10,11 @@ import sys
 
 
 mode = "C"
-nPart = 50
+nPart = 1000
 phi = 0.2
 Pe = 20.0
-K = "1.0"
-seed = 1
+K = "10.0"
+seed = 10
 
 fun.animate(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
 

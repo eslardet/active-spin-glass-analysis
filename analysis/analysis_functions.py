@@ -366,11 +366,12 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(x_all), interval=10, blit=True)
 
-    folder = os.path.abspath('../animations')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.mp4'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    ani.save(os.path.join(folder, filename))
+    ani.save("ani.mp4")
+    # folder = os.path.abspath('../animations')
+    # filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.mp4'
+    # if not os.path.exists(folder):
+    #     os.makedirs(folder)
+    # ani.save(os.path.join(folder, filename))
 
 
 def plot_vorder_time(mode, nPart, phi, K, seed, min_T=None, max_T=None):

@@ -17,22 +17,22 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=100
-phi=0.1
-seed=1
+nPart=1000
+phi=0.2
+seed=10
 
 gx=1.0
 Pe=20.0
-Rr=3.0
+Rr=1.0
 Rp=2.0
-xTy=1.0
+xTy=5.0
 
-initMode='S'
+initMode='R'
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='G'
+couplingMode='C'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -40,26 +40,26 @@ couplingMode='G'
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
 
-# K0=1.0
+K0=10.0
 
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
 
-KAVG=1.0
-STDK=1.0
+# KAVG=1.0
+# STDK=1.0
 
 dT=2.e-5
-DT=0.1
+DT=0.01
 DTex=0.5
 eqT=0
 simulT=1.0
 
 savePos=1
 saveForce=0
-saveCoupling=1 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
+saveCoupling=0 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
-potMode='C'
+potMode='W'
 # can be:
 #    'W' WCA potential,
 #    'H' Harmonic potential
@@ -158,6 +158,6 @@ else
     echo ${potMode} >> 'inpar'
 fi
 
-time ${bin_dir}/activeSpinGlass_2D_MG inpar
+time ${bin_dir}/activeSpinGlass_2D_no_nl inpar
 
 echo "2D Active Spin Glass run done."
