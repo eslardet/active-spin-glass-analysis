@@ -171,7 +171,7 @@ def snapshot(mode, nPart, phi, noise, K, seed, view_time):
     Get static snapshot at specified time from the positions file
     """
 
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, n=noise, K=K, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, seed=seed)
     inpar_dict = get_params(inparFile)
     
     nPart = inpar_dict["nPart"]
@@ -184,8 +184,6 @@ def snapshot(mode, nPart, phi, noise, K, seed, view_time):
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
     Lx = L*xTy
-
-    print(Lx, Ly)
 
     timestep = int(view_time/DT)
     view_time = timestep*DT
@@ -266,3 +264,6 @@ def animate(mode, nPart, phi, noise, K, seed, min_T=None, max_T=None):
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))
+
+
+## Add getting snapshot from exact pos file (line by line)
