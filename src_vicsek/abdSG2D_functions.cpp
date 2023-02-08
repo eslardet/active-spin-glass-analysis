@@ -705,14 +705,23 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
     double ff;
 
     std::vector<float> nei(nPart); // number of neighbours
-    
-    for (int i=0 ; i<nPart ; i++) {
 
+
+    for (int i=0 ; i<nPart ; i++) {
         pi = pp[i];
         // Self-propelling force
         ffx[i] = vp*cos(pi);
         ffy[i] = vp*sin(pi);
         ffp[i] = 0.0;
+    }
+
+    for (int i=0 ; i<nPart ; i++) {
+
+        pi = pp[i];
+        // // Self-propelling force
+        // ffx[i] = vp*cos(pi);
+        // ffy[i] = vp*sin(pi);
+        // ffp[i] = 0.0;
 
         for (int j=cl[i] ; j<cl[i+1] ; j++) {
 

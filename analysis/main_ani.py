@@ -14,7 +14,7 @@ nPart = 1000
 phi = 0.2
 Pe = 20.0
 K = "10.0"
-seed = 10
+seed = 1
 
 fun.animate(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
 

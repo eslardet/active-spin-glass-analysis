@@ -743,10 +743,10 @@ void EM(vector<double>& x, vector<double>& fx,
     double sig_T = sqrt(2.0*dT);
     double sig_R = sqrt(6.0*dT);
 
-    // Check the neighbor list and update if necessary
-    if ( checkNL(x,y) ) {
-        updateNL(x,y);
-    }
+    // // Check the neighbor list and update if necessary
+    // if ( checkNL(x,y) ) {
+    //     updateNL(x,y);
+    // }
 
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
     force(x,y,p,fx,fy,fp);
@@ -781,13 +781,13 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
         ffy[i] = Pe*sin(pi);
         ffp[i] = 0.0;
 
-        for (int j=cl[i] ; j<cl[i+1] ; j++) {
+        for (int j=0 ; j<nPart ; j++) {
+            if (i != j) {
+                xij = xx[i]-xx[j];
+                xij = xij - Lx*rint(xij/Lx);
 
-            xij = xx[i]-xx[nl[j]];
-            xij = xij - Lx*rint(xij/Lx);
-
-            if (fabs(xij) <= rc) { // rc = MAX(rr,rp)
-                yij = yy[i]-yy[nl[j]];
+                // if (fabs(xij) <= rc) { // rc = MAX(rr,rp)
+                yij = yy[i]-yy[j];
                 yij = yij - Ly*rint(yij/Ly);
 
                 rijsq = SQR(xij)+SQR(yij);
@@ -819,20 +819,21 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
                     ffx[i] += ff*xij/rij;
                     ffy[i] += ff*yij/rij;
 
-                    ffx[nl[j]] -= ff*xij/rij;
-                    ffy[nl[j]] -= ff*yij/rij;
+                    // ffx[j] -= ff*xij/rij;
+                    // ffy[j] -= ff*yij/rij;
                 }
 
                 // Vicsek alignment
                 if (rijsq <= rpsq){
-                    pj = pp[nl[j]];
-                    Kij = K[i][nl[j]];
+                    pj = pp[j];
+                    Kij = K[i][j];
                     pij = pi-pj;
                     ff = -Kij*sin(pij);
 
-                    ffp[i]     += ff;
-                    ffp[nl[j]] -= ff;
+                    ffp[i] += ff;
+                    // ffp[j] -= ff;
                 }
+            // }
             }
         }
     }

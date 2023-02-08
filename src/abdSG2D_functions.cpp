@@ -772,14 +772,21 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
     double pi,pj,pij,Kij;
     double ff;
 
-    
     for (int i=0 ; i<nPart ; i++) {
-
         pi = pp[i];
         // Self-propelling force
         ffx[i] = Pe*cos(pi);
         ffy[i] = Pe*sin(pi);
         ffp[i] = 0.0;
+    }
+    
+    for (int i=0 ; i<nPart ; i++) {
+
+        pi = pp[i];
+        // // Self-propelling force
+        // ffx[i] = Pe*cos(pi);
+        // ffy[i] = Pe*sin(pi);
+        // ffp[i] = 0.0;
 
         for (int j=cl[i] ; j<cl[i+1] ; j++) {
 

@@ -19,7 +19,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 
 nPart=1000
 phi=0.2
-seed=10
+seed=1
 
 gx=1.0
 Pe=20.0
@@ -50,10 +50,10 @@ K0=10.0
 # STDK=1.0
 
 dT=2.e-5
-DT=0.01
+DT=0.1
 DTex=0.5
 eqT=0
-simulT=1.0
+simulT=100.0
 
 savePos=1
 saveForce=0
@@ -158,6 +158,6 @@ else
     echo ${potMode} >> 'inpar'
 fi
 
-time ${bin_dir}/activeSpinGlass_2D_no_nl inpar
+time ${bin_dir}/activeSpinGlass_2D inpar
 
 echo "2D Active Spin Glass run done."
