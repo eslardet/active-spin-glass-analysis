@@ -6,7 +6,7 @@ import sys
 import time
 
 mode = "C"
-nPart = 10000
+nPart = 1000
 phi = 1.0
 noise = 0.3
 K = 1.0
