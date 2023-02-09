@@ -16,7 +16,7 @@ unsigned int seed;
 double phi;
 double gx,Pe,Rr,Rp;
 bool savePos,saveForce,saveCoupling;
-char initMode,potMode,couplingMode;
+char initMode,potMode,couplingMode,intMethod;
 double dT,DT,DTex,eqT,simulT,startT;
 int Nsimul,Neq,Nskip,Nskipexact;
 double xmin,xmax;

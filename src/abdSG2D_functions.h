@@ -16,7 +16,7 @@ extern int nPart;
 extern unsigned int seed;
 extern double phi;
 extern bool saveCoupling;
-extern char initMode,potMode,couplingMode;
+extern char initMode,potMode,couplingMode,intMethod;
 extern double dT,DT,DTex,eqT,simulT,startT;
 extern int Nsimul,Neq,Nskip,Nskipexact;
 extern double Lx,xmin,xmax;

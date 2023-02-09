@@ -189,6 +189,9 @@ for (sig=1; sig<=32; sig++)
 
     logFile << "------------------------------------------------------------" << endl;
 
+    inputFile >> intMethod;
+    logFile << " --> SDE solving method = " << intMethod << endl; 
+
     inputFile >> potMode; 
     logFile << " --> Repulsion Potential Mode = " << potMode << endl; 
 

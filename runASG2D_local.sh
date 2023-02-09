@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=1000
+nPart=100
 phi=0.2
 seed=1
 
@@ -53,11 +53,13 @@ dT=2.e-5
 DT=0.1
 DTex=0.5
 eqT=0
-simulT=100.0
+simulT=1.0
 
 savePos=1
 saveForce=0
 saveCoupling=0 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
+
+intMethod='E'
 
 potMode='W'
 # can be:
@@ -154,6 +156,8 @@ else
     echo ${savePos} >> 'inpar'
     echo ${saveForce} >> 'inpar'
     echo ${saveCoupling} >> 'inpar'
+
+    echo ${intMethod} >> 'inpar'
 
     echo ${potMode} >> 'inpar'
 fi

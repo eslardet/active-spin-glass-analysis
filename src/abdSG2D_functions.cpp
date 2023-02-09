@@ -135,6 +135,22 @@ void checkParameters()
             ::exit(1);
 
     }
+
+    switch(intMethod)
+    {
+        case 'E' :
+            logFile << "Initializing Euler-Maruyama method for solving the SDE" << endl;
+            break;
+
+        case 'S' :
+            logFile << "Initializing 2nd order Stochastic Runge-Kutta method for solving the SDE" << endl;
+            break;
+
+        default:            
+            cerr << "Invalid method for SDE solving!" << endl;
+            cerr << " --> Valid modes are : 'E', 'S' " << endl;
+            ::exit(1);
+    }
 }
 
 ////////////////
@@ -856,7 +872,16 @@ void activeBrownianDynamics(vector<double>& x, vector<double>& y, vector<double>
                                double& t)
 {
     // Force Balance equation
-    SRK2(x,fx,y,fy,p,fp);
+    switch (intMethod)
+    {
+    case 'E':
+        EM(x,fx,y,fy,p,fp);
+        break;
+    
+    case 'S':
+        SRK2(x,fx,y,fy,p,fp);
+        break;
+    }
     t += dT;
     return;
 }
