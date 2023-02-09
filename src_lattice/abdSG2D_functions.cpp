@@ -523,12 +523,12 @@ void updateNL(vector<double> x, vector<double> y)
 // SRK2 //
 //////////
 // Integrator for overdamped Langevin equation -- Stochastic Runge-Kutta 2nd order
-void SRK2(vector<double>& x, vector<double>& y, vector<double>& p, vector<double>& fp)
+void SRK2(vector<double>& p, vector<double>& fp)
 {
     double sig_R = sqrt(2.0*rotD*dT);
 
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
-    force(x,y,p,fp);
+    force(p,fp);
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
@@ -536,7 +536,7 @@ void SRK2(vector<double>& x, vector<double>& y, vector<double>& p, vector<double
     }
 
     // Calculate Forces on particle i at positions {R_i}, F_i({R_i(t)})
-    force(x,y,P,Fp);
+    force(P,Fp);
 
     // Calculate Final updated positions
     for (int i=0 ; i<nPart ; i++ ) {
@@ -550,12 +550,12 @@ void SRK2(vector<double>& x, vector<double>& y, vector<double>& p, vector<double
 // EM //
 ////////
 // Integrator for Force Balance equation -- Euler-Mayurama
-void EM(vector<double>& x, vector<double>& y, vector<double>& p, vector<double>& fp)
+void EM(vector<double>& p, vector<double>& fp)
 {
     double sig_R = sqrt(2.0*rotD*dT);
 
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
-    force(x,y,p,fp);
+    force(p,fp);
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
@@ -569,18 +569,22 @@ void EM(vector<double>& x, vector<double>& y, vector<double>& p, vector<double>&
 // force //
 ///////////
 // consists of : alignment interactions
-void force(vector<double> xx, vector<double> yy, vector<double> pp, vector<double>& ffp)
+void force(vector<double> pp, vector<double>& ffp)
 {
-    double xij,yij,rij,rijsq;
+    // double xij,yij,rij,rijsq;
     double pi,pj,pij,Kij;
     double ff;
+
+    for (int i=0 ; i<nPart ; i++) {
+        ffp[i] = 0.0;
+    }
 
     
     for (int i=0 ; i<nPart ; i++) {
 
         pi = pp[i];
-        // Self-propelling force
-        ffp[i] = 0.0;
+
+        // ffp[i] = 0.0;
 
         for (int j=cl[i] ; j<cl[i+1] ; j++) {
             pj = pp[nl[j]];
@@ -600,10 +604,10 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp, vector<doubl
 // brownianDynamics //
 //////////////////////
 // Proceeds to one timestep integration of the equation of motion
-void activeBrownianDynamics(vector<double>& x, vector<double>& y, vector<double>& p, vector<double>& fp, double& t)
+void activeBrownianDynamics(vector<double>& p, vector<double>& fp, double& t)
 {
     // Force Balance equation
-    EM(x,y,p,fp);
+    EM(p,fp);
     t += dT;
     return;
 }

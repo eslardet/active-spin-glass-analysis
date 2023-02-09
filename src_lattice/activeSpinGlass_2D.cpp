@@ -230,7 +230,7 @@ for (sig=1; sig<=32; sig++)
 	// (1) Equilibration
     for(int ne=0 ; ne<Neq ; ne++) {
         // full equilibration
-        activeBrownianDynamics(x,y,p,fp,t);
+        activeBrownianDynamics(p,fp,t);
     }
 
     // t0 = t;
@@ -247,7 +247,7 @@ for (sig=1; sig<=32; sig++)
     cout << " --> " << flush;
     for(int ns=0 ; ns<Nsimul ; ns++) {
         // Move to the next timestep
-        activeBrownianDynamics(x,y,p,fp,t);
+        activeBrownianDynamics(p,fp,t);
         // Save data if necessary                
         if ( (ns+1)%Nskip == 0 ) {
             if (savePos) {

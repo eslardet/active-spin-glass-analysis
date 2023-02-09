@@ -20,7 +20,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 nPart=1024
 seed=1
 
-rotD=0.0
+rotD=1.0
 
 Rp=1.0
 
@@ -36,7 +36,7 @@ couplingMode='C'
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
 
-K0=-10.0
+K0=0.0
 
 # KAA=10.0
 # KAB=0.0
@@ -53,7 +53,7 @@ simulT=20.0
 
 savePos=1
 saveForce=0
-saveCoupling=1 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
+saveCoupling=0 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
 # Local
 if [ "${couplingMode}" == "C" ]; then

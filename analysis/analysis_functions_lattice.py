@@ -268,7 +268,6 @@ def plot_porder_time(mode, nPart, K, Rp, rotD, seed, min_T=None, max_T=None):
     inparFile, posFile = get_files(mode=mode, nPart=nPart, K=K, Rp=Rp, rotD=rotD, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
-    print(DT)
     simulT = inpar_dict["simulT"]
     if min_T == None:
         min_T = 0

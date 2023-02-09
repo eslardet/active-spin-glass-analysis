@@ -119,10 +119,10 @@ bool checkOverlap(std::vector<double>,std::vector<double>);
 void buildMap(void);
 bool checkNL(std::vector<double>,std::vector<double>);
 void updateNL(std::vector<double>,std::vector<double>);
-void SRK2(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void EM(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void force(std::vector<double>,std::vector<double>,std::vector<double>,std::vector<double>&);
-void activeBrownianDynamics(std::vector<double>&,std::vector<double>&,std::vector<double>&,std::vector<double>&,double&);
+void SRK2(std::vector<double>&,std::vector<double>&);
+void EM(std::vector<double>&,std::vector<double>&);
+void force(std::vector<double>,std::vector<double>&);
+void activeBrownianDynamics(std::vector<double>&,std::vector<double>&,double&);
 
 ///////////////////
 // saveInitFrame //
