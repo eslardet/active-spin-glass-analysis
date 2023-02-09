@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=1000
+nPart=10000
 phi=1.0
 noise=0.3
 
@@ -51,10 +51,10 @@ K0=1.0
 # STDK=1.0
 
 dT=0.01
-DT=100.0
+DT=10.0
 DTex=100.0
 eqT=0
-simulT=200.0
+simulT=1000.0
 
 savePos=1
 saveForce=0
