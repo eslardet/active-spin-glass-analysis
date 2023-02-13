@@ -129,6 +129,40 @@ def get_theta_arr(inparFile, posFile, min_T=None, max_T=None):
         theta.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2])
     return theta
 
+def get_pos_snapshot(posFile, nPart, timestep):
+    """
+    Get lists of x, y, theta at a single timestep
+    """
+    with open(posFile) as f:
+        line_count = 0
+        x = []
+        y = []
+        theta = []
+        for line in f:
+            line_count += 1
+            if 8 + timestep*(nPart + 1) <= line_count <= 7 + timestep*(nPart + 1) + nPart:
+                x.append(float(line.split('\t')[0]))
+                y.append(float(line.split('\t')[1]))
+                theta.append(float(line.split('\t')[2]))
+            if line_count > 7 + timestep*(nPart + 1) + nPart:
+                break
+    return x, y, theta
+
+def get_theta_snapshot(posFile, nPart, timestep):
+    """
+    Get list of theta orientations at a single timestep
+    """
+    with open(posFile) as f:
+        line_count = 0
+        theta = []
+        for line in f:
+            line_count += 1
+            if 8 + timestep*(nPart + 1) <= line_count <= 7 + timestep*(nPart + 1) + nPart:
+                theta.append(float(line.split('\t')[2]))
+            if line_count > 7 + timestep*(nPart + 1) + nPart:
+                break
+    return theta
+
 def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_color=True):
     """
     Get static snapshot at specified time from the positions file
@@ -158,16 +192,13 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
     Ly = L
     Lx = L*xTy
-    
-    with open(posFile) as f:
-        reader = csv.reader(f, delimiter="\t")
-        r = list(reader)[6:]
-    
-    i = int(view_time/DT)
-    view_time = i*DT
-    x = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0], Lx)
-    y = pbc_wrap(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1], Ly)
-    theta = np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2]
+
+    timestep = int(view_time/DT)
+    view_time = timestep*DT
+
+    x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=timestep)
+    x = pbc_wrap(x,Lx)
+    y = pbc_wrap(y,Ly)
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /L *beta
@@ -175,7 +206,6 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
         diameter = diameter * 1.6
 
     norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
-    # norm = colors.Normalize(vmin=-1.0, vmax=1.0, clip=True)
     mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
     
     if mode == "T":
@@ -186,7 +216,6 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
         if show_color == True:
             for i in range(nPart):
                 color = mapper.to_rgba(theta[i]%(2*np.pi))
-                # color = mapper.to_rgba(np.cos(theta[i]))
                 ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
         else:
             ax.plot(x, y, 'o', ms=diameter, zorder=1)
@@ -197,7 +226,6 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     ax.set_aspect('equal')
     ax.set_title("t=" + str(view_time))
     cbar = plt.colorbar(mappable=mapper, ax=ax)
-    # cbar.ax.set_ylabel(r'$\cos(\theta_i)$', rotation=270)
     
     folder = os.path.abspath('../snapshots')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.png'
@@ -374,7 +402,7 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
     ani.save(os.path.join(folder, filename))
 
 
-def plot_vorder_time(mode, nPart, phi, K, seed, min_T=None, max_T=None):
+def plot_porder_time(mode, nPart, phi, K, seed, min_T=None, max_T=None):
     """
     Plot Vicsek order parameter against time for one simulation
     """
@@ -387,70 +415,33 @@ def plot_vorder_time(mode, nPart, phi, K, seed, min_T=None, max_T=None):
     if max_T == None:
         max_T = simulT
     
-    theta_all = get_theta_arr(inparFile=inparFile, posFile=posFile, min_T=min_T, max_T=max_T)
-    v_order = []
-    for theta_t in theta_all:
-        cos_sum = 0
-        sin_sum = 0
-        for i in theta_t:
-            cos_sum += np.cos(i)
-            sin_sum += np.sin(i)
-        v_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
+    p_order = []
+
+    with open(posFile) as f:
+        line_count = 1
+        timestep = int(min_T//DT)
+        for line in f:
+            if 8 + timestep*(nPart + 1) <= line_count <= 7 + timestep*(nPart + 1) + nPart:
+                if line_count == 8 + timestep*(nPart+1):
+                    cos_sum = 0
+                    sin_sum = 0
+                theta = float(line.split('\t')[2])
+                cos_sum += np.cos(theta)
+                sin_sum += np.sin(theta)
+                if line_count == 7 + timestep*(nPart + 1) + nPart:
+                    p_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
+                    timestep += 1
+            line_count += 1
+            if timestep*DT > max_T:
+                break
     fig, ax = plt.subplots()
     t_plot = np.arange(0, max_T+DT/4, DT)
-    ax.plot(t_plot, v_order)
+    ax.plot(t_plot, p_order)
     ax.set_xlabel("time")
     ax.set_ylabel(r"Vicsek order parameter, $\Psi$")
     
-    plt.savefig(os.path.abspath('../plots/v_order_vs_time/' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_K' + str(K) + '_s' + str(seed) + '.png'))
+    plt.savefig(os.path.abspath('../plots/p_order_vs_time/' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_K' + str(K) + '_s' + str(seed) + '.png'))
 
-
-def v_order_ss(mode, nPart, phi, K, seed, avg_over):
-    """
-    Find steady state Vicsek order parameter for simulation, averaged over a certain number of final timesteps
-    """
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, K=K, seed=seed)
-    inpar_dict = get_params(inparFile)
-    DT = inpar_dict["DT"]
-    simulT = inpar_dict["simulT"]
-    max_T = simulT
-    min_T = simulT - avg_over*DT
-    
-    theta_all = get_theta_arr(inparFile, posFile, min_T, max_T)
-    v_ss = 0
-    for theta_t in theta_all:
-        cos_sum = 0
-        sin_sum = 0
-        for i in theta_t:
-            cos_sum += np.cos(i)
-            sin_sum += np.sin(i)
-        v_ss += np.sqrt(cos_sum**2+sin_sum**2)/nPart
-    v_ss = v_ss/len(theta_all)
-    return v_ss
-
-def v_order_sd(mode, nPart, phi, K, seed, avg_over):
-    """
-    Find standard deviation of Vicsek order parameter over the last avg_over timesteps saved to file
-    """
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, K=K, seed=seed)
-    
-    inpar_dict = get_params(inparFile)
-    DT = inpar_dict["DT"]
-    simulT = inpar_dict["simulT"]
-    max_T = simulT
-    min_T = simulT - avg_over*DT
-
-    theta_all = get_theta_arr(inparFile, posFile, min_T, max_T)
-    v_order = []
-    for theta_t in theta_all:
-        cos_sum = 0
-        sin_sum = 0
-        for i in theta_t:
-            cos_sum += np.cos(i)
-            sin_sum += np.sin(i)
-        v_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
-    v_sd = np.std(v_order)
-    return v_sd
 
 def pos_lowres(mode, nPart, phi, Pe, K, seed, DT_new=1.0, delete=True):
     """
@@ -497,7 +488,7 @@ def del_pos(mode, nPart, phi, Pe, K, seed):
     sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
     os.remove(os.path.join(sim_dir, "pos"))
 
-def write_stats(mode, nPart, phi, K, seed, avg_over, remove_pos=False):
+def write_stats(mode, nPart, phi, K, seed, min_T=None, max_T=None, remove_pos=False):
     """
     Write a file with various statistics from the simulation data (Vicsek order parameter mean, standard deviation, susceptibility)
     """
@@ -505,34 +496,47 @@ def write_stats(mode, nPart, phi, K, seed, avg_over, remove_pos=False):
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
     simulT = inpar_dict["simulT"]
-    max_T = simulT
-    min_T = simulT - avg_over*DT
+    if min_T == None:
+        min_T = 0
+    if max_T == None:
+        max_T = simulT
     
-    theta_all = get_theta_arr(inparFile, posFile, min_T, max_T)
-    v_order = []
-    # q_cos = np.zeros(nPart)
-    # q_sin = np.zeros(nPart)
-    for theta_t in theta_all:
-        cos_sum = 0
-        sin_sum = 0
-        for i in theta_t:
-            cos_sum += np.cos(i)
-            sin_sum += np.sin(i)
-        v_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
-        # q_cos += np.cos(theta_t)
-        # q_sin += np.sin(theta_t)
-    v_mean = np.mean(v_order)
-    v_sd = np.std(v_order)
-    v_sus = nPart*v_sd**2
+    p_order = []
+    n_order = []
+    with open(posFile) as f:
+        line_count = 1
+        timestep = int(min_T//DT)
+        for line in f:
+            if 8 + timestep*(nPart + 1) <= line_count <= 7 + timestep*(nPart + 1) + nPart:
+                if line_count == 8 + timestep*(nPart+1):
+                    cos_sum = 0
+                    sin_sum = 0
+                    cos_sq_sum = 0
+                    cos_sin_sum = 0
+                theta = float(line.split('\t')[2])
+                cos_sum += np.cos(theta)
+                sin_sum += np.sin(theta)
+                cos_sq_sum += np.cos(theta)**2
+                cos_sin_sum += np.sin(theta)*np.cos(theta)
+                if line_count == 7 + timestep*(nPart + 1) + nPart:
+                    p_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
+                    n_order.append(2*np.sqrt((cos_sq_sum/nPart - 1/2)**2+(cos_sin_sum/nPart)**2))
+                    timestep += 1
+            line_count += 1
+            if timestep*DT > max_T:
+                break
+    p_mean = np.mean(p_order)
+    p_sus = nPart*np.std(p_order)**2
+    n_mean = np.mean(n_order)
+    n_sus = nPart*np.std(n_order)**2
 
-    # q_param = np.sum((q_cos/len(theta_all))**2 + (q_sin/len(theta_all))**2)/nPart
 
     sim_dir = get_sim_dir(mode, nPart, phi, K, seed)
     statsFile = open(os.path.join(sim_dir, "stats"), "w")
-    statsFile.write(str(v_mean) + '\n')
-    statsFile.write(str(v_sd) + '\n')
-    statsFile.write(str(v_sus))
-    # statsFile.write(str(q_param))
+    statsFile.write(str(p_mean) + '\n')
+    statsFile.write(str(p_sus) + '\n')
+    statsFile.write(str(n_mean) + '\n')
+    statsFile.write(str(n_sus))
     statsFile.close()
 
     ## Write file with lower resolution than pos
@@ -552,10 +556,10 @@ def read_stats(mode, nPart, phi, K, seed):
         reader = csv.reader(file, delimiter="\n")
         r = list(reader)
     stats_dict = {}
-    stats_dict["v_mean"] = float(r[0][0])
-    stats_dict["v_sd"] = float(r[1][0])
-    stats_dict["v_sus"] = float(r[2][0])
-    # stats_dict["q"] = float(r[3][0])
+    stats_dict["p_mean"] = float(r[0][0])
+    stats_dict["p_sus"] = float(r[1][0])
+    stats_dict["n_mean"] = float(r[2][0])
+    stats_dict["n_sus"] = float(r[3][0])
     return stats_dict
 
 
