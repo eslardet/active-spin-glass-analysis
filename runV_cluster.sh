@@ -10,28 +10,28 @@
 # Directories #
 ###############
 
-bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
+bin_dir=$HOME/bin
 # matlab_dir=$bd_dir/codes/matlab
 
 ##############
 # Parameters #
 ##############
 
-nPart=1000
-phi=1.0
-Pe=3.0
+nPart=$1
+phi=$2
+Pe=$3
 
-seed=1
+seed=$4
 
 Rp=1.0
-xTy=5.0
+xTy=$5
 
-initMode='R'
+initMode=$6
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='C'
+couplingMode=$7
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -39,7 +39,7 @@ couplingMode='C'
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
 
-K0=1.0
+K0=$8
 
 # KAA=10.0
 # KAB=0.0
@@ -48,29 +48,29 @@ K0=1.0
 # KAVG=1.0
 # STDK=1.0
 
-dT=0.01
-DT=1.0
-DTex=1.0
-eqT=0
-simulT=1.0
+dT=$9
+DT=${10}
+DTex=${11}
+eqT=${12}
+simulT=${13}
 
 savePos=1
 saveForce=0
 saveCoupling=0 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
-intMethod='E'
+intMethod=${14}
 
-# Local
+# Cluster
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Constant/N${nPart}/phi${phi}_Pe${Pe}/K${K0}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D_ND/simulation_data/Constant/N${nPart}/phi${phi}_Pe${Pe}/K${K0}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/TwoPopulations/N${nPart}/phi${phi}_Pe${Pe}/K${KAA}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D_ND/simulation_data/TwoPopulations/N${nPart}/phi${phi}_Pe${Pe}/K${KAA}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Gaussian/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D_ND/simulation_data/Gaussian/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Ferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D_ND/simulation_data/Ferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Antiferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D_ND/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
 fi
 
 

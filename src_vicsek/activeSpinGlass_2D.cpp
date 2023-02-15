@@ -92,14 +92,11 @@ for (sig=1; sig<=32; sig++)
     inputFile >> phi;
     logFile << " --> Volume fraction, phi = " << phi << endl;
 
+    inputFile >> Pe;
+    logFile << " --> Peclet = " << Pe << endl;  
+
     inputFile >> seed;
     logFile << " --> Seed = " << seed << endl;
-
-    inputFile >> noise;
-    logFile << " --> Noise strength = " << noise << endl;
-
-    inputFile >> vp;
-    logFile << " --> Particle velocity = " << vp << endl;  
 
     inputFile >> Rp;
     logFile << " --> Ratio of Vicsek interaction radius to particle size = " << Rp << endl;    
@@ -185,6 +182,9 @@ for (sig=1; sig<=32; sig++)
     logFile << " --> saveCoupling = " << saveCoupling << endl;
 
     logFile << "------------------------------------------------------------" << endl;
+
+    inputFile >> intMethod;
+    logFile << " --> SDE solving method = " << intMethod << endl; 
 
     logFile << '\n';
     
@@ -294,7 +294,7 @@ for (sig=1; sig<=32; sig++)
     if (savePos) { posFile.close(); }
     if (saveForce) { forceFile.close(); }
     
-    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", noise = " << noise << ", couplingMode = " << couplingMode << endl;
+    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", Pe = " << Pe << ", couplingMode = " << couplingMode << endl;
     switch(couplingMode)
     {
         case 'C' : // Constant coupling

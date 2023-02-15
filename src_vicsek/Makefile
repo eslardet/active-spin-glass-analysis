@@ -1,9 +1,9 @@
-app = vicsek_2D
+app = vicsek_2D_ND
 
 srcExt = cpp
-srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_vicsek
-objDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/obj
-binDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/bin
+srcDir = $(HOME)/Vicsek_2D_ND/src
+objDir = $(HOME)/Vicsek_2D_ND/obj
+binDir = $(HOME)/bin
 inc = 
 
 debug = 0

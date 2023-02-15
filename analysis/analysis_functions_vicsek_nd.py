@@ -8,7 +8,7 @@ import csv
 import os
 
 
-def get_sim_dir(mode, nPart, phi, noise, K, seed):
+def get_sim_dir(mode, nPart, phi, Pe, K, xTy, seed):
     if mode == "C":
         mode_name = "Constant"
     elif mode == "T":
@@ -20,25 +20,25 @@ def get_sim_dir(mode, nPart, phi, noise, K, seed):
     elif mode == "F":
         mode_name = "Ferromagnetic"
 
-    sim_dir = os.path.abspath('../simulation_data_v/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/s' + str(seed))
-    # sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/s' + str(seed))
+    # sim_dir = os.path.abspath('../simulation_data_v/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/s' + str(seed))
+    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_Pe' + str(Pe) + '/K' + str(K) + '/xTy' + str(xTy) + '/s' + str(seed))
 
     return sim_dir
 
-def get_files(mode, nPart, phi, noise, K, seed):
+def get_files(mode, nPart, phi, Pe, K, xTy, seed):
     """
     Get file paths for the input parameters and position files
     """
-    sim_dir = get_sim_dir(mode, nPart, phi, noise, K, seed)
+    sim_dir = get_sim_dir(mode, nPart, phi, Pe, K, xTy, seed)
     inparFile = os.path.join(sim_dir, "inpar")
     posFile = os.path.join(sim_dir, "pos")
     return inparFile, posFile
 
-def get_file_path(mode, nPart, phi, noise, K, seed, file_name):
+def get_file_path(mode, nPart, phi, Pe, K, xTy, seed, file_name):
     """
     Get the file path for a certain file name in the simulation data directory
     """
-    sim_dir = get_sim_dir(mode, nPart, phi, noise, K, seed)
+    sim_dir = get_sim_dir(mode, nPart, phi, Pe, K, xTy, seed)
     file_path = os.path.join(sim_dir, file_name)
     return file_path
 
@@ -52,22 +52,21 @@ def get_params(inparFile):
     inpar_dict = {}
     inpar_dict["nPart"] = int(r[0][0])
     inpar_dict["phi"] = float(r[1][0])
-    inpar_dict["seed"] = int(r[2][0])
-    inpar_dict["noise"] = float(r[3][0])
-    inpar_dict["vp"] = float(r[4][0])
-    inpar_dict["Rp"] = float(r[5][0])
-    inpar_dict["xTy"] = float(r[6][0])
-    inpar_dict["mode"] = r[8][0]
+    inpar_dict["Pe"] = float(r[2][0])
+    inpar_dict["seed"] = int(r[3][0])
+    inpar_dict["Rp"] = float(r[4][0])
+    inpar_dict["xTy"] = float(r[5][0])
+    inpar_dict["mode"] = r[7][0]
     
     if inpar_dict["mode"] == 'C':
-        inpar_dict["DT"] = float(r[11][0])
-        inpar_dict["simulT"] = float(r[14][0])
+        inpar_dict["DT"] = float(r[10][0])
+        inpar_dict["simulT"] = float(r[13][0])
     elif inpar_dict["mode"] == 'T':
-        inpar_dict["DT"] = float(r[13][0])
-        inpar_dict["simulT"] = float(r[16][0])
-    else:
         inpar_dict["DT"] = float(r[12][0])
         inpar_dict["simulT"] = float(r[15][0])
+    else:
+        inpar_dict["DT"] = float(r[11][0])
+        inpar_dict["simulT"] = float(r[14][0])
     return inpar_dict
 
 def pbc_wrap(x, L):
@@ -169,18 +168,33 @@ def get_pos_ex_snapshot(file):
                 theta.append(float(line.split('\t')[2]))
     return x, y, theta, view_time
 
+def get_theta_snapshot(posFile, nPart, timestep):
+    """
+    Get list of theta orientations at a single timestep
+    """
+    with open(posFile) as f:
+        line_count = 0
+        theta = []
+        for line in f:
+            line_count += 1
+            if 8 + timestep*(nPart + 1) <= line_count <= 7 + timestep*(nPart + 1) + nPart:
+                theta.append(float(line.split('\t')[2]))
+            if line_count > 7 + timestep*(nPart + 1) + nPart:
+                break
+    return theta
 
-def snapshot(mode, nPart, phi, noise, K, seed, view_time, show_color=True):
+
+def snapshot(mode, nPart, phi, Pe, K, xTy, seed, view_time, show_colour=True):
     """
     Get static snapshot at specified time from the positions file
     """
 
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed)
     inpar_dict = get_params(inparFile)
     
     nPart = inpar_dict["nPart"]
     phi = inpar_dict["phi"]
-    noise = inpar_dict["noise"]
+    Pe = inpar_dict["Pe"]
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
     xTy = inpar_dict["xTy"]
@@ -193,7 +207,7 @@ def snapshot(mode, nPart, phi, noise, K, seed, view_time, show_color=True):
     view_time = timestep*DT
 
     x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=timestep)
-    
+
     x = pbc_wrap(x,Lx)
     y = pbc_wrap(y,Ly)
     u = np.cos(theta)
@@ -201,11 +215,11 @@ def snapshot(mode, nPart, phi, noise, K, seed, view_time, show_color=True):
 
     norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
     mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
-    cols = mapper.to_rgba(np.mod(theta, 2*np.pi))
+    cols = mapper.to_rgba(np.arctan2(u,v) + np.pi)
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     
-    if show_color == True:
+    if show_colour == True:
         ax.quiver(x, y, u, v, color=cols)
         plt.colorbar(mappable=mapper, ax=ax)
     else:
@@ -215,26 +229,24 @@ def snapshot(mode, nPart, phi, noise, K, seed, view_time, show_color=True):
     ax.set_aspect('equal')
     ax.set_title("t=" + str(view_time))
 
-    plt.show()
-    # folder = os.path.abspath('../snapshots_vicsek')
-    # filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_s' + str(seed) + '.png'
-    # if not os.path.exists(folder):
-    #     os.makedirs(folder)
-    # plt.savefig(os.path.join(folder, filename))
+    folder = os.path.abspath('../snapshots_vicsek')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
-
-def snapshot_pos_ex(mode, nPart, phi, noise, K, seed, show_color=True):
+def snapshot_pos_ex(mode, nPart, phi, Pe, K, xTy, seed, show_colour=True):
     """
-    Get static snapshot at specified time from the positions file
+    Get static snapshot at specified time from the exact positions file
     """
 
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, seed=seed)
-    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, seed=seed, file_name="pos_exact")
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed)
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed, file_name="pos_exact")
     inpar_dict = get_params(inparFile)
     
     nPart = inpar_dict["nPart"]
     phi = inpar_dict["phi"]
-    noise = inpar_dict["noise"]
+    Pe = inpar_dict["Pe"]
     mode = inpar_dict["mode"]
     xTy = inpar_dict["xTy"]
 
@@ -243,7 +255,7 @@ def snapshot_pos_ex(mode, nPart, phi, noise, K, seed, show_color=True):
     Lx = L*xTy
 
     x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
-    
+
     x = pbc_wrap(x,Lx)
     y = pbc_wrap(y,Ly)
     u = np.cos(theta)
@@ -251,11 +263,11 @@ def snapshot_pos_ex(mode, nPart, phi, noise, K, seed, show_color=True):
 
     norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
     mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
-    cols = mapper.to_rgba(np.mod(theta, 2*np.pi))
+    cols = mapper.to_rgba(np.arctan2(u,v) + np.pi)
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     
-    if show_color == True:
+    if show_colour == True:
         ax.quiver(x, y, u, v, color=cols)
         plt.colorbar(mappable=mapper, ax=ax)
     else:
@@ -265,18 +277,18 @@ def snapshot_pos_ex(mode, nPart, phi, noise, K, seed, show_color=True):
     ax.set_aspect('equal')
     ax.set_title("t=" + str(round(view_time)))
 
-    plt.show()
-    # folder = os.path.abspath('../snapshots_vicsek')
-    # filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_s' + str(seed) + '.png'
-    # if not os.path.exists(folder):
-    #     os.makedirs(folder)
-    # plt.savefig(os.path.join(folder, filename))
+    folder = os.path.abspath('../snapshots_vicsek')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
-def animate(mode, nPart, phi, noise, K, seed, min_T=None, max_T=None):
+
+def animate(mode, nPart, phi, Pe, K, xTy, seed, min_T=None, max_T=None):
     """
     Make animation from positions file
     """
-    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, seed=seed)
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed)
 
     x_all, y_all, theta_all = get_pos_arr(inparFile=inparFile, posFile=posFile, min_T=min_T, max_T=max_T)
     
@@ -284,7 +296,7 @@ def animate(mode, nPart, phi, noise, K, seed, min_T=None, max_T=None):
     
     nPart = inpar_dict["nPart"]
     phi = inpar_dict["phi"]
-    noise = inpar_dict["noise"]
+    Pe = inpar_dict["Pe"]
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
     seed = inpar_dict["seed"]
@@ -327,7 +339,7 @@ def animate(mode, nPart, phi, noise, K, seed, min_T=None, max_T=None):
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=10, blit=True)
 
     folder = os.path.abspath('../animations_vicsek')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_s' + str(seed) + '.mp4'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))

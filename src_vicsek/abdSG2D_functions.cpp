@@ -30,7 +30,6 @@ mt19937 rnd_gen;
 
 uniform_real_distribution<double> uniDist(0.0,1.0);
 normal_distribution<double> normDist(0.0,1.0);
-uniform_real_distribution<double> whiteNoise(-PI,PI);
 
 /////////////////////
 // currentDateTime //
@@ -109,6 +108,22 @@ void checkParameters()
             cerr << " --> Valid modes are : 'C', 'T', 'G', 'F', 'A' ... " << endl;
             ::exit(1);
 
+    }
+
+    switch(intMethod)
+    {
+        case 'E' :
+            logFile << "Initializing Euler-Maruyama method for solving the SDE" << endl;
+            break;
+
+        case 'S' :
+            logFile << "Initializing 2nd order Stochastic Runge-Kutta method for solving the SDE" << endl;
+            break;
+
+        default:            
+            cerr << "Invalid method for SDE solving!" << endl;
+            cerr << " --> Valid modes are : 'E', 'S' " << endl;
+            ::exit(1);
     }
 }
 
@@ -710,8 +725,8 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
     for (int i=0 ; i<nPart ; i++) {
         pi = pp[i];
         // Self-propelling force
-        ffx[i] = vp*cos(pi);
-        ffy[i] = vp*sin(pi);
+        ffx[i] = Pe*cos(pi);
+        ffy[i] = Pe*sin(pi);
         ffp[i] = 0.0;
     }
 
@@ -762,7 +777,16 @@ void activeBrownianDynamics(vector<double>& x, vector<double>& y, vector<double>
                                double& t)
 {
     // Force Balance equation
-    EM(x,fx,y,fy,p,fp);
+    switch (intMethod)
+    {
+    case 'E':
+        EM(x,fx,y,fy,p,fp);
+        break;
+    
+    case 'S':
+        SRK2(x,fx,y,fy,p,fp);
+        break;
+    }
     t += dT;
     return;
 }

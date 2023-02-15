@@ -16,13 +16,13 @@ extern int nPart;
 extern unsigned int seed;
 extern double phi;
 extern bool saveCoupling;
-extern char initMode,couplingMode;
+extern char initMode,couplingMode,intMethod;
 extern double dT,DT,DTex,eqT,simulT,startT;
 extern int Nsimul,Neq,Nskip,Nskipexact;
 extern double Lx,xmin,xmax;
 extern double Ly,ymin,ymax;
 extern double xTy;
-extern double noise,vp;
+extern double Pe;
 
 extern double K0; // mode 'C': K0: Coupling constant
 extern double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
