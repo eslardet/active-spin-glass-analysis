@@ -616,7 +616,7 @@ void SRK2(vector<double>& x, vector<double>& fx,
           vector<double>& p, vector<double>& fp)
 {
     double sig_T = 0.0;
-    double sig_R = noise*sqrt(dT);
+    double sig_R = sqrt(2*dT);
     vector<float> nei(nPart); // number of neighbours
 
     // Check the neighbor list and update if necessary
@@ -632,10 +632,10 @@ void SRK2(vector<double>& x, vector<double>& fx,
         X[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         Y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
         if (nnei[i] == 0) {
-            P[i] = p[i] + sig_R*whiteNoise(rnd_gen);
+            P[i] = p[i] + sig_R*normDist(rnd_gen);
         }
         else {
-            P[i] = p[i] + fp[i]*dT/(nnei[i]) + sig_R*whiteNoise(rnd_gen);
+            P[i] = p[i] + fp[i]*dT/(nnei[i]) + sig_R*normDist(rnd_gen);
         }
     }
 
@@ -650,10 +650,10 @@ void SRK2(vector<double>& x, vector<double>& fx,
         y[i] += (fy[i]+Fy[i])/2.0*dT + sig_T*normDist(rnd_gen);
 
         if (nei[i] == 0) {
-            p[i] += whiteNoise(rnd_gen);
+            p[i] += normDist(rnd_gen);
         }
         else {
-            p[i] += (fp[i]+Fp[i])/2.0*dT/(nnei[i]) + sig_R*whiteNoise(rnd_gen);
+            p[i] += (fp[i]+Fp[i])/2.0*dT/(nnei[i]) + sig_R*normDist(rnd_gen);
         }
     }
     return;
@@ -668,7 +668,7 @@ void EM(vector<double>& x, vector<double>& fx,
         vector<double>& p, vector<double>& fp)
 {
     double sig_T = 0.0;
-    double sig_R = noise*sqrt(dT);
+    double sig_R = sqrt(2*dT);
 
     // Check the neighbor list and update if necessary
     if ( checkNL(x,y) ) {
