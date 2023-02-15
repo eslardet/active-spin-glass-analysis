@@ -683,10 +683,10 @@ void EM(vector<double>& x, vector<double>& fx,
         x[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
         if (nnei[i] == 0) {
-            p[i] = p[i] + sig_R*normDist(rnd_gen);
+            p[i] = p[i] + sig_R*whiteNoise(rnd_gen);
         }
         else {
-            p[i] = p[i] + fp[i]*dT/nnei[i] + sig_R*normDist(rnd_gen);
+            p[i] = p[i] + fp[i]*dT/nnei[i] + sig_R*whiteNoise(rnd_gen);
         }
     }
 
