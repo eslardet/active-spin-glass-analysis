@@ -23,7 +23,7 @@ def get_sim_dir(mode, nPart, phi, K, seed, Pe=None):
     if Pe == None:
         sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '/K' + str(K) + '/s' + str(seed))
     else:
-        sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_Pe' + str(Pe) + '/K' + str(K) + '/s' + str(seed))
+        sim_dir = os.path.abspath('../simulation_data_mips/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_Pe' + str(Pe) + '/K' + str(K) + '/s' + str(seed))
 
     return sim_dir
 
@@ -56,20 +56,26 @@ def get_params(inparFile):
     inpar_dict["phi"] = float(r[1][0])
     inpar_dict["seed"] = int(r[2][0])
     inpar_dict["Pe"] = float(r[4][0])
-    inpar_dict["Rp"] = float(r[6][0])
-    inpar_dict["xTy"] = float(r[7][0])
-    inpar_dict["mode"] = r[9][0]
+    # inpar_dict["Rp"] = float(r[6][0])
+    # inpar_dict["xTy"] = float(r[7][0])
+    # inpar_dict["mode"] = r[9][0]
+    # inpar_dict["repulsion"] = r[-1][0]
+    
+    # if inpar_dict["mode"] == 'C':
+    #     inpar_dict["DT"] = float(r[12][0])
+    #     inpar_dict["simulT"] = float(r[15][0])
+    # elif inpar_dict["mode"] == 'T':
+    #     inpar_dict["DT"] = float(r[14][0])
+    #     inpar_dict["simulT"] = float(r[17][0])
+    # else:
+    #     inpar_dict["DT"] = float(r[13][0])
+    #     inpar_dict["simulT"] = float(r[16][0])
+
+    inpar_dict["xTy"] = float(r[6][0])
     inpar_dict["repulsion"] = r[-1][0]
     
-    if inpar_dict["mode"] == 'C':
-        inpar_dict["DT"] = float(r[12][0])
-        inpar_dict["simulT"] = float(r[15][0])
-    elif inpar_dict["mode"] == 'T':
-        inpar_dict["DT"] = float(r[14][0])
-        inpar_dict["simulT"] = float(r[17][0])
-    else:
-        inpar_dict["DT"] = float(r[13][0])
-        inpar_dict["simulT"] = float(r[16][0])
+    inpar_dict["DT"] = float(r[9][0])
+    inpar_dict["simulT"] = float(r[12][0])
     return inpar_dict
 
 def pbc_wrap(x, L):
@@ -174,9 +180,9 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     nPart = inpar_dict["nPart"]
     phi = inpar_dict["phi"]
     Pe = inpar_dict["Pe"]
-    mode = inpar_dict["mode"]
+    # mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
-    Rp = inpar_dict["Rp"]
+    # Rp = inpar_dict["Rp"]
     xTy = inpar_dict["xTy"]
     repulsion = inpar_dict["repulsion"]
 
@@ -228,7 +234,7 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
     cbar = plt.colorbar(mappable=mapper, ax=ax)
     
     folder = os.path.abspath('../snapshots')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.png'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_' + repulsion + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
@@ -323,10 +329,10 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
     nPart = inpar_dict["nPart"]
     phi = inpar_dict["phi"]
     Pe = inpar_dict['Pe']
-    mode = inpar_dict["mode"]
+    # mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
     seed = inpar_dict["seed"]
-    Rp = inpar_dict["Rp"]
+    # Rp = inpar_dict["Rp"]
     xTy = inpar_dict["xTy"]
     repulsion = inpar_dict["repulsion"]
 
@@ -395,7 +401,7 @@ def animate(mode, nPart, phi, Pe, K, seed, min_T=None, max_T=None):
 
     # ani.save("ani.mp4")
     folder = os.path.abspath('../animations')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.mp4'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_' + repulsion + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))

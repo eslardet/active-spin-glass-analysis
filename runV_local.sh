@@ -90,6 +90,9 @@ echo "Starting Vicsek 2D run..."
 
 cd $run_dir
 
+if [ -e "stats" ]; then
+    rm 'stats'
+
 if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
     sed -i '' "7s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
     if [ "${couplingMode}" == "C" ]; then

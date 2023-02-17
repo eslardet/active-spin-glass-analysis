@@ -50,16 +50,16 @@ K0=0.0
 # STDK=1.0
 
 dT=2.e-5
-DT=1.0
+DT=0.1
 DTex=1.0
 eqT=0
-simulT=100.0
+simulT=1.0
 
 savePos=1
 saveForce=0
 saveCoupling=0 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
-intMethod='S'
+intMethod='E'
 
 potMode='W'
 # can be:
@@ -69,15 +69,15 @@ potMode='W'
 
 # Local
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Constant/N${nPart}/phi${phi}_Pe${Pe}/K${K0}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_mips/Constant/N${nPart}/phi${phi}_Pe${Pe}/K${K0}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/TwoPopulations/N${nPart}/phi${phi}_Pe${Pe}/K${KAA}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_mips/TwoPopulations/N${nPart}/phi${phi}_Pe${Pe}/K${KAA}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_mips/Gaussian/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Ferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_mips/Ferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_mips/Antiferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/s${seed}
 fi
 
 
@@ -99,17 +99,7 @@ cd $run_dir
 
 if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
     sed -i '' "9s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
-    if [ "${couplingMode}" == "C" ]; then
-        sed -i '' "16s/.*/${simulT}/" 'inpar'
-    elif [ "${couplingMode}" == "T" ]; then
-        sed -i '' "18s/.*/${simulT}/" 'inpar'
-    elif [ "${couplingMode}" == "G" ]; then
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
-    elif [ "${couplingMode}" == "F" ]; then
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
-    elif [ "${couplingMode}" == "A" ]; then
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
-    fi
+    sed -i '' "14s/.*/${simulT}/" 'inpar'
 
 else
     if [ -e "inpar" ]; then
@@ -124,28 +114,9 @@ else
     echo ${gx} >> 'inpar'
     echo ${Pe} >> 'inpar'
     echo ${Rr} >> 'inpar'
-    echo ${Rp} >> 'inpar'
     echo ${xTy} >> 'inpar'
 
     echo ${initMode} >> 'inpar'
-
-    echo ${couplingMode} >> 'inpar'
-    if [ "${couplingMode}" == "C" ]; then
-        echo ${K0} >> 'inpar'
-    elif [ "${couplingMode}" == "T" ]; then
-        echo ${KAA} >> 'inpar'
-        echo ${KAB} >> 'inpar'
-        echo ${KBB} >> 'inpar'
-    elif [ "${couplingMode}" == "G" ]; then
-        echo ${KAVG} >> 'inpar'
-        echo ${STDK} >> 'inpar'
-    elif [ "${couplingMode}" == "F" ]; then
-        echo ${KAVG} >> 'inpar'
-        echo ${STDK} >> 'inpar'
-    elif [ "${couplingMode}" == "A" ]; then
-        echo ${KAVG} >> 'inpar'
-        echo ${STDK} >> 'inpar'
-    fi
 
     echo ${dT} >> 'inpar'
     echo ${DT} >> 'inpar'
@@ -155,13 +126,12 @@ else
 
     echo ${savePos} >> 'inpar'
     echo ${saveForce} >> 'inpar'
-    echo ${saveCoupling} >> 'inpar'
 
     echo ${intMethod} >> 'inpar'
 
     echo ${potMode} >> 'inpar'
 fi
 
-time ${bin_dir}/activeSpinGlass_2D inpar
+time ${bin_dir}/activeSpinGlass_2D_mips inpar
 
 echo "2D Active Spin Glass run done."

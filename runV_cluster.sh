@@ -45,20 +45,20 @@ K0=$8
 # KAB=0.0
 # KBB=10.0
 
-# KAVG=1.0
-# STDK=1.0
+# KAVG=$8
+# STDK=$9
 
-dT=$9
-DT=${10}
-DTex=${11}
-eqT=${12}
-simulT=${13}
+dT=${10}
+DT=${11}
+DTex=${12}
+eqT=${13}
+simulT=${14}
 
 savePos=1
 saveForce=0
 saveCoupling=0 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
-intMethod=${14}
+intMethod=${15}
 
 # Cluster
 if [ "${couplingMode}" == "C" ]; then
