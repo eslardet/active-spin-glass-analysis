@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions as fun
+import analysis_functions_mips as fun
 import os
 import matplotlib.pyplot as plt
 import sys
@@ -11,11 +11,12 @@ import sys
 
 mode = "C"
 nPart = 1000
-phi = 0.2
-Pe = 20.0
-K = "10.0"
+phi = 0.6
+Pe = 120.0
+K = "0.0"
 seed = 1
 
 fun.animate(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, seed=seed)
+# fun.snapshot_pos_ex(mode, nPart, phi, Pe, K, seed, show_color=False)
 
 
