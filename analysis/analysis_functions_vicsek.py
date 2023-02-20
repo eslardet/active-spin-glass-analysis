@@ -61,12 +61,15 @@ def get_params(inparFile):
     
     if inpar_dict["mode"] == 'C':
         inpar_dict["DT"] = float(r[11][0])
+        inpar_dict["eqT"] = float(r[13][0])
         inpar_dict["simulT"] = float(r[14][0])
     elif inpar_dict["mode"] == 'T':
         inpar_dict["DT"] = float(r[13][0])
+        inpar_dict["eqT"] = float(r[15][0])
         inpar_dict["simulT"] = float(r[16][0])
     else:
         inpar_dict["DT"] = float(r[12][0])
+        inpar_dict["eqT"] = float(r[14][0])
         inpar_dict["simulT"] = float(r[15][0])
     return inpar_dict
 
@@ -183,6 +186,7 @@ def snapshot(mode, nPart, phi, noise, K, seed, view_time, show_color=True):
     noise = inpar_dict["noise"]
     mode = inpar_dict["mode"]
     DT = inpar_dict["DT"]
+    eqT = inpar_dict["eqT"]
     xTy = inpar_dict["xTy"]
 
     L = np.sqrt(nPart / (phi*xTy))
@@ -213,14 +217,14 @@ def snapshot(mode, nPart, phi, noise, K, seed, view_time, show_color=True):
     ax.set_xlim(0,Lx)
     ax.set_ylim(0,Ly)
     ax.set_aspect('equal')
-    ax.set_title("t=" + str(view_time))
+    ax.set_title("t=" + str(view_time+eqT))
 
-    plt.show()
-    # folder = os.path.abspath('../snapshots_vicsek')
-    # filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_s' + str(seed) + '.png'
-    # if not os.path.exists(folder):
-    #     os.makedirs(folder)
-    # plt.savefig(os.path.join(folder, filename))
+    # plt.show()
+    folder = os.path.abspath('../snapshots_vicsek')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
 
 def snapshot_pos_ex(mode, nPart, phi, noise, K, seed, show_color=True):

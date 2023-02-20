@@ -186,6 +186,9 @@ for (sig=1; sig<=32; sig++)
 
     logFile << "------------------------------------------------------------" << endl;
 
+    inputFile >> intMethod;
+    logFile << " --> SDE solving method = " << intMethod << endl; 
+
     logFile << '\n';
     
     inputFile.close();

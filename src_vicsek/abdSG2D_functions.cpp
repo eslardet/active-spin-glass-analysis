@@ -30,7 +30,7 @@ mt19937 rnd_gen;
 
 uniform_real_distribution<double> uniDist(0.0,1.0);
 normal_distribution<double> normDist(0.0,1.0);
-uniform_real_distribution<double> whiteNoise(-PI,PI);
+normal_distribution<double> whiteNoise(0.0,1.0);
 
 /////////////////////
 // currentDateTime //
@@ -110,7 +110,7 @@ void checkParameters()
             ::exit(1);
 
     }
-    
+
     switch(intMethod)
     {
         case 'E' :
@@ -632,7 +632,7 @@ void SRK2(vector<double>& x, vector<double>& fx,
           vector<double>& p, vector<double>& fp)
 {
     double sig_T = 0.0;
-    double sig_R = noise*sqrt(dT);
+    double sig_R = sqrt(2*dT);
     vector<float> nei(nPart); // number of neighbours
 
     // Check the neighbor list and update if necessary
@@ -658,7 +658,7 @@ void SRK2(vector<double>& x, vector<double>& fx,
 
 
     // Calculate Forces on particle i at positions {R_i}, F_i({R_i(t)})
-    nnei = force(X,Y,P,Fx,Fy,Fp);
+    std::vector<float> NNei = force(X,Y,P,Fx,Fy,Fp);
 
     // Calculate Final updated positions
     for (int i=0 ; i<nPart ; i++ ) {
@@ -666,10 +666,10 @@ void SRK2(vector<double>& x, vector<double>& fx,
         y[i] += (fy[i]+Fy[i])/2.0*dT + sig_T*normDist(rnd_gen);
 
         if (nei[i] == 0) {
-            p[i] += whiteNoise(rnd_gen);
+            p[i] += sig_R*whiteNoise(rnd_gen); //// Found where mistake was
         }
         else {
-            p[i] += (fp[i]+Fp[i])/2.0*dT/(nnei[i]) + sig_R*whiteNoise(rnd_gen);
+            p[i] += (fp[i]/nnei[i]+Fp[i]/NNei[i])/2.0*dT + sig_R*whiteNoise(rnd_gen);
         }
     }
     return;

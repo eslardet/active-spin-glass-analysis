@@ -13,8 +13,8 @@ std::fstream logFile,posFile,posExactFile,forceFile,couplingFile;
 // Input parameters
 int nPart;
 unsigned int seed;
-double phi;
-double noise,vp,Rp;
+double phi,noise,vp;
+double Rp;
 bool savePos,saveForce,saveCoupling;
 char initMode,couplingMode,intMethod;
 double dT,DT,DTex,eqT,simulT,startT;
