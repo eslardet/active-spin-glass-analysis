@@ -20,8 +20,8 @@ def get_sim_dir(mode, nPart, phi, Pe, K, xTy, seed):
     elif mode == "F":
         mode_name = "Ferromagnetic"
 
-    sim_dir = os.path.abspath('../simulation_data_v/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_Pe' + str(Pe) + '/K' + str(K) + '/xTy' + str(xTy) + '/s' + str(seed))
-    # sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_Pe' + str(Pe) + '/K' + str(K) + '/xTy' + str(xTy) + '/s' + str(seed))
+    # sim_dir = os.path.abspath('../simulation_data_v/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_Pe' + str(Pe) + '/K' + str(K) + '/xTy' + str(xTy) + '/s' + str(seed))
+    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_Pe' + str(Pe) + '/K' + str(K) + '/xTy' + str(xTy) + '/s' + str(seed))
 
     return sim_dir
 
@@ -440,6 +440,38 @@ def read_stats(mode, nPart, phi, Pe, K, xTy, seed):
     stats_dict["n_sus"] = float(r[3][0])
     return stats_dict
 
+## TO DO: add to stats function
+def local_density_var(mode, nPart, phi, Pe, K, xTy, seed, min_grid_size=2):
+    ## Currently with pos_ex but could average over a number of timesteps before deletion of pos file
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    x = pbc_wrap(x,Lx)
+    y = pbc_wrap(y,Ly)
+
+    ngrid_x = int(Lx // min_grid_size)
+    grid_size_x = Lx / ngrid_x
+    ngrid_y = int(Ly // min_grid_size)
+    grid_size_y = Ly / ngrid_y
+
+    grid_area = grid_size_x*grid_size_y
+
+    grid_counts = np.zeros((ngrid_x, ngrid_y))
+
+    for i in range(nPart):
+        gridx = int(x[i]//grid_size_x)
+        gridy = int(y[i]//grid_size_y)
+        grid_counts[gridx,gridy] += 1
+    n_density = grid_counts / grid_area
+
+    var_density = np.std(n_density)**2
+
+    return var_density
+
 
 ## Add plotting for:
 #  psi vs Pe - yes
@@ -449,7 +481,7 @@ def read_stats(mode, nPart, phi, Pe, K, xTy, seed):
 #  Local density profiles
 #  Local density variance against Pe
 
-def plot_porder_pe(mode, nPart, phi, Pe_range, K, xTy, seed_range):
+def plot_porder_pe(mode, nPart, phi, Pe_range, K, xTy, seed_range, inverse=False):
     """
     Plot steady state polar order parameter against Pe
     Averaged over a number of realizations
@@ -464,11 +496,42 @@ def plot_porder_pe(mode, nPart, phi, Pe_range, K, xTy, seed_range):
                 write_stats(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed)
             p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed)["p_mean"]
         p_ss.append(p_ss_sum/len(seed_range))
-    ax.plot(Pe_range, p_ss, 'o-')
-    ax.set_xlabel("Pe")
+
+    if inverse == True:
+        inverse_Pe = [1/p for p in Pe_range]
+        ax.plot(inverse_Pe, p_ss, 'o-')
+        ax.set_xlabel(r"Pe$^{-1}$")
+    else:
+        ax.plot(Pe_range, p_ss, '-o')
+        ax.set_xlabel(r"Pe")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     
-    folder = os.path.abspath('../plots/vicsek_p_order_vs_Pe/')
+    folder = os.path.abspath('../plots/p_order_vs_Pe/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_K' + str(K) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+def plot_var_density_pe(mode, nPart, phi, Pe_range, K, xTy, seed_range, inverse=False):
+    fig, ax = plt.subplots()
+    vars = []
+    for Pe in Pe_range:
+        var_sum = 0
+        for seed in seed_range:
+            var_sum += local_density_var(mode, nPart, phi, Pe, K, xTy, seed)
+        vars.append(var_sum/len(seed_range))
+
+    if inverse == True:
+        inverse_Pe = [1/p for p in Pe_range]
+        ax.plot(inverse_Pe, vars, 'o-')
+        ax.set_xlabel(r"Pe$^{-1}$")
+    else:
+        ax.plot(Pe_range, vars, 'o-')
+        ax.set_xlabel("Pe")
+    ax.set_ylabel(r"Local density variance $\langle(\rho-\bar{\rho})^2\rangle$")
+
+    folder = os.path.abspath('../plots/var_density_vs_Pe/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_K' + str(K) + '_xTy' + str(xTy) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)

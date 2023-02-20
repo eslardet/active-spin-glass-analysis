@@ -50,10 +50,10 @@ K0=0.0
 # STDK=1.0
 
 dT=2.e-5
-DT=1.0
+DT=0.001
 DTex=1.0
-eqT=0
-simulT=100.0
+eqT=10.0
+simulT=0.1
 
 savePos=1
 saveForce=0

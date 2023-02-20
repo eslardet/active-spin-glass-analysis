@@ -63,12 +63,15 @@ def get_params(inparFile):
     
     if inpar_dict["mode"] == 'C':
         inpar_dict["DT"] = float(r[12][0])
+        inpar_dict["eqT"] = float(r[14][0])
         inpar_dict["simulT"] = float(r[15][0])
     elif inpar_dict["mode"] == 'T':
         inpar_dict["DT"] = float(r[14][0])
+        inpar_dict["eqT"] = float(r[16][0])
         inpar_dict["simulT"] = float(r[17][0])
     else:
         inpar_dict["DT"] = float(r[13][0])
+        inpar_dict["eqT"] = float(r[15][0])
         inpar_dict["simulT"] = float(r[16][0])
     return inpar_dict
 
@@ -86,6 +89,7 @@ def get_pos_arr(inparFile, posFile, min_T=None, max_T=None):
     
     nPart = inpar_dict["nPart"]
     DT = inpar_dict["DT"]
+    eqT = inpar_dict["eqT"]
     if min_T == None:
         min_T = 0
     if max_T == None:
@@ -101,7 +105,7 @@ def get_pos_arr(inparFile, posFile, min_T=None, max_T=None):
     y_all = []
     theta_all = []
 
-    for i in range(max(int((min_T-startT)/DT),0), int((max_T-startT)/DT)+1):
+    for i in range(max(int((min_T-startT+eqT)/DT),0), int((max_T-startT+eqT)/DT)+1):
         x_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0])
         y_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1])
         theta_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2])
