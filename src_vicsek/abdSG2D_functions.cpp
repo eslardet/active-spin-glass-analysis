@@ -632,7 +632,7 @@ void SRK2(vector<double>& x, vector<double>& fx,
           vector<double>& p, vector<double>& fp)
 {
     double sig_T = 0.0;
-    double sig_R = sqrt(2*dT);
+    double sig_R = noise*sqrt(dT);
     vector<float> nei(nPart); // number of neighbours
 
     // Check the neighbor list and update if necessary
@@ -664,12 +664,12 @@ void SRK2(vector<double>& x, vector<double>& fx,
     for (int i=0 ; i<nPart ; i++ ) {
         x[i] += (fx[i]+Fx[i])/2.0*dT + sig_T*normDist(rnd_gen);
         y[i] += (fy[i]+Fy[i])/2.0*dT + sig_T*normDist(rnd_gen);
-
-        if (nei[i] == 0) {
-            p[i] += sig_R*whiteNoise(rnd_gen); //// Found where mistake was
+        p[i] += sig_R*whiteNoise(rnd_gen);
+        if (nnei[i] != 0) {
+            p[i] += fp[i]/(2.0*nnei[i])*dT;
         }
-        else {
-            p[i] += (fp[i]/nnei[i]+Fp[i]/NNei[i])/2.0*dT + sig_R*whiteNoise(rnd_gen);
+        if (NNei[i] != 0) {
+            p[i] += Fp[i]/(2.0*NNei[i])*dT;
         }
     }
     return;

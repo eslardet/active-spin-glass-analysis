@@ -96,10 +96,10 @@ for (sig=1; sig<=32; sig++)
     logFile << " --> Seed = " << seed << endl;
 
     inputFile >> noise;
-    logFile << " --> Peclet = " << noise << endl;  
+    logFile << " --> Noise = " << noise << endl;  
 
     inputFile >> vp;
-    logFile << " --> Peclet = " << vp << endl;  
+    logFile << " --> Particle velocity = " << vp << endl;  
 
     inputFile >> Rp;
     logFile << " --> Ratio of Vicsek interaction radius to particle size = " << Rp << endl;    

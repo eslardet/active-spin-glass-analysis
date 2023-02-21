@@ -221,15 +221,15 @@ def snapshot(mode, nPart, phi, Pe, K, seed, view_time, show_quiver=False, show_c
             for i in range(nPart):
                 color = mapper.to_rgba(theta[i]%(2*np.pi))
                 ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
+            plt.colorbar(mappable=mapper, ax=ax)
         else:
-            ax.plot(x, y, 'o', ms=diameter, zorder=1)
+            ax.plot(x, y, 'o', ms=diameter, zorder=1, alpha=0.5)
     if show_quiver == True:
         ax.quiver(x, y, np.cos(theta), np.sin(theta), zorder=2)
     ax.set_xlim(0,Lx)
     ax.set_ylim(0,Ly)
     ax.set_aspect('equal')
     ax.set_title("t=" + str(view_time))
-    cbar = plt.colorbar(mappable=mapper, ax=ax)
     
     folder = os.path.abspath('../snapshots')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Pe' + str(Pe) + '_K' + str(K) + '_s' + str(seed) + '_Rp' + str(Rp) + '_' + repulsion + '.png'
