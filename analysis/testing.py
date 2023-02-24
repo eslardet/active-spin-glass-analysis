@@ -1,5 +1,6 @@
 import numpy as np
 import analysis_functions_vicsek_nd as fun
+import matplotlib.pyplot as plt
 
 def local_density_var(mode, nPart, phi, Pe, K, xTy, seed, min_grid_size=2):
     posFileExact = fun.get_file_path(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
@@ -36,6 +37,36 @@ def local_density_var(mode, nPart, phi, Pe, K, xTy, seed, min_grid_size=2):
 # def plot_var_density_pe(mode, nPart, phi, Pe, K, xTy, seed):
 
 
-var = local_density_var(mode="C", nPart=1000, phi=1.0, Pe=3.0, K=1.0, xTy=5.0, seed=1)
+# var = local_density_var(mode="C", nPart=1000, phi=1.0, Pe=3.0, K=1.0, xTy=5.0, seed=1)
 
-print(var)
+# print(var)
+
+
+def plot_transverse_density(mode, nPart, phi, Pe, K, xTy, seed, min_grid_size=2):
+    posFileExact = fun.get_file_path(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+    x, y, theta, view_time = fun.get_pos_ex_snapshot(file=posFileExact)
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    x = fun.pbc_wrap(x,Lx)
+
+    ngrid_x = int(Lx // min_grid_size)
+    grid_size_x = Lx / ngrid_x
+
+    grid_area = grid_size_x*Ly
+
+    grid_counts = np.zeros(ngrid_x)
+
+    for i in range(nPart):
+        gridx = int(x[i]//grid_size_x)
+        grid_counts[gridx] += 1
+    n_density = grid_counts / grid_area
+
+    fig, ax = plt.subplots()
+    x_vals = np.arange(0, Lx, grid_size_x)
+    ax.plot(x_vals, n_density)
+    plt.show()
+
+# plot_transverse_density(mode="C", nPart=1000, phi=1.0, Pe=3.0, K=1.0, xTy=5.0, seed=1)

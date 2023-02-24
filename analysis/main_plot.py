@@ -1,15 +1,19 @@
 import numpy as np
-import analysis_functions_lattice as fun
+import analysis_functions_vicsek as fun
 import os
 import matplotlib.pyplot as plt
 import sys
 
 mode = 'C'
-nPart_range = [1024]
-K_range = [1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0]
-Rp = 2.0
+nPart = 5000
+phi = 0.2
+noise_range = np.arange(0.1,1.1,1.0)
+K = 1.0
+xTy = 5.0
 seed_range = [1]
 
 
-fun.plot_vorder_k(mode=mode, nPart_range=nPart_range, K_range=K_range, Rp=Rp, seed_range=seed_range)
+noise_range = np.arange(0.1,1.1,0.1)
+
+fun.plot_porder_noise(mode=mode, nPart=nPart, phi=phi, noise_range=noise_range, K=K, xTy=xTy, seed_range=[2])
 
