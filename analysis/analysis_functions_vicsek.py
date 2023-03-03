@@ -256,6 +256,9 @@ def animate(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None):
     seed = inpar_dict["seed"]
     xTy = inpar_dict["xTy"]
 
+    if min_T == None:
+        min_T = 0
+
     with open(posFile) as f:
         reader = csv.reader(f, delimiter="\t")
         startT = float(list(reader)[6][0])
@@ -286,7 +289,7 @@ def animate(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None):
         theta = theta_all[n]
         arrows.set_offsets(np.c_[x, y])
         arrows.set_UVC(np.cos(theta), np.sin(theta))
-        ax.set_title("t = " + str(round(n*DT+startT, 1)), fontsize=10, loc='left')
+        ax.set_title("t = " + str(round(n*DT+startT+min_T, 1)), fontsize=10, loc='left')
         
         return arrows,
 
@@ -351,7 +354,7 @@ def del_pos(mode, nPart, phi, noise, K, xTy, seed):
     sim_dir = get_sim_dir(mode, nPart, phi, noise, K, xTy, seed)
     os.remove(os.path.join(sim_dir, "pos"))
 
-def write_stats(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None, remove_pos=False):
+def write_stats(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None, remove_pos=False, density_var=False):
     """
     Write a file with various statistics from the simulation data (Vicsek order parameter mean, standard deviation, susceptibility)
     """
@@ -399,7 +402,17 @@ def write_stats(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None, r
     statsFile.write(str(p_mean) + '\n')
     statsFile.write(str(p_sus) + '\n')
     statsFile.write(str(n_mean) + '\n')
-    statsFile.write(str(n_sus))
+    statsFile.write(str(n_sus) + '\n')
+
+    if density_var == True:
+        d_var_list = []
+        timestep_min = int(min_T//DT)
+        timestep_max = int(max_T//DT)
+        for timestep in range(timestep_min, timestep_max, 10):
+            d_var_list.append(local_density_var(mode, nPart, phi, noise, K, xTy, seed, pos_ex=False, timestep=timestep))
+        d_var_mean = d_var_list/(len(d_var_list))
+        statsFile.write(str(d_var_mean) + '\n')
+
     statsFile.close()
 
     ## Write file with lower resolution than pos
@@ -423,6 +436,7 @@ def read_stats(mode, nPart, phi, noise, K, xTy, seed):
     stats_dict["p_sus"] = float(r[1][0])
     stats_dict["n_mean"] = float(r[2][0])
     stats_dict["n_sus"] = float(r[3][0])
+    # stats_dict["d_var_mean"] = float(r[4][0])
     return stats_dict
 
 
@@ -482,9 +496,9 @@ def plot_porder_phi(mode, nPart, phi_range, noise, K, xTy, seed_range):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_porder_Kavg(mode, nPart, phi, noise, K_range, xTy, seed_range):
+def plot_porder_K0(mode, nPart, phi, noise, K_range, xTy, seed_range):
     """
-    Plot steady state polar order parameter against Kavg
+    Plot steady state polar order parameter against K0
     Averaged over a number of realizations
     """
     fig, ax = plt.subplots()
@@ -499,18 +513,111 @@ def plot_porder_Kavg(mode, nPart, phi, noise, K_range, xTy, seed_range):
         p_ss.append(p_ss_sum/len(seed_range))
 
     ax.plot(K_range, p_ss, '-o')
-    ax.set_xlabel(r"$K_0$")
+    ax.set_xlabel(r"$K_{0}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
-    
+    ax.legend()
+
+    folder = os.path.abspath('../plots/p_order_vs_Kavg/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd0.0' + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def plot_porder_Kavg(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, seed_range):
+    """
+    Plot steady state polar order parameter against Kavg, for each fixed K_std value
+    Averaged over a number of realizations
+    """
+    fig, ax = plt.subplots()
+    for K_std in K_std_range:
+        p_ss = []
+        for K_avg in K_avg_range:
+            K = str(K_avg) + "_" + str(K_std)
+            p_ss_sum = 0
+            for seed in seed_range:
+                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                    write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
+            p_ss.append(p_ss_sum/len(seed_range))
+
+        ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std))
+    ax.set_xlabel(r"$K_{AVG}$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
+    ax.legend()
+
     folder = os.path.abspath('../plots/p_order_vs_Kavg/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_xTy' + str(xTy) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
+def plot_porder_Kstd(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, seed_range):
+    """
+    Plot steady state polar order parameter against Kstd, for each fixed K_avg value
+    Averaged over a number of realizations
+    """
+    fig, ax = plt.subplots()
+    for K_avg in K_avg_range:
+        p_ss = []
+        for K_std in K_std_range:
+            K = str(K_avg) + "_" + str(K_std)
+            p_ss_sum = 0
+            for seed in seed_range:
+                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                    write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
+            p_ss.append(p_ss_sum/len(seed_range))
+
+        ax.plot(K_std_range, p_ss, '-o', label=r"$K_{AVG}=$" + str(K_avg))
+    ax.set_xlabel(r"$K_{STD}$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
+    ax.legend()
+
+    folder = os.path.abspath('../plots/p_order_vs_Kstd/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def plot_porder_Kratio(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, seed_range):
+    """
+    Plot steady state polar order parameter against Kavg/Kstd
+    Averaged over a number of realizations
+    """
+    fig, ax = plt.subplots()
+    for K_std in K_std_range:
+        p_ss = []
+        for K_avg in K_avg_range:
+            K = str(K_avg) + "_" + str(K_std)
+            p_ss_sum = 0
+            for seed in seed_range:
+                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                    write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
+            p_ss.append(p_ss_sum/len(seed_range))
+
+        ax.plot([i/K_std for i in K_avg_range], p_ss, '-o', label=r"$K_{STD}=$" + str(K_std))
+    ax.set_xlabel(r"$K_{AVG}/K_{STD}$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
+    ax.legend()
+
+    folder = os.path.abspath('../plots/p_order_vs_Kratio/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
 def plot_density_profile(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2):
+    """
+    Plot x-directional density profile for the final snapshot
+    """
     posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
     x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
 
@@ -545,9 +652,22 @@ def plot_density_profile(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2)
     plt.savefig(os.path.join(folder, filename))
 
 
-def local_density_var(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2):
-    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
-    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+def local_density_var(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
+    """
+    Calculate the variance in the local densities of smaller grids from the final snapshot
+    """
+    if pos_ex == True:
+        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+    else: 
+        inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+        inpar_dict = get_params(inparFile)
+        DT = inpar_dict["DT"]
+        simulT = inpar_dict["simulT"]
+        eqT = inpar_dict["eqT"]
+        if timestep == None:
+            timestep = int((simulT-eqT)/DT) 
+        x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
 
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
@@ -575,13 +695,16 @@ def local_density_var(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2):
 
     return var_density
 
-def plot_var_density_noise(mode, nPart, phi, noise_range, K, xTy, seed_range):
+def plot_var_density_noise(mode, nPart, phi, noise_range, K, xTy, seed_range, min_grid_size=2):
+    """
+    Plot the local density variance against noise
+    """
     fig, ax = plt.subplots()
     vars = []
     for noise in noise_range:
         var_sum = 0
         for seed in seed_range:
-            var_sum += local_density_var(mode, nPart, phi, noise, K, xTy, seed)
+            var_sum += local_density_var(mode, nPart, phi, noise, K, xTy, seed, min_grid_size)
         vars.append(var_sum/len(seed_range))
 
     noise_range = [float(i) for i in noise_range]
@@ -594,3 +717,30 @@ def plot_var_density_noise(mode, nPart, phi, noise_range, K, xTy, seed_range):
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+
+def plot_var_density_Kavg(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, seed_range, min_grid_size=2):
+    """
+    Plot the local density variance against K_AVG, for various K_STD values
+    """
+    fig, ax = plt.subplots()
+    for K_std in K_std_range:
+        vars = []
+        for K_avg in K_avg_range:
+            K = str(K_avg) + "_" + str(K_std)
+            var_sum = 0
+            for seed in seed_range:
+                var_sum += local_density_var(mode, nPart, phi, noise, K, xTy, seed, min_grid_size)
+            vars.append(var_sum/len(seed_range))
+
+        ax.plot(K_avg_range, vars, 'o-', label=r"$K_{STD}=$" + str(K_std))
+    ax.set_xlabel(r"$K_{AVG}$")
+    ax.set_ylabel(r"Local density variance $\langle(\rho-\bar{\rho})^2\rangle$")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/var_density_vs_Kavg/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
