@@ -546,6 +546,7 @@ def plot_porder_Kavg(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, see
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
+    ax.set_xlim([-1,2])
     ax.legend()
 
     folder = os.path.abspath('../plots/p_order_vs_Kavg/')

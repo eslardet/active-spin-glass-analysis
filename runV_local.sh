@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=1000
+nPart=10000
 phi=1.0
 Pe=3.0
 
@@ -31,7 +31,7 @@ initMode='R'
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='C'
+couplingMode='G'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -45,18 +45,18 @@ K0=1.0
 # KAB=0.0
 # KBB=10.0
 
-# KAVG=1.0
-# STDK=1.0
+KAVG=1.0
+STDK=1.0
 
 dT=0.01
 DT=1.0
 DTex=1.0
 eqT=0
-simulT=1.0
+simulT=0.0
 
 savePos=1
 saveForce=0
-saveCoupling=0 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
+saveCoupling=1 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
 intMethod='E'
 
@@ -90,8 +90,8 @@ echo "Starting Vicsek 2D run..."
 
 cd $run_dir
 
-if [ -e "stats" ]; then
-    rm 'stats'
+# if [ -e "stats" ]; then
+#     rm 'stats'
 
 if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
     sed -i '' "7s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
@@ -155,6 +155,6 @@ else
     echo ${intMethod} >> 'inpar'
 fi
 
-time ${bin_dir}/vicsek_2D_ND inpar
+time ${bin_dir}/vicsek_2D inpar
 
 echo "2D Vicsek run done."
