@@ -19,9 +19,11 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 
 nPart=10000
 phi=1.0
-Pe=3.0
+noise=0.60
 
 seed=1
+
+vp=1.0
 
 Rp=1.0
 xTy=5.0
@@ -45,14 +47,14 @@ K0=1.0
 # KAB=0.0
 # KBB=10.0
 
-KAVG=1.0
+KAVG=0.0
 STDK=1.0
 
-dT=0.01
-DT=1.0
-DTex=1.0
+dT=0.005
+DT=1
+DTex=1
 eqT=0
-simulT=0.0
+simulT=0
 
 savePos=1
 saveForce=0
@@ -62,15 +64,15 @@ intMethod='E'
 
 # Local
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Constant/N${nPart}/phi${phi}_Pe${Pe}/K${K0}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/TwoPopulations/N${nPart}/phi${phi}_Pe${Pe}/K${KAA}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/TwoPopulations/N${nPart}/phi${phi}_n${noise}/K${KAA}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Gaussian/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Ferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Ferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Antiferromagnetic/N${nPart}/phi${phi}_Pe${Pe}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Antiferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
 fi
 
 
@@ -115,10 +117,10 @@ else
 
     echo ${nPart} > 'inpar'
     echo ${phi} >> 'inpar'
-    echo ${Pe} >> 'inpar'
-
     echo ${seed} >> 'inpar'
 
+    echo ${noise} >> 'inpar'
+    echo ${vp} >> 'inpar'
     echo ${Rp} >> 'inpar'
     echo ${xTy} >> 'inpar'
 

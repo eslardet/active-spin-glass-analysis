@@ -235,7 +235,7 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                 couplingFile.open("coupling",ios::out);
                 if(couplingFile.fail())
                 {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-                couplingFile.precision(8);
+                couplingFile.precision(4);
                 saveCouplings(K,couplingFile);
                 couplingFile.close();
             }
