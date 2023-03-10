@@ -1,7 +1,7 @@
-app = vicsek_2D_switch
+app = vicsek_2D
 
 srcExt = cpp
-srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_vicsek_switch
+srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_vicsek
 objDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/obj
 binDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/bin
 inc = 
@@ -9,7 +9,7 @@ inc =
 debug = 0
 
 CFlags = -W -std=c++11 -O2
-LDFlags =
+LDFlags = -lboost_iostreams
 libs =
 libDir =
 

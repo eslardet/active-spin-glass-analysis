@@ -15,10 +15,10 @@ extern std::fstream initposFile,logFile,couplingFile, posExactFile;
 extern int nPart;
 extern unsigned int seed;
 extern double phi,noise,vp;
-extern bool saveCoupling;
-extern char initMode,couplingMode,intMethod;
-extern double dT,DT,DTex,eqT,simulT,startT;
-extern int Nsimul,Neq,Nskip,Nskipexact;
+extern bool saveCoupling,saveCouplingNew;
+extern char initMode,couplingMode,couplingModeNew,intMethod;
+extern double dT,DT,DTex,eqT,simulT,startT,switchT;
+extern int Nsimul,Neq,Nskip,Nskipexact,Nswitch;
 extern double Lx,xmin,xmax;
 extern double Ly,ymin,ymax;
 extern double xTy;
@@ -29,6 +29,9 @@ extern double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interacti
                            //           KBB: Coupling constant for B-B interactions
 extern double KAVG,STDK; // mode 'G', 'F', 'A': KAVG: Average coupling constant
                          //                     STDK: Standard deviation of coupling constant
+
+extern double K0_new;
+extern double KAVG_new,STDK_new;
 
 /////////////////////////////
 // Define global variables //
@@ -114,6 +117,7 @@ inline int lCellIndex(int ii, int jj)
 std::string currentDateTime(void);
 void checkParameters(void);
 void initialize(std::vector<double>&,std::vector<double>&,std::vector<double>&);
+void initializeSwitch(void);
 void initialConditionsRandom(std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void initialConditionsSim(std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void allocateSRKmem(void);

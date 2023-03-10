@@ -161,15 +161,25 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
 // saveCouplings //
 ///////////////////
 // Saves to file the coupling constants
-inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& File) 
+// inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& File) 
+inline void saveCouplings(std::vector< std::vector<double> > k) 
 {
-    
+    std::ofstream File("coupling.gz", std::ios_base::out | std::ios_base::binary);
+    boost::iostreams::filtering_streambuf<boost::iostreams::output> outbuf;
+    outbuf.push(boost::iostreams::gzip_compressor());
+    outbuf.push(File);
+
+    // ostream out(&outbuf);
     for(int i=0 ; i<nPart ; i++)
     {
         for(int j=i+1 ; j<nPart ; j++){
-            File << k[i][j] << std::endl; 
+            // File << k[i][j] << std::endl;
+            ostream out(&outbuf);        
+            out << k[i][j] << std::endl;
         }
     }
+    boost::iostreams::close(outbuf);
+    File.close();
 }
 
 

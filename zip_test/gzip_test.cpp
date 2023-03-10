@@ -24,7 +24,7 @@ int main()
 {
     using namespace std;
 
-    std::ofstream file("coupling", std::ios_base::out | std::ios_base::binary);
+    std::ofstream file("coupling.gz", std::ios_base::out | std::ios_base::binary);
     boost::iostreams::filtering_streambuf<boost::iostreams::output> outbuf;
     outbuf.push(boost::iostreams::gzip_compressor());
     outbuf.push(file);
@@ -32,5 +32,7 @@ int main()
     ostream out(&outbuf);
     out << "This is a test text!\n";
     boost::iostreams::close(outbuf);
-    file.close()
+    file.close();
+
+
 }

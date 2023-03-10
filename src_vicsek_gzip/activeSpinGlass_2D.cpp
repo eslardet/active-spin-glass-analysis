@@ -158,32 +158,6 @@ for (sig=1; sig<=32; sig++)
 
 	logFile << "------------------------------------------------------------" << endl;
 
-
-    inputFile >> couplingModeNew; 
-    logFile << " --> Coupling Constants Mode after switch = " << couplingModeNew << endl; 
-
-    // Add the coupling constants parameters
-    switch(couplingMode)
-    {
-        case 'C' : // Constant coupling
-            inputFile >> K0_new; 
-            logFile << " ----> Coupling Constant K0 = " << K0 << endl; 
-            break;
-
-        case 'G' : // Gaussian distributed couplings
-            inputFile >> KAVG_new; 
-            inputFile >> STDK;            
-            logFile << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
-            break;
-
-        default :
-            cerr << "Invalid New Couplings Initialization Mode!" << endl;
-            cerr << " --> Valid modes are : 'C', 'G', ... " << endl;
-            exit(1);
-    }
-
-	logFile << "------------------------------------------------------------" << endl;
-
     inputFile >> dT; 
     logFile << " --> Timestep, dt = "  << dT << endl;
 
@@ -194,10 +168,7 @@ for (sig=1; sig<=32; sig++)
     logFile << " --> Recording Timestep (precise) = " << DTex << endl;
 
 	inputFile >> eqT; 
-	logFile << " --> Equilibration Time = " << eqT << endl;
-
- 	inputFile >> switchT; 
-	logFile << " --> Switch Time = " << switchT << endl;      
+	logFile << " --> Equilibration Time = " << eqT << endl;   
 
     inputFile >> simulT; 
 	logFile << " --> Simulation Time = " << simulT << endl;   
@@ -212,9 +183,6 @@ for (sig=1; sig<=32; sig++)
 
     inputFile >> saveCoupling; 
     logFile << " --> saveCoupling = " << saveCoupling << endl;
-
-    inputFile >> saveCouplingNew;
-    logFile << " --> saveCouplingNew = " << saveCouplingNew << endl;
 
     logFile << "------------------------------------------------------------" << endl;
 
@@ -296,11 +264,6 @@ for (sig=1; sig<=32; sig++)
     cout << "Starting to record simulation results:" << endl;
     cout << " --> " << flush;
     for(int ns=0 ; ns<Nsimul ; ns++) {
-        // Switch couplings
-        if (ns==Nswitch) {
-            initializeSwitch();
-        }
-
         // Move to the next timestep
         activeBrownianDynamics(x,y,p,fx,fy,fp,t);
         // Save data if necessary                

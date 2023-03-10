@@ -15,10 +15,10 @@ int nPart;
 unsigned int seed;
 double phi,noise,vp;
 double Rp;
-bool savePos,saveForce,saveCoupling,saveCouplingNew;
-char initMode,couplingMode,couplingModeNew,intMethod;
-double dT,DT,DTex,eqT,simulT,startT,switchT;
-int Nsimul,Neq,Nskip,Nskipexact,Nswitch;
+bool savePos,saveForce,saveCoupling;
+char initMode,couplingMode,intMethod;
+double dT,DT,DTex,eqT,simulT,startT;
+int Nsimul,Neq,Nskip,Nskipexact;
 double xmin,xmax;
 double ymin,ymax;
 double xTy,Lx,Ly;
@@ -30,9 +30,6 @@ double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions
                     //           KBB: Coupling constant for B-B interactions
 double KAVG,STDK; // mode 'G', 'F', 'A': KAVG: Average coupling constant
                   //                     STDK: Standard deviation of coupling constant
-
-double K0_new;
-double KAVG_new,STDK_new;
 
 ///////////////
 // saveFrame //

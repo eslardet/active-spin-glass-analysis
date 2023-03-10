@@ -16,6 +16,10 @@
 #include "math.h"
 #include "abdSG2D_functions.h"
 
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+
 using namespace std;
 
 ///////////////////////
@@ -107,23 +111,6 @@ void checkParameters()
         default :
             cerr << "Invalid Couplings Initialization Mode!" << endl;
             cerr << " --> Valid modes are : 'C', 'T', 'G', 'F', 'A' ... " << endl;
-            ::exit(1);
-
-    }
-
-    switch(couplingModeNew)
-    {
-        case 'C' : // Constant coupling
-            logFile << "Initializing new couplings in mode 'C', couplings are constant" << endl;
-            break;
-
-        case 'G' : // Gaussian distributed couplings
-            logFile << "Initializing new couplings in mode 'G', Gaussian distributed couplings" << endl;
-            break;
-
-        default :
-            cerr << "Invalid New Couplings Initialization Mode!" << endl;
-            cerr << " --> Valid modes are : 'C', 'G', ... " << endl;
             ::exit(1);
 
     }
@@ -249,12 +236,13 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             }
 
             if (saveCoupling) {
-                couplingFile.open("coupling",ios::out);
-                if(couplingFile.fail())
-                {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-                couplingFile.precision(4);
-                saveCouplings(K,couplingFile);
-                couplingFile.close();
+                // couplingFile.open("coupling",ios::out);
+                // if(couplingFile.fail())
+                // {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
+                // couplingFile.precision(4);
+                // saveCouplings(K,couplingFile);
+                // couplingFile.close();
+                saveCouplings(K);
             }
             break;
 
@@ -315,53 +303,6 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     }
 }
 
-
-////////////////
-// initializeSwitch //
-////////////////
-// Initialize couplings for after switch
-void initializeSwitch(void)
-{
-    double KK;
-
-    // Initialize the coupling array
-    switch(couplingMode)
-    {
-        case 'C' : // Constant coupling
-            for(int i=0 ; i<nPart ; i++){
-                K[i][i] = 0.0;
-                for(int j=i+1 ; j<nPart ; j++){
-                    K[i][j] = K0; 
-                    K[j][i] = K0; 
-                }
-            }
-            break;
-
-        case 'G' : // Gaussian distributed couplings
-            for(int i=0 ; i<nPart ; i++){
-                K[i][i] = 0.0;
-                for(int j=i+1 ; j<nPart ; j++){
-                    KK = KAVG + STDK*normDist(rnd_gen);
-                    K[i][j] = KK;
-                    K[j][i] = KK;
-                }
-            }
-            break;
-    }
-
-    if (saveCouplingNew) {
-        couplingFile.open("coupling_new",ios::out);
-        if(couplingFile.fail())
-        {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-        couplingFile.precision(4);
-        saveCouplings(K,couplingFile);
-        couplingFile.close();
-    }
-    break;
-    }
-}
-
-
 /////////////////////////////
 // initialConditionsRandom //
 /////////////////////////////
@@ -393,10 +334,9 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     // Timing
     Neq = (int) ceil(eqT/dT);
     Nsimul = (int) ceil(simulT/dT);
-    Nswitch = (int) ceil(switchT/dT);
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);
-    logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << ", Nswitch = " << Nswitch << " and Nskip = " << Nskip << endl;
+    logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
     logFile << "Volume fraction is phi = " << phi << endl;
 
     // Initialize particles at random positions
