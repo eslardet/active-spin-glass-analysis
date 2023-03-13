@@ -7,6 +7,10 @@
 #ifndef abdSG2Dfunctions_h
 #define abdSG2Dfunctions_h
 
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+
 ///////////////////////////////
 // Define external variables //
 ///////////////////////////////
@@ -14,7 +18,7 @@ extern std::fstream initposFile,logFile,couplingFile, posExactFile;
 
 extern int nPart;
 extern unsigned int seed;
-extern double phi;
+extern double phi,noise,vp;
 extern bool saveCoupling;
 extern char initMode,couplingMode,intMethod;
 extern double dT,DT,DTex,eqT,simulT,startT;
@@ -22,7 +26,6 @@ extern int Nsimul,Neq,Nskip,Nskipexact;
 extern double Lx,xmin,xmax;
 extern double Ly,ymin,ymax;
 extern double xTy;
-extern double Pe;
 
 extern double K0; // mode 'C': K0: Coupling constant
 extern double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
@@ -160,11 +163,11 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
 // Saves to file the coupling constants
 inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& File) 
 {
-
+    
     for(int i=0 ; i<nPart ; i++)
     {
         for(int j=i+1 ; j<nPart ; j++){
-            File << k[i][j] << std::endl;        
+            File << k[i][j] << std::endl; 
         }
     }
 }

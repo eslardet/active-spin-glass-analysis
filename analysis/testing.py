@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek_nd as fun
+import analysis_functions_vicsek as fun
 import matplotlib.pyplot as plt
 from matplotlib import cm, colors
 

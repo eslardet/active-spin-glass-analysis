@@ -30,6 +30,7 @@ mt19937 rnd_gen;
 
 uniform_real_distribution<double> uniDist(0.0,1.0);
 normal_distribution<double> normDist(0.0,1.0);
+normal_distribution<double> whiteNoise(0.0,1.0);
 
 /////////////////////
 // currentDateTime //
@@ -234,7 +235,7 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                 couplingFile.open("coupling",ios::out);
                 if(couplingFile.fail())
                 {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-                couplingFile.precision(8);
+                couplingFile.precision(4);
                 saveCouplings(K,couplingFile);
                 couplingFile.close();
             }
@@ -631,7 +632,7 @@ void SRK2(vector<double>& x, vector<double>& fx,
           vector<double>& p, vector<double>& fp)
 {
     double sig_T = 0.0;
-    double sig_R = sqrt(2*dT);
+    double sig_R = noise*sqrt(dT);
     vector<float> nei(nPart); // number of neighbours
 
     // Check the neighbor list and update if necessary
@@ -647,10 +648,10 @@ void SRK2(vector<double>& x, vector<double>& fx,
         X[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         Y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
         if (nnei[i] == 0) {
-            P[i] = p[i] + sig_R*normDist(rnd_gen);
+            P[i] = p[i] + sig_R*whiteNoise(rnd_gen);
         }
         else {
-            P[i] = p[i] + fp[i]*dT/(nnei[i]) + sig_R*normDist(rnd_gen);
+            P[i] = p[i] + fp[i]*dT/(nnei[i]) + sig_R*whiteNoise(rnd_gen);
         }
     }
 
@@ -663,12 +664,12 @@ void SRK2(vector<double>& x, vector<double>& fx,
     for (int i=0 ; i<nPart ; i++ ) {
         x[i] += (fx[i]+Fx[i])/2.0*dT + sig_T*normDist(rnd_gen);
         y[i] += (fy[i]+Fy[i])/2.0*dT + sig_T*normDist(rnd_gen);
-
-        if (nei[i] == 0) {
-            p[i] += normDist(rnd_gen);
+        p[i] += sig_R*whiteNoise(rnd_gen);
+        if (nnei[i] != 0) {
+            p[i] += fp[i]/(2.0*nnei[i])*dT;
         }
-        else {
-            p[i] += (fp[i]/nnei[i]+Fp[i]/NNei[i])/2.0*dT + sig_R*normDist(rnd_gen);
+        if (NNei[i] != 0) {
+            p[i] += Fp[i]/(2.0*NNei[i])*dT;
         }
     }
     return;
@@ -683,7 +684,7 @@ void EM(vector<double>& x, vector<double>& fx,
         vector<double>& p, vector<double>& fp)
 {
     double sig_T = 0.0;
-    double sig_R = sqrt(2*dT);
+    double sig_R = noise*sqrt(dT);
 
     // Check the neighbor list and update if necessary
     if ( checkNL(x,y) ) {
@@ -698,10 +699,10 @@ void EM(vector<double>& x, vector<double>& fx,
         x[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
         if (nnei[i] == 0) {
-            p[i] = p[i] + sig_R*normDist(rnd_gen);
+            p[i] = p[i] + sig_R*whiteNoise(rnd_gen);
         }
         else {
-            p[i] = p[i] + fp[i]*dT/nnei[i] + sig_R*normDist(rnd_gen);
+            p[i] = p[i] + fp[i]*dT/nnei[i] + sig_R*whiteNoise(rnd_gen);
         }
     }
 
@@ -725,8 +726,8 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
     for (int i=0 ; i<nPart ; i++) {
         pi = pp[i];
         // Self-propelling force
-        ffx[i] = Pe*cos(pi);
-        ffy[i] = Pe*sin(pi);
+        ffx[i] = vp*cos(pi);
+        ffy[i] = vp*sin(pi);
         ffp[i] = 0.0;
     }
 

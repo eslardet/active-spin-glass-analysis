@@ -5,7 +5,7 @@
 //		-overdamped langevin dynamics for both position and orientations
 //      -Purely repulsive Lennard-Jones interactions between particles
 //      -Vicsek interactions with generalized coupling constants
-//      -self-propelled particles via a constant peclet Pe (constant velocity)
+//      -self-propelled particles via a constant velocity vp
 //      -Hybrid cell-linked list and Verlet neighbor lists
 //
 //  Created by Thibault Bertrand on 2022-04-19
@@ -92,11 +92,14 @@ for (sig=1; sig<=32; sig++)
     inputFile >> phi;
     logFile << " --> Volume fraction, phi = " << phi << endl;
 
-    inputFile >> Pe;
-    logFile << " --> Peclet = " << Pe << endl;  
-
     inputFile >> seed;
     logFile << " --> Seed = " << seed << endl;
+
+    inputFile >> noise;
+    logFile << " --> Noise = " << noise << endl;  
+
+    inputFile >> vp;
+    logFile << " --> Particle velocity = " << vp << endl;  
 
     inputFile >> Rp;
     logFile << " --> Ratio of Vicsek interaction radius to particle size = " << Rp << endl;    
@@ -294,7 +297,7 @@ for (sig=1; sig<=32; sig++)
     if (savePos) { posFile.close(); }
     if (saveForce) { forceFile.close(); }
     
-    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", Pe = " << Pe << ", couplingMode = " << couplingMode << endl;
+    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", noise = " << noise << ", vp = " << vp << ", couplingMode = " << couplingMode << endl;
     switch(couplingMode)
     {
         case 'C' : // Constant coupling

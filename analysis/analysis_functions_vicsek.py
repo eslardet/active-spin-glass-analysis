@@ -539,28 +539,29 @@ def plot_porder_K0(mode, nPart, phi, noise, K_range, xTy, seed_range):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_porder_Kavg(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, seed_range):
+def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, xTy, seed_range):
     """
-    Plot steady state polar order parameter against Kavg, for each fixed K_std value
+    Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
     Averaged over a number of realizations
     """
     fig, ax = plt.subplots()
-    for K_std in K_std_range:
-        p_ss = []
-        error_count = 0
-        for K_avg in K_avg_range:
-            K = str(K_avg) + "_" + str(K_std)
-            p_ss_sum = 0
-            for seed in seed_range:
-                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-                if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                    print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
-                    error_count += 1
-                    # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-                p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
-            p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+    for noise in noise_range:
+        for K_std in K_std_range:
+            p_ss = []
+            error_count = 0
+            for K_avg in K_avg_range:
+                K = str(K_avg) + "_" + str(K_std)
+                p_ss_sum = 0
+                for seed in seed_range:
+                    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                    if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                        print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
+                        error_count += 1
+                        # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                    p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
+                p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-        ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std))
+            ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise))
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
@@ -568,10 +569,41 @@ def plot_porder_Kavg(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, see
     ax.legend()
 
     folder = os.path.abspath('../plots/p_order_vs_Kavg/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_xTy' + str(xTy) + '.png'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_xTy' + str(xTy) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+
+def plot_porder_Kavg_ax(mode, nPart, phi, noise_range, K_avg_range, K_std_range, xTy, seed_range, ax):
+    """
+    Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
+    Averaged over a number of realizations
+    Return axis for further plotting
+    """
+    # fig, ax = plt.subplots()
+    for noise in noise_range:
+        for K_std in K_std_range:
+            p_ss = []
+            error_count = 0
+            for K_avg in K_avg_range:
+                K = str(K_avg) + "_" + str(K_std)
+                p_ss_sum = 0
+                for seed in seed_range:
+                    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                    if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                        print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
+                        error_count += 1
+                        # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                    p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
+                p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+
+            ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise))
+    ax.set_xlabel(r"$K_{AVG}$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
+    ax.legend()
+
+    return ax
 
 def plot_porder_Kstd(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, seed_range):
     """
