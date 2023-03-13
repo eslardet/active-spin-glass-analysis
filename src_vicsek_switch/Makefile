@@ -1,9 +1,12 @@
 app = vicsek_2D_switch
 
 srcExt = cpp
-srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_vicsek_switch
-objDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/obj
-binDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/bin
+# srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_vicsek_switch
+# objDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/obj
+# binDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/bin
+srcDir = $(HOME)/Vicsek_2D/src_vicsek_switch
+objDir = $(HOME)/obj
+binDir = $(HOME)/bin
 inc = 
 
 debug = 0

@@ -10,7 +10,7 @@
 ///////////////////////////////
 // Define external variables //
 ///////////////////////////////
-extern std::fstream initposFile,logFile,couplingFile, posExactFile;
+extern std::fstream initposFile,logFile,couplingFile,couplingNewFile,posExactFile;
 
 extern int nPart;
 extern unsigned int seed;

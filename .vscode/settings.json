@@ -59,7 +59,8 @@
         "tuple": "cpp",
         "type_traits": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "algorithm": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

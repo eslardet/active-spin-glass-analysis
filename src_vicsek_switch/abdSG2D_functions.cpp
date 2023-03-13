@@ -325,14 +325,14 @@ void initializeSwitch(void)
     double KK;
 
     // Initialize the coupling array
-    switch(couplingMode)
+    switch(couplingModeNew)
     {
         case 'C' : // Constant coupling
             for(int i=0 ; i<nPart ; i++){
                 K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
-                    K[i][j] = K0; 
-                    K[j][i] = K0; 
+                    K[i][j] = K0_new; 
+                    K[j][i] = K0_new; 
                 }
             }
             break;
@@ -341,7 +341,7 @@ void initializeSwitch(void)
             for(int i=0 ; i<nPart ; i++){
                 K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
-                    KK = KAVG + STDK*normDist(rnd_gen);
+                    KK = KAVG_new + STDK_new*normDist(rnd_gen);
                     K[i][j] = KK;
                     K[j][i] = KK;
                 }
@@ -350,14 +350,12 @@ void initializeSwitch(void)
     }
 
     if (saveCouplingNew) {
-        couplingFile.open("coupling_new",ios::out);
-        if(couplingFile.fail())
+        couplingNewFile.open("coupling_new",ios::out);
+        if(couplingNewFile.fail())
         {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-        couplingFile.precision(4);
-        saveCouplings(K,couplingFile);
-        couplingFile.close();
-    }
-    break;
+        couplingNewFile.precision(4);
+        saveCouplings(K,couplingNewFile);
+        couplingNewFile.close();
     }
 }
 

@@ -273,10 +273,17 @@ def animate(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None):
     
     fig, ax = plt.subplots(figsize=(5*xTy,5))
 
+    norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
+    plt.set_cmap('hsv')
+
+    # mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
+    # plt.colorbar(mappable=mapper, ax=ax)
+
     x = pbc_wrap(x_all[0],Lx)
     y = pbc_wrap(y_all[0],Ly)
     theta = theta_all[0]
-    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta))
+    cols = np.mod(theta, 2*np.pi)
+    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta), norm(cols))
 
     def init():
         ax.set_xlim(0, Lx)
@@ -288,7 +295,8 @@ def animate(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None):
         y = pbc_wrap(y_all[n],Ly)
         theta = theta_all[n]
         arrows.set_offsets(np.c_[x, y])
-        arrows.set_UVC(np.cos(theta), np.sin(theta))
+        cols = np.mod(theta, 2*np.pi)
+        arrows.set_UVC(np.cos(theta), np.sin(theta), norm(cols))
         ax.set_title("t = " + str(round(n*DT+startT+min_T, 1)), fontsize=10, loc='left')
         
         return arrows,

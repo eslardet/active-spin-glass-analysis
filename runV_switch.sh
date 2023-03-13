@@ -10,30 +10,30 @@
 # Directories #
 ###############
 
-# bin_dir=$HOME/bin
-bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
+bin_dir=$HOME/bin
+# bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 
 ##############
 # Parameters #
 ##############
 
-nPart=100
-phi=1.0
-noise=0.60
+nPart=$1
+phi=$2
+noise=$3
 
-seed=1
+seed=$4
 
-vp=1.0
+vp=$5
 
 Rp=1.0
-xTy=5.0
+xTy=$6
 
 initMode='R'
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='C'
+couplingMode=$7
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -41,45 +41,45 @@ couplingMode='C'
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
 
-K0=1.0
+K0=$8
 
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
 
-KAVG=0.0
-STDK=1.0
+# KAVG=$8
+# STDK=$9
 
-couplingModeNew='G'
+couplingModeNew=$9
 # can be:
 #    'C' constant, 
 #    'G' for Gaussian distribution
 
 # K0_new=1.0
 
-KAVG_new=1.0
-STDK_new=10.0
+KAVG_new=${10}
+STDK_new=${11}
 
-dT=0.005
-DT=1
-DTex=1
-eqT=0
-switchT=5
-simulT=10
+dT=${12}
+DT=${13}
+DTex=${14}
+eqT=${15}
+switchT=${16}
+simulT=${17}
 
 savePos=1
 saveForce=0
 saveCoupling=0 # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 saveCouplingNew=0
 
-intMethod='E'
+intMethod=${18}
 
 # Local
 if [ "${couplingMode}" == "C" ]; then
     if [ "${couplingModeNew}" == "C" ]; then
-        run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Switch_CC/N${nPart}/phi${phi}_n${noise}/K${K0}/Knew${K0_new}/xTy${xTy}/s${seed}
+        run_dir=$HOME/Vicsek_2D/simulation_data/Switch_CC/N${nPart}/phi${phi}_n${noise}/K${K0}/Knew${K0_new}/xTy${xTy}/s${seed}
     elif [ "${couplingModeNew}" == "G" ]; then
-        run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Switch_CG/N${nPart}/phi${phi}_n${noise}/K${K0}/Knew${KAVG_new}_${STDK_new}/xTy${xTy}/s${seed}
+        run_dir=$HOME/Vicsek_2D/simulation_data/Switch_CG/N${nPart}/phi${phi}_n${noise}/K${K0}/Knew${KAVG_new}_${STDK_new}/xTy${xTy}/s${seed}
     fi
 fi
 
