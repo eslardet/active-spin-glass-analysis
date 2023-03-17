@@ -1,0 +1,55 @@
+##PBS -m abe
+#PBS -N V2D_G_Kstd_6-8
+#PBS -q standard
+#PBS -t 0-29
+
+#PBS -o output/$PBS_JOBNAME.o$PBS_JOBID
+#PBS -e output/$PBS_JOBNAME.e$PBS_JOBID
+
+num_s=10
+
+mode="G"
+intMethod="E"
+
+N=10000
+
+
+##phi_arr=($(seq 0.1 0.1 2.0))
+##phi=${phi_arr[$(($PBS_ARRAYID / $num_s))]}
+phi=1.0
+
+vp=1.0
+
+noise_arr=($(seq 0.10 0.05 1.00))
+##noise=${noise_arr[$(($PBS_ARRAYID / $num_s))]}
+noise=0.60
+
+seed_arr=($(seq 11 1 20))
+seed=${seed_arr[$(($PBS_ARRAYID % $num_s))]}
+##seed=21
+
+K_arr=($(seq 0.0 0.1 1.0))
+##K_arr=(0.5 0.8 1.0 1.2 1.5 1.8)
+##K_AVG=${K_arr[$(($PBS_ARRAYID / $num_s))]}
+K_AVG=1.0
+
+
+K_std_arr=(6.0 7.0 8.0)
+K_STD=${K_std_arr[$(($PBS_ARRAYID / $num_s))]}
+##K_STD=8.0
+
+xTy=5.0
+
+dt=0.005
+DT=1.0
+DTex=1000.0
+eqT=2000.0
+simulT=1000.0
+
+cd $PBS_O_WORKDIR
+
+bash runV.sh $N $phi $noise $seed $vp $xTy $mode $K_AVG $K_STD $dt $DT $DTex $eqT $simulT $intMethod
+
+cd $PBS_O_WORKDIR/analysis
+python3 main_stats.py $mode $N $phi $noise $K_AVG $K_STD $xTy $seed $simulT
+##python3 main.py $mode $N $phi $noise $K_AVG $K_STD $xTy $seed $simulT

@@ -53,23 +53,24 @@ def get_params(inparFile):
     inpar_dict["phi"] = float(r[1][0])
     inpar_dict["seed"] = int(r[2][0])
     inpar_dict["noise"] = r[3][0]
-    inpar_dict["vp"] = float(r[4][0])
-    inpar_dict["Rp"] = float(r[5][0])
-    inpar_dict["xTy"] = float(r[6][0])
-    inpar_dict["mode"] = r[8][0]
+    inpar_dict["vp"] = float(r[5][0])
+    inpar_dict["Rp"] = float(r[7][0])
+    inpar_dict["xTy"] = float(r[8][0])
+    inpar_dict["mode"] = r[10][0]
+    inpar_dict["repulsion"] = r[-1][0]
     
     if inpar_dict["mode"] == 'C':
-        inpar_dict["DT"] = float(r[11][0])
-        inpar_dict["eqT"] = float(r[13][0])
-        inpar_dict["simulT"] = float(r[14][0])
-    elif inpar_dict["mode"] == 'T':
         inpar_dict["DT"] = float(r[13][0])
         inpar_dict["eqT"] = float(r[15][0])
         inpar_dict["simulT"] = float(r[16][0])
+    elif inpar_dict["mode"] == 'T':
+        inpar_dict["DT"] = float(r[15][0])
+        inpar_dict["eqT"] = float(r[17][0])
+        inpar_dict["simulT"] = float(r[18][0])
     else:
-        inpar_dict["DT"] = float(r[12][0])
-        inpar_dict["eqT"] = float(r[14][0])
-        inpar_dict["simulT"] = float(r[15][0])
+        inpar_dict["DT"] = float(r[14][0])
+        inpar_dict["eqT"] = float(r[16][0])
+        inpar_dict["simulT"] = float(r[17][0])
     return inpar_dict
 
 def pbc_wrap(x, L):
@@ -192,7 +193,9 @@ def snapshot(mode, nPart, phi, noise, K, xTy, seed, view_time=None, pos_ex=False
     xTy = inpar_dict["xTy"]
     simulT = inpar_dict["simulT"]
 
-    L = np.sqrt(nPart / (phi*xTy))
+    beta = 2**(1/6)
+
+    L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
     Ly = L
     Lx = L*xTy
 
@@ -213,14 +216,18 @@ def snapshot(mode, nPart, phi, noise, K, xTy, seed, view_time=None, pos_ex=False
 
     norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
     mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
-    cols = mapper.to_rgba(np.mod(theta, 2*np.pi))
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
+
+    diameter = (ax.get_window_extent().height * 72/fig.dpi) /L * beta
     
     if show_color == True:
-        ax.quiver(x, y, u, v, color=cols)
+        for i in range(nPart):
+            color = mapper.to_rgba(theta[i]%(2*np.pi))
+            ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
         plt.colorbar(mappable=mapper, ax=ax)
     else:
+        ax.plot(x, y, 'o', ms=diameter)
         ax.quiver(x, y, u, v)
     ax.set_xlim(0,Lx)
     ax.set_ylim(0,Ly)
@@ -231,7 +238,7 @@ def snapshot(mode, nPart, phi, noise, K, xTy, seed, view_time=None, pos_ex=False
         folder = get_sim_dir(mode, nPart, phi, noise, K, xTy, seed)
         filename = 'snapshot.png'
     else:
-        folder = os.path.abspath('../snapshots_vicsek')
+        folder = os.path.abspath('../snapshots')
         filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -255,6 +262,7 @@ def animate(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None):
     DT = inpar_dict["DT"]
     seed = inpar_dict["seed"]
     xTy = inpar_dict["xTy"]
+    repulsion = inpar_dict["repulsion"]
 
     if min_T == None:
         min_T = 0
@@ -266,15 +274,25 @@ def animate(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None):
     plt.rcParams["animation.html"] = "jshtml"
     plt.ioff()
     plt.rcParams['animation.embed_limit'] = 2**128
-
-    L = np.sqrt(nPart / (phi*xTy))
-    Ly = L
-    Lx = L*xTy
     
     fig, ax = plt.subplots(figsize=(5*xTy,5))
 
-    norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
-    plt.set_cmap('hsv')
+    if repulsion == 'W':
+        beta = 2**(1/6)
+    if repulsion == 'H':
+        beta = 2
+    if repulsion == 'C':
+        beta = 1
+    else:
+        beta = 2**(1/6)
+    L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
+    Ly = L
+    Lx = L*xTy
+    
+    diameter = (ax.get_window_extent().height * 72/fig.dpi) /L * beta
+
+    # norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
+    # plt.set_cmap('hsv')
 
     # mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
     # plt.colorbar(mappable=mapper, ax=ax)
@@ -282,28 +300,30 @@ def animate(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None):
     x = pbc_wrap(x_all[0],Lx)
     y = pbc_wrap(y_all[0],Ly)
     theta = theta_all[0]
-    cols = np.mod(theta, 2*np.pi)
-    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta), norm(cols))
+    # cols = np.mod(theta, 2*np.pi)
+    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta))
+    points, = plt.plot([], [], 'o', ms=diameter, zorder=1)
 
     def init():
         ax.set_xlim(0, Lx)
         ax.set_ylim(0, Ly)
-        return arrows,
+        return arrows, points
 
     def update(n):
         x = pbc_wrap(x_all[n],Lx)
         y = pbc_wrap(y_all[n],Ly)
         theta = theta_all[n]
+        # cols = np.mod(theta, 2*np.pi)
+        points.set_data(x, y)
         arrows.set_offsets(np.c_[x, y])
-        cols = np.mod(theta, 2*np.pi)
-        arrows.set_UVC(np.cos(theta), np.sin(theta), norm(cols))
+        arrows.set_UVC(np.cos(theta), np.sin(theta))
         ax.set_title("t = " + str(round(n*DT+startT+min_T, 1)), fontsize=10, loc='left')
         
-        return arrows,
+        return arrows, points
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=10, blit=True)
 
-    folder = os.path.abspath('../animations_vicsek')
+    folder = os.path.abspath('../animations')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -548,24 +568,44 @@ def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, xT
     for noise in noise_range:
         for K_std in K_std_range:
             p_ss = []
-            error_count = 0
             for K_avg in K_avg_range:
                 K = str(K_avg) + "_" + str(K_std)
                 p_ss_sum = 0
+                error_count = 0
                 for seed in seed_range:
-                    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-                    if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                    # sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                    # if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                        # print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
+                        # error_count += 1
+                        # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                    try:
+                        p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
+                        if p_mean > 1.0:
+                            print("p_mean is bigger than 1!!")
+                            print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
+                            error_count += 1
+                        elif p_mean < 0.0:
+                            print("p_mean is smaller than 0!!")
+                            print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
+                            error_count += 1                            
+                        else:
+                            p_ss_sum += p_mean
+                    except:
+                        print("No stats file to read")
                         print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
                         error_count += 1
-                        # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-                    p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
+                p_ss_av = p_ss_sum/(len(seed_range)-error_count)
+                if p_ss_av > 1.0:
+                    print("Average is greater than 1!")
+                    print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
+                    print(p_ss_sum, len(seed_range), error_count)
                 p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
             ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise))
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
-    ax.set_xlim([-1,2])
+    # ax.set_xlim([-1,2])
     ax.legend()
 
     folder = os.path.abspath('../plots/p_order_vs_Kavg/')
@@ -1018,67 +1058,3 @@ def plot_var_density_Kavg(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-
-
-def critical_value_kavg(mode, nPart, phi, noise, K_avg_range, K_std, xTy, seed_range, cutoff):
-    """
-    Find where the plot crosses the horizontal line at a cutoff value to extract the critical value of KAVG
-    """
-    p_ss = []
-    for K_avg in K_avg_range:
-        p_ss_sum = 0
-        count_err = 0
-        for seed in seed_range:
-            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=str(K_avg)+'_'+str(K_std), xTy=xTy, seed=seed)
-            if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                try:
-                    write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=str(K_avg)+'_'+str(K_std), xTy=xTy, seed=seed)
-                except:
-                    print(nPart, K_avg, K_std, seed)
-                    count_err += 1
-            try:
-                p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=str(K_avg) + "_" + str(K_std), xTy=xTy, seed=seed)["p_mean"]
-            except:
-                print("error")
-        p_ss.append(p_ss_sum/(len(seed_range) - count_err))
-    for i in range(len(p_ss)):
-        if p_ss[i] > cutoff: # For a strictly increasing function
-            break
-
-    # Midpoint method
-    # KAVG_crit = (KAVG_range[i] + KAVG_range[i-1])/2
-
-    # Equation of line method (more accurate)
-    grad = (p_ss[i]-p_ss[i-1])/(K_avg_range[i]-K_avg_range[i-1])
-    intercept = p_ss[i] - grad*K_avg_range[i]
-
-    KAVG_crit = (cutoff-intercept)/grad
-    
-    return KAVG_crit
-
-
-def plot_kcrit_kstd(mode, nPart, phi, noise_range, K_avg_range, K_std_range, xTy, seed_range, cutoff=0.3):
-    """
-    Plot Kavg critical value against Kstd
-    """
-    fig, ax = plt.subplots()
-
-    for noise in noise_range:
-        K_crit_list = []
-
-        for K_std in K_std_range:
-            K_crit = critical_value_kavg(mode, nPart, phi, noise, K_avg_range, K_std, xTy, seed_range, cutoff)
-            K_crit_list.append(K_crit)
-            print(K_crit)
-
-        ax.plot(K_std_range, K_crit_list, '-o', label=r"$\eta = $" + str(noise))
-    
-    ax.set_xlabel(r"$K_{STD}$")
-    ax.set_ylabel(r"$K_{AVG}^C$")
-    ax.legend()
-
-    folder = os.path.abspath('../plots/Kavg_crit_vs_Kstd/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_xTy' + str(xTy) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
