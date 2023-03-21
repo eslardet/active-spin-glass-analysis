@@ -295,3 +295,176 @@ def animate(mode, nPart, phi, noise, K, K_new, xTy, seed, min_T=None, max_T=None
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))
 
+
+def plot_density_profile(mode, nPart, phi, noise, K, K_new, xTy, seed, min_grid_size=2):
+    """
+    Plot x-directional density profile for the final snapshot
+    """
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, K_new=K_new, xTy=xTy, seed=seed, file_name='pos_exact')
+    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    x = pbc_wrap(x,Lx)
+
+    ngrid_x = int(Lx // min_grid_size)
+    grid_size_x = Lx / ngrid_x
+
+    grid_area = grid_size_x*Ly
+
+    grid_counts = np.zeros(ngrid_x)
+
+    for i in range(nPart):
+        gridx = int(x[i]//grid_size_x)
+        grid_counts[gridx] += 1
+    n_density = grid_counts / grid_area
+
+    fig, ax = plt.subplots()
+    x_vals = np.arange(0, Lx, grid_size_x)
+    ax.plot(x_vals, n_density)
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(r"Local density")
+
+    folder = os.path.abspath('../plots/density_profile/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Knew' + str(K_new) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+
+def get_average_band_profile(mode, nPart, phi, noise, K, K_new, xTy, seed_range, timestep_range, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
+    """
+    Get x-directional density profile averaged over timesteps and/or seeds
+    """
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    ngrid_x = int(Lx // min_grid_size)
+    grid_size_x = Lx / ngrid_x
+    grid_area = grid_size_x*Ly
+
+    x_vals = np.arange(0, Lx, grid_size_x)
+
+    extra_left = int(len(x_vals) / 10)
+    extra_right = int(len(x_vals) / 10)
+    total_len = extra_left + extra_right
+
+    x_plot = x_vals[:total_len]
+    d_plot_av = np.zeros(total_len)
+
+    no_band = 0
+
+    for seed in seed_range:
+        # posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+        # x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+        inparFile, posFile = get_files(mode, nPart, phi, noise, K, K_new, xTy, seed)
+
+        for timestep in timestep_range:
+
+            x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+            x = pbc_wrap(x,Lx)
+
+            grid_counts = np.zeros(ngrid_x)
+            for i in range(nPart):
+                gridx = int(x[i]//grid_size_x)
+                grid_counts[gridx] += 1
+            n_density = grid_counts / grid_area
+
+            if n_density[0] > cutoff:
+                in_band = 1
+            else:
+                in_band = 0
+
+            band_start = []
+            band_end = []
+            for i, val in enumerate(n_density):
+                if in_band == 0:
+                    if val > cutoff:
+                        in_band = 1
+                        band_start.append(i)
+                elif in_band == 1:
+                    if val < cutoff:
+                        in_band = 0
+                        band_end.append(i)
+        
+            if len(band_start) != len(band_end):
+                band_end.append(len(x_vals)-1)
+                # raise Exception("Unequal band starts/ ends at seed " + str(seed))
+            band_number = len(band_start)
+            if band_number == 0:
+                no_band += 1
+                print("No band at seed " + str(seed))
+                continue
+
+            # Handle the case where band is on boundary
+            if band_end[0] < band_start[0]:
+                band_start.insert(0, band_start.pop(-1))
+
+            # Reclassify based on peak value
+            band_peak = []
+            # band_start_new = band_start
+            # band_end_new = band_end
+            for i in range(band_number):
+                if band_start[i] < band_end[i]:
+                    band_vals = n_density[band_start[i]:band_end[i]]
+                else: ## case where band is on boundary
+                    band_vals = np.concatenate((n_density[band_start[i]:], n_density[:band_end[i]]))
+                peak = np.max(band_vals)
+                peak_id = band_vals.argmax()
+                if peak > peak_cutoff:
+                    band_peak.append(band_start[i]+peak_id)
+                # else: ## if need start and end of bands
+                    # band_start_new.pop(i)
+                    # band_end_new.pop(i)
+
+            band_number = len(band_peak)
+            if band_number == 0:
+                no_band += 1
+                print("No band above peak cutoff at seed " + str(seed))
+                continue
+
+            d_plot = np.zeros(total_len)
+            for i in range(band_number):
+                if band_peak[i] + extra_right > len(x_vals):
+                    d_plot += np.concatenate((n_density[band_peak[i]-extra_left:], n_density[:band_peak[i]+extra_right-len(x_vals)]))
+                elif band_peak[i] - extra_left < 0:
+                    d_plot += np.concatenate((n_density[band_peak[i]-extra_left+len(x_vals):], n_density[:band_peak[i]+extra_right]))
+                else:
+                    d_plot += n_density[band_peak[i]-extra_left:band_peak[i]+extra_right]
+            # for i in range(band_number):
+            #     if band_start[i] + extra_right > len(x_vals):
+            #         d_plot += np.concatenate((n_density[band_start[i]-extra_left:], n_density[:band_start[i]+extra_right-len(x_vals)]))
+            #     elif band_start[i] - extra_left < 0:
+            #         d_plot += np.concatenate((n_density[band_start[i]-extra_left+len(x_vals):], n_density[:band_start[i]+extra_right]))
+            #     else:
+            #         d_plot += n_density[band_start[i]-extra_left:band_start[i]+extra_right]
+            d_plot_av += d_plot/band_number
+    d_plot_av = d_plot_av/(len(seed_range)*len(timestep_range)-no_band)
+
+    return x_plot, d_plot_av
+
+def plot_average_band_profile(mode, nPart, phi, noise, K, K_new, xTy, seed_range, timestep_range, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
+    """
+    Plot x-directional density profile shifted to the origin averaged over timesteps and/or seeds
+    """
+
+    fig, ax = plt.subplots()
+
+    x_plot, d_plot_av = get_average_band_profile(mode, nPart, phi, noise, K, K_new, xTy, seed_range, timestep_range, min_grid_size, cutoff, peak_cutoff)
+
+    ax.plot(x_plot, d_plot_av)
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(r"Average local density")
+    ax.set_title(r"Average band: $\rho=$" + str(phi) + r"$, \eta=$" + str(noise) + r"$, K=$" + str(K))
+
+    folder = os.path.abspath('../plots/density_profile_shifted/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Knew' + str(K_new) + '_xTy' + str(xTy) + '_av.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))

@@ -1075,22 +1075,14 @@ def critical_value_kavg(mode, nPart, phi, noise, K_avg_range, K_std, xTy, seed_r
         p_ss_sum = 0
         count_err = 0
         for seed in seed_range:
-            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=str(K_avg)+'_'+str(K_std), xTy=xTy, seed=seed)
-            if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                print("No stats!")
-                print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
-                count_err += 1
-            else:
-            # try:
+            # sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=str(K_avg)+'_'+str(K_std), xTy=xTy, seed=seed)
+            try:
                 p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=str(K_avg) + "_" + str(K_std), xTy=xTy, seed=seed)["p_mean"]
-                if np.isnan(p_mean):
-                    count_err += 1
-                else:
-                    p_ss_sum += p_mean
-            # except:
-            #     print("No stats!")
-            #     print(nPart, K_avg, K_std, seed)
-            #     count_err += 1
+                p_ss_sum += p_mean
+            except:
+                print("No stats!")
+                print(nPart, K_avg, K_std, seed)
+                count_err += 1
         p_ss.append(p_ss_sum/(len(seed_range) - count_err))
     for i in range(len(p_ss)):
         if p_ss[i] > cutoff: # For a strictly increasing function

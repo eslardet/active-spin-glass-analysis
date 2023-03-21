@@ -558,7 +558,8 @@ def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, xT
                         print(mode, nPart, phi, noise, K_avg, K_std, xTy, seed)
                         error_count += 1
                         # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-                    p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
+                    else:
+                        p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
                 p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
             ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise))
@@ -703,7 +704,7 @@ def plot_density_profile(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2)
     plt.savefig(os.path.join(folder, filename))
 
 
-def get_band_profiles(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
+def plot_band_profiles(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
     """
     Plot x-directional density profile for the final snapshot shifted to the origin
     """
@@ -801,7 +802,9 @@ def get_band_profiles(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, cu
     plt.savefig(os.path.join(folder, filename))
 
 
-def get_average_band_profile(mode, nPart, phi, noise, K, xTy, seed_range, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
+## TO DO: Make this be a time average
+## Would need to perform before deleting pos file
+def plot_average_band_profile(mode, nPart, phi, noise, K, xTy, seed_range, timestep_range, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
     """
     Plot x-directional density profile for the final snapshot shifted to the origin
     """
@@ -828,80 +831,85 @@ def get_average_band_profile(mode, nPart, phi, noise, K, xTy, seed_range, min_gr
     no_band = 0
 
     for seed in seed_range:
-        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
-        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+        # posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+        # x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
 
-        x = pbc_wrap(x,Lx)
+        inparFile, posFile = get_files(mode, nPart, phi, noise, K, xTy, seed)
 
-        grid_counts = np.zeros(ngrid_x)
-        for i in range(nPart):
-            gridx = int(x[i]//grid_size_x)
-            grid_counts[gridx] += 1
-        n_density = grid_counts / grid_area
+        for timestep in timestep_range:
 
-        if n_density[0] > cutoff:
-            in_band = 1
-        else:
-            in_band = 0
+            x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+            x = pbc_wrap(x,Lx)
 
-        band_start = []
-        band_end = []
-        for i, val in enumerate(n_density):
-            if in_band == 0:
-                if val > cutoff:
-                    in_band = 1
-                    band_start.append(i)
-            elif in_band == 1:
-                if val < cutoff:
-                    in_band = 0
-                    band_end.append(i)
-    
-        if len(band_start) != len(band_end):
-            band_end.append(len(x_vals)-1)
-            # raise Exception("Unequal band starts/ ends at seed " + str(seed))
-        band_number = len(band_start)
-        if band_number == 0:
-            no_band += 1
-            print("No band at seed " + str(seed))
-            continue
+            grid_counts = np.zeros(ngrid_x)
+            for i in range(nPart):
+                gridx = int(x[i]//grid_size_x)
+                grid_counts[gridx] += 1
+            n_density = grid_counts / grid_area
 
-        # Handle the case where band is on boundary
-        if band_end[0] < band_start[0]:
-            band_start.insert(0, band_start.pop(-1))
-
-        # Reclassify based on peak value
-        band_peak = []
-        # band_start_new = band_start
-        # band_end_new = band_end
-        for i in range(band_number):
-            if band_start[i] < band_end[i]:
-                band_vals = n_density[band_start[i]:band_end[i]]
-            else: ## case where band is on boundary
-                band_vals = np.concatenate((n_density[band_start[i]:], n_density[:band_end[i]]))
-            peak = np.max(band_vals)
-            peak_id = band_vals.argmax()
-            if peak > peak_cutoff:
-                band_peak.append(band_start[i]+peak_id)
-            # else: ## if need start and end of bands
-                # band_start_new.pop(i)
-                # band_end_new.pop(i)
-
-        band_number = len(band_peak)
-        if band_number == 0:
-            no_band += 1
-            print("No band above peak cutoff at seed " + str(seed))
-            continue
-
-        d_plot = np.zeros(total_len)
-        for i in range(band_number):
-            if band_peak[i] + extra_right > len(x_vals):
-                d_plot += np.concatenate((n_density[band_peak[i]-extra_left:], n_density[:band_peak[i]+extra_right-len(x_vals)]))
-            elif band_peak[i] - extra_left < 0:
-                d_plot += np.concatenate((n_density[band_peak[i]-extra_left+len(x_vals):], n_density[:band_peak[i]+extra_right]))
+            if n_density[0] > cutoff:
+                in_band = 1
             else:
-                d_plot += n_density[band_peak[i]-extra_left:band_peak[i]+extra_right]
-        d_plot_av += d_plot/band_number
-    d_plot_av = d_plot_av/(len(seed_range)-no_band)
+                in_band = 0
+
+            band_start = []
+            band_end = []
+            for i, val in enumerate(n_density):
+                if in_band == 0:
+                    if val > cutoff:
+                        in_band = 1
+                        band_start.append(i)
+                elif in_band == 1:
+                    if val < cutoff:
+                        in_band = 0
+                        band_end.append(i)
+        
+            if len(band_start) != len(band_end):
+                band_end.append(len(x_vals)-1)
+                # raise Exception("Unequal band starts/ ends at seed " + str(seed))
+            band_number = len(band_start)
+            if band_number == 0:
+                no_band += 1
+                print("No band at seed " + str(seed))
+                continue
+
+            # Handle the case where band is on boundary
+            if band_end[0] < band_start[0]:
+                band_start.insert(0, band_start.pop(-1))
+
+            # Reclassify based on peak value
+            band_peak = []
+            # band_start_new = band_start
+            # band_end_new = band_end
+            for i in range(band_number):
+                if band_start[i] < band_end[i]:
+                    band_vals = n_density[band_start[i]:band_end[i]]
+                else: ## case where band is on boundary
+                    band_vals = np.concatenate((n_density[band_start[i]:], n_density[:band_end[i]]))
+                peak = np.max(band_vals)
+                peak_id = band_vals.argmax()
+                if peak > peak_cutoff:
+                    band_peak.append(band_start[i]+peak_id)
+                # else: ## if need start and end of bands
+                    # band_start_new.pop(i)
+                    # band_end_new.pop(i)
+
+            band_number = len(band_peak)
+            if band_number == 0:
+                no_band += 1
+                print("No band above peak cutoff at seed " + str(seed))
+                continue
+
+            d_plot = np.zeros(total_len)
+            for i in range(band_number):
+                if band_peak[i] + extra_right > len(x_vals):
+                    d_plot += np.concatenate((n_density[band_peak[i]-extra_left:], n_density[:band_peak[i]+extra_right-len(x_vals)]))
+                elif band_peak[i] - extra_left < 0:
+                    d_plot += np.concatenate((n_density[band_peak[i]-extra_left+len(x_vals):], n_density[:band_peak[i]+extra_right]))
+                else:
+                    d_plot += n_density[band_peak[i]-extra_left:band_peak[i]+extra_right]
+            d_plot_av += d_plot/band_number
+    d_plot_av = d_plot_av/(len(seed_range)*len(timestep_range)-no_band)
 
     ax.plot(x_plot, d_plot_av)
     ax.set_xlabel(r"$x$")
@@ -913,6 +921,49 @@ def get_average_band_profile(mode, nPart, phi, noise, K, xTy, seed_range, min_gr
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+
+def local_density_var(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
+    """
+    Calculate the variance in the local densities of smaller grids from the final snapshot
+    """
+    if pos_ex == True:
+        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+    else: 
+        inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+        inpar_dict = get_params(inparFile)
+        DT = inpar_dict["DT"]
+        simulT = inpar_dict["simulT"]
+        eqT = inpar_dict["eqT"]
+        if timestep == None:
+            timestep = int((simulT-eqT)/DT) 
+        x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    x = pbc_wrap(x,Lx)
+    y = pbc_wrap(y,Ly)
+
+    ngrid_x = int(Lx // min_grid_size)
+    grid_size_x = Lx / ngrid_x
+    ngrid_y = int(Ly // min_grid_size)
+    grid_size_y = Ly / ngrid_y
+
+    grid_area = grid_size_x*grid_size_y
+
+    grid_counts = np.zeros((ngrid_x, ngrid_y))
+
+    for i in range(nPart):
+        gridx = int(x[i]//grid_size_x)
+        gridy = int(y[i]//grid_size_y)
+        grid_counts[gridx,gridy] += 1
+    n_density = grid_counts / grid_area
+
+    var_density = np.std(n_density)**2
+
+    return var_density
 
 def local_density_var(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
     """
