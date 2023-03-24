@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import cm, colors
 from decimal import Decimal
+import freud
 
 import csv
 import os
@@ -566,7 +567,7 @@ def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, xT
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
-    ax.set_xlim([-1,2])
+    # ax.set_xlim([-1,2])
     ax.legend()
 
     folder = os.path.abspath('../plots/p_order_vs_Kavg/')
@@ -1130,6 +1131,61 @@ def plot_kcrit_kstd(mode, nPart, phi, noise_range, K_avg_range, K_std_range, xTy
 
     folder = os.path.abspath('../plots/Kavg_crit_vs_Kstd/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+def plot_correlation(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, seed_range, timestep_range, pos_ex=False):
+    """
+    Plot equal time 2-point correlation function, averaged over time and seeds
+    """
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    r_max = Ly / 2.01
+
+    fig, ax = plt.subplots()
+
+    for K_avg in K_avg_range:
+        for K_std in K_std_range:
+            cf = freud.density.CorrelationFunction(bins=25, r_max=r_max)
+            K = str(K_avg) + "_" + str(K_std)
+            for seed in seed_range:
+
+                if pos_ex == True:
+                    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name="pos_exact")
+                else:
+                    inparFile, posFile = get_files(mode, nPart, phi, noise, K, xTy, seed)
+
+                for t in timestep_range:
+                    if pos_ex == True:
+                        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+                    else:
+                        x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
+
+                    points = np.zeros((nPart, 3))
+                    points[:,0] = x
+                    points[:,1] = y
+                    box = freud.Box.from_box([Lx, Ly])
+                    points = box.wrap(points)
+
+                    theta = np.array(theta)
+                    values = np.array(np.exp(theta * 1j))
+
+                    cf.compute(system=(box, points), values=values, query_points=points, query_values=values, reset=False)
+
+            ax.plot(cf.bin_centers, cf.correlation, label=r"$K_{AVG}=$" + str(K_avg) + r"$; K_{STD}=$" + str(K_std))
+
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C(r)$")
+    ax.hlines(y=0, xmin=0, xmax=r_max, color="grey", linestyle="dashed")
+    # ax.set_ylim([0,1])
+    ax.legend()
+
+    folder = os.path.abspath('../plots/correlation/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_xTy' + str(xTy) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))

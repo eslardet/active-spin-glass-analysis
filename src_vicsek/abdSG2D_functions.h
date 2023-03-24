@@ -19,7 +19,7 @@ extern std::fstream initposFile,logFile,couplingFile, posExactFile;
 extern int nPart;
 extern unsigned int seed;
 extern double phi,noise,vp;
-extern bool saveCoupling;
+extern bool saveCoupling,savePos;
 extern char initMode,couplingMode,intMethod;
 extern double dT,DT,DTex,eqT,simulT,startT;
 extern int Nsimul,Neq,Nskip,Nskipexact;
@@ -135,6 +135,7 @@ void dfHarmonic(std::vector<double>&,std::vector<double>&,std::vector<double>&,s
 void fire(std::vector<double> &px, std::vector<double> &py, const double dT0, const double ftol, 
 		  double &fret, double func(std::vector<double> &,std::vector<double> &), 
 		  void dfunc(std::vector<double> &, std::vector<double> &, std::vector<double> &, std::vector<double> &));
+void finalize(void);
 
 ///////////////////
 // saveInitFrame //

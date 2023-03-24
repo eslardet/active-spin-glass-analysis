@@ -338,10 +338,15 @@ def plot_porder_time(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=No
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
     simulT = inpar_dict["simulT"]
+
+    with open(posFile) as f:
+        reader = csv.reader(f, delimiter="\t")
+        startT = float(list(reader)[6][0])
+
     if min_T == None:
         min_T = 0
     if max_T == None:
-        max_T = simulT
+        max_T = simulT-startT
     
     p_order = []
 
@@ -363,10 +368,11 @@ def plot_porder_time(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=No
             if timestep*DT > max_T:
                 break
     fig, ax = plt.subplots()
-    t_plot = np.arange(0, max_T+DT/4, DT)
+    t_plot = np.arange(0+startT, max_T+startT+DT/4, DT)
     ax.plot(t_plot, p_order)
     ax.set_xlabel("time")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
 
     folder = os.path.abspath('../plots/p_order_vs_time/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
