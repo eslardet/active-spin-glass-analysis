@@ -288,14 +288,14 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                     break;
             }
 
-            if (saveCoupling) {
-                couplingFile.open("coupling",ios::out);
-                if(couplingFile.fail())
-                {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-                couplingFile.precision(4);
-                saveCouplings(K,couplingFile);
-                couplingFile.close();
-            }
+            // if (saveCoupling) {
+            //     couplingFile.open("coupling",ios::out);
+            //     if(couplingFile.fail())
+            //     {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
+            //     couplingFile.precision(4);
+            //     saveCouplings(K,couplingFile);
+            //     couplingFile.close();
+            // }
             break;
 
         case 'S' : // Particles configured starting from previous simulation
@@ -355,6 +355,22 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     }
 }
 
+void finalize(void)
+{
+    if (saveCoupling) {
+    couplingFile.open("coupling",ios::out);
+    if(couplingFile.fail())
+    {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
+    couplingFile.precision(4);
+    saveCouplings(K,couplingFile);
+    cout << '\n' << K[0][1] << '\n'; // remove
+    cout << K[0][2] << '\n';
+    cout << K[0][3] << '\n';
+    cout << K[0][4];
+    couplingFile.close();
+    }
+}
+
 /////////////////////////////
 // initialConditionsRandom //
 /////////////////////////////
@@ -366,11 +382,11 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
 
     startT = 0.0;
 
-    // Open file to write initial conditions
-    initposFile.open("initpos",ios::out);
-    if (initposFile.fail()) 
-    {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
-    initposFile.precision(8);
+    // // Open file to write initial conditions
+    // initposFile.open("initpos",ios::out);
+    // if (initposFile.fail()) 
+    // {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
+    // initposFile.precision(8);
 
     // Calculate size of the box
     L = sqrt(double(nPart)*PI*SQR(beta/2.0)/(phi*xTy));
@@ -398,8 +414,8 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
         p[i] = 2.0*PI*uniDist(rnd_gen); 
     }
 
-    // Save initial conditions
-    saveInitFrame(x,y,p,initposFile);
+    // // Save initial conditions
+    // saveInitFrame(x,y,p,initposFile);
 
     // Initialize lengthscales related to the cell list
     lx = rl; 
@@ -420,9 +436,9 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     U = -1.0;
     fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
 
-    // Save initial conditions
-    saveInitFrame(x,y,p,initposFile);
-    initposFile.close();
+    // // Save initial conditions
+    // saveInitFrame(x,y,p,initposFile);
+    // initposFile.close();
 
     return; 
 }

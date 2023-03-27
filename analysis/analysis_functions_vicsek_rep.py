@@ -20,7 +20,7 @@ def get_sim_dir(mode, nPart, phi, noise, K, xTy, seed):
     elif mode == "F":
         mode_name = "Ferromagnetic"
 
-    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/xTy' + str(xTy) + '/s' + str(seed))
+    sim_dir = os.path.abspath('../simulation_data_v/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/xTy' + str(xTy) + '/s' + str(seed))
 
     return sim_dir
 

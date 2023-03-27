@@ -300,6 +300,9 @@ for (sig=1; sig<=32; sig++)
         }           
     }     
 
+    // Save coupling file if required
+    finalize();
+
 	///////////////////
     // Closing Files //
     ///////////////////
