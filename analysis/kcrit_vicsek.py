@@ -25,18 +25,23 @@ K_std_range = np.arange(1,9,1)
 noise_range = np.round(np.arange(0.2, 0.85, 0.2),2)
 
 
-fig, ax = plt.subplots()
+slope, intercept = np.poly1d(np.polyfit(K_std_range, K_crit[2], 1)).c
+print(slope)
+# fig, ax = plt.subplots()
 
-for i, noise in enumerate(noise_range):
-    ax.plot(K_std_range, K_crit[i], '-o', label=r"$\eta = $" + str(noise))
+# # for i, noise in enumerate(noise_range):
+# #     ax.plot(K_std_range, K_crit[i], '-o', label=r"$\eta = $" + str(noise))
 
-# ax.plot(K_std_range, [-i/14 + 0.1 for i in K_std_range])
-# ax.plot(K_std_range, [-i/14 + 0.3 for i in K_std_range])
-# ax.plot(K_std_range, [-i/18 + 0.6 for i in K_std_range])
-# ax.plot(K_std_range, [-i/20 + 1.1 for i in K_std_range])
+# ax.plot(K_std_range, K_crit[2], '-o', label=r"$\eta=0.60")
 
-ax.set_xlabel(r"$K_{STD}$")
-ax.set_ylabel(r"$K_{AVG}^C$")
-ax.legend()
+# ax.plot(np.unique(K_std_range), np.poly1d(np.polyfit(K_std_range, K_crit[2], 1))(np.unique(K_std_range)), label="Line of best fit")
+# # ax.plot(K_std_range, [-i/14 + 0.1 for i in K_std_range])
+# # ax.plot(K_std_range, [-i/14 + 0.3 for i in K_std_range])
+# # ax.plot(K_std_range, [-i/18 + 0.6 for i in K_std_range])
+# # ax.plot(K_std_range, [-i/20 + 1.1 for i in K_std_range])
 
-plt.show()
+# ax.set_xlabel(r"$K_{STD}$")
+# ax.set_ylabel(r"$K_{AVG}^C$")
+# ax.legend()
+
+# plt.show()

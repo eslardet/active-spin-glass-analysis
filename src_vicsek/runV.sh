@@ -10,30 +10,30 @@
 # Directories #
 ###############
 
-bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
+bin_dir=$HOME/bin
 # matlab_dir=$bd_dir/codes/matlab
 
 ##############
 # Parameters #
 ##############
 
-nPart=100
-phi=1.0
-noise=0.60
+nPart=$1
+phi=$2
+noise=$3
 
-seed=22
+seed=$4
 
-vp=1.0
+vp=$5
 
-Rp=1.0
-xTy=5.0
+Rp=$6
+xTy=$7
 
-initMode='S'
+initMode=$8
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='G'
+couplingMode=$9
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -41,52 +41,38 @@ couplingMode='G'
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
 
-K0=1.0
+K0=${10}
 
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
 
-KAVG=1.0
-STDK=1.0
+KAVG=${10}
+STDK=${11}
 
-dT=0.005
-DT=10.0
-DTex=10.0
-eqT=10.0
-simulT=100.0
+dT=${12}
+DT=${13}
+DTex=${14}
+eqT=${15}
+simulT=${16}
 
-savePos=1
+savePos=${17}
 saveForce=0
-saveCoupling=1
+saveCoupling=${18} # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
-intMethod='E'
+intMethod=${19}
 
-# Local
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D/simulation_data/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/TwoPopulations/N${nPart}/phi${phi}_n${noise}/K${KAA}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D/simulation_data/TwoPopulations/N${nPart}/phi${phi}_n${noise}/K${KAA}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Ferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D/simulation_data/Ferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Antiferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
-
-# # Cluster
-# if [ "${couplingMode}" == "C" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# elif [ "${couplingMode}" == "T" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/TwoPopulations/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# elif [ "${couplingMode}" == "G" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/Gaussian/N${nPart}/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# elif [ "${couplingMode}" == "F" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/Ferromagnetic/N${nPart}/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# elif [ "${couplingMode}" == "A" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/Antiferromagnetic/N${nPart}/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# fi
 
 
 ###################################
@@ -105,26 +91,33 @@ echo "Starting Vicsek 2D run..."
 
 cd $run_dir
 
-# if [ -e "stats" ]; then
-#     rm 'stats'
-
 if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
-    sed -i '' "8s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
+    sed -i "8s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
     if [ "${couplingMode}" == "C" ]; then
-        sed -i '' "14s/.*/${eqT}/" 'inpar'
-        sed -i '' "15s/.*/${simulT}/" 'inpar'
+        sed -i "12s/.*/${DT}/" 'inpar'
+        sed -i "13s/.*/${DTex}/" 'inpar'
+        sed -i "14s/.*/${eqT}/" 'inpar'
+        sed -i "15s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "T" ]; then
-        sed -i '' "16s/.*/${eqT}/" 'inpar'
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
+        sed -i "14s/.*/${DT}/" 'inpar'
+        sed -i "15s/.*/${DTex}/" 'inpar'
+        sed -i "16s/.*/${eqT}/" 'inpar'
+        sed -i "17s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "G" ]; then
-        sed -i '' "15s/.*/${eqT}/" 'inpar'
-        sed -i '' "16s/.*/${simulT}/" 'inpar'
+        sed -i "13s/.*/${DT}/" 'inpar'
+        sed -i "14s/.*/${DTex}/" 'inpar'
+        sed -i "15s/.*/${eqT}/" 'inpar'
+        sed -i "16s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        sed -i '' "15s/.*/${eqT}/" 'inpar'
-        sed -i '' "16s/.*/${simulT}/" 'inpar'
+        sed -i "13s/.*/${DT}/" 'inpar'
+        sed -i "14s/.*/${DTex}/" 'inpar'
+        sed -i "15s/.*/${eqT}/" 'inpar'
+        sed -i "16s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
-        sed -i '' "15s/.*/${eqT}/" 'inpar'
-        sed -i '' "16s/.*/${simulT}/" 'inpar'
+        sed -i "13s/.*/${DT}/" 'inpar'
+        sed -i "14s/.*/${DTex}/" 'inpar'
+        sed -i "15s/.*/${eqT}/" 'inpar'
+        sed -i "16s/.*/${simulT}/" 'inpar'
     fi
 
 else

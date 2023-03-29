@@ -1,84 +1,121 @@
 import numpy as np
 import analysis_functions_vicsek as fun
 import matplotlib.pyplot as plt
-import gzip
-import shutil
 
 
-with open('coupling', 'rb') as f_in, gzip.open('coupling.gz', 'wb') as f_out:
-    shutil.copyfileobj(f_in, f_out)
+# v = np.array([1, 3])
 
-# Lx = 2*np.pi
+# mean_head = np.array([2,0])
 
-# cutoff = 1
-# x_vals = np.linspace(0,Lx,1000)
-# n_density = 2*np.sin(x_vals)+2*np.sin(4*x_vals)
+# unit_vec = mean_head / np.linalg.norm(mean_head)
 
-# # plt.plot(x_vals, n_density)
-# # plt.show()
+# unit_norm = np.array([-unit_vec[1], unit_vec[0]])
 
-# if n_density[0] > 1:
-#     in_band = 1
-# else:
-#     in_band = 0
+# v_perp = np.dot(v, unit_norm) * unit_norm
+# v_par = np.dot(v, unit_vec) * unit_vec
 
-# band_start = []
-# band_end = []
-# for i, val in enumerate(n_density):
-#     if in_band == 0:
-#         if val > cutoff:
-#             in_band = 1
-#             band_start.append(i)
-#     if in_band == 1:
-#         if val < cutoff:
-#             in_band = 0
-#             band_end.append(i)
+# print(v_perp)
 
-# if len(band_start) != len(band_start):
-#     raise Exception("Unequal band starts/ ends")
-# else:
-#     band_number = len(band_start)
+# print(v_par)
 
-# if band_number == 0:
-#     raise Exception("No bands!")
 
-# # Handle the case where band is on boundary
-# if band_end[0] < band_start[0]:
-#     band_start.insert(0, band_start.pop(-1))
+mode = "C"
+nPart = 100
+phi = 0.1
+noise = "0.60"
+K = "1.0"
+xTy=5.0
+seed=1
 
-# # Reclassify based on peak value
-# band_centre = []
-# for i in range(band_number):
-#     if band_start[i] < band_end[i]:
-#         band_vals = n_density[band_start[i]:band_end[i]]
-#     else:
-#         band_vals = np.concatenate((n_density[band_start[i]:], n_density[:band_end[i]]))
-#     peak = np.max(band_vals)
-#     peak_id = band_vals.argmax()
-#     if peak > 2:
-#         band_centre.append(band_start[i]+peak_id)
-#     else:
-#         band_start.pop(i)
-#         band_end.pop(i)
 
-# band_number = len(band_centre)
-# if band_number == 0:
-#     raise Exception("No bands with large enough peak!")
+def get_velocity_fluctuations(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
+    """
+    Get velocity fluctations for each particle
+    """
+    if pos_ex == True:
+        posFileExact = fun.get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+        x, y, theta, view_time = fun.get_pos_ex_snapshot(file=posFileExact)
+    else: 
+        inparFile, posFile = fun.get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+        inpar_dict = fun.get_params(inparFile)
+        DT = inpar_dict["DT"]
+        simulT = inpar_dict["simulT"]
+        eqT = inpar_dict["eqT"]
+        if timestep == None:
+            timestep = int((simulT-eqT)/DT) 
+        x, y, theta = fun.get_pos_snapshot(posFile, nPart, timestep)
 
-# extra_left = int(len(x_vals) / 10)
-# extra_right = int(len(x_vals) / 10)
-# total_len = extra_left + extra_right
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
 
-# fig, ax = plt.subplots()
+    x = fun.pbc_wrap(x,Lx)
+    y = fun.pbc_wrap(y,Ly)
 
-# for i in range(band_number):
-#     if band_centre[i] + extra_right > len(x_vals):
-#         d_plot = np.concatenate((n_density[band_centre[i]-extra_left:], n_density[:band_centre[i]+extra_right-len(x_vals)]))
-#     elif band_centre[i] - extra_left < 0:
-#         d_plot = np.concatenate((n_density[band_centre[i]-extra_left+len(x_vals):], n_density[:band_centre[i]+extra_right]))
-#     else:
-#         d_plot = n_density[band_centre[i]-extra_left:band_centre[i]+extra_right]
-#     x_plot = x_vals[:total_len]
-#     ax.plot(x_plot, d_plot, label="band " + str(i))
-# ax.legend()
-# plt.show()
+    velocity = [np.array([np.cos(p), np.sin(p)]) for p in theta]
+    av_vel = np.mean(velocity, axis=0)
+
+    fluc_vel = [v - av_vel for v in velocity]
+
+    av_unit = av_vel / np.linalg.norm(av_vel)
+    av_norm = np.array([-av_vel[1], av_vel[0]])
+
+    fluc_par = [np.dot(f, av_unit) * av_unit for f in fluc_vel]
+    fluc_perp = [np.dot(f, av_norm) * av_norm for f in fluc_vel]
+
+    ## Next: 
+    # take Fourier transform
+    # compute equal-time spatial correlation function in Fourier space
+    # (Could just do in real space first as Fourier transform stuff has some inconsistencies in the Zhao et al. paper)
+    # Plot!
+
+
+
+def get_velocity_fields(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
+    """
+    Get velocity fields from local averages in small cells
+    """
+    if pos_ex == True:
+        posFileExact = fun.get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+        x, y, theta, view_time = fun.get_pos_ex_snapshot(file=posFileExact)
+    else: 
+        inparFile, posFile = fun.get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+        inpar_dict = fun.get_params(inparFile)
+        DT = inpar_dict["DT"]
+        simulT = inpar_dict["simulT"]
+        eqT = inpar_dict["eqT"]
+        if timestep == None:
+            timestep = int((simulT-eqT)/DT) 
+        x, y, theta = fun.get_pos_snapshot(posFile, nPart, timestep)
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    x = fun.pbc_wrap(x,Lx)
+    y = fun.pbc_wrap(y,Ly)
+
+    ngrid_x = int(Lx // min_grid_size)
+    grid_size_x = Lx / ngrid_x
+    ngrid_y = int(Ly // min_grid_size)
+    grid_size_y = Ly / ngrid_y
+
+    grid_area = grid_size_x*grid_size_y
+
+    grid_counts = np.zeros((ngrid_x, ngrid_y))
+
+    grid_velocities_sum = np.zeros((ngrid_x, ngrid_y))
+
+    for i in range(nPart):
+        gridx = int(x[i]//grid_size_x)
+        gridy = int(y[i]//grid_size_y)
+        grid_counts[gridx,gridy] += 1
+    #     velocity = ??
+    #     grid_velocities_sum[gridx,gridy] += 2
+    # n_density = grid_counts / grid_area
+
+    # var_density = np.std(n_density)**2
+
+    # return var_density
+
+

@@ -7,9 +7,9 @@
 #ifndef abdSG2Dfunctions_h
 #define abdSG2Dfunctions_h
 
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
+// #include <boost/iostreams/filtering_streambuf.hpp>
+// #include <boost/iostreams/copy.hpp>
+// #include <boost/iostreams/filter/gzip.hpp>
 
 ///////////////////////////////
 // Define external variables //

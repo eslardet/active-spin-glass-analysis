@@ -803,8 +803,6 @@ def plot_band_profiles(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, c
     plt.savefig(os.path.join(folder, filename))
 
 
-## TO DO: Make this be a time average
-## Would need to perform before deleting pos file
 def plot_average_band_profile(mode, nPart, phi, noise, K, xTy, seed_range, timestep_range, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
     """
     Plot x-directional density profile for the final snapshot shifted to the origin
@@ -923,48 +921,6 @@ def plot_average_band_profile(mode, nPart, phi, noise, K, xTy, seed_range, times
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def local_density_var(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
-    """
-    Calculate the variance in the local densities of smaller grids from the final snapshot
-    """
-    if pos_ex == True:
-        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
-        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
-    else: 
-        inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-        inpar_dict = get_params(inparFile)
-        DT = inpar_dict["DT"]
-        simulT = inpar_dict["simulT"]
-        eqT = inpar_dict["eqT"]
-        if timestep == None:
-            timestep = int((simulT-eqT)/DT) 
-        x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
-
-    L = np.sqrt(nPart / (phi*xTy))
-    Ly = L
-    Lx = L*xTy
-
-    x = pbc_wrap(x,Lx)
-    y = pbc_wrap(y,Ly)
-
-    ngrid_x = int(Lx // min_grid_size)
-    grid_size_x = Lx / ngrid_x
-    ngrid_y = int(Ly // min_grid_size)
-    grid_size_y = Ly / ngrid_y
-
-    grid_area = grid_size_x*grid_size_y
-
-    grid_counts = np.zeros((ngrid_x, ngrid_y))
-
-    for i in range(nPart):
-        gridx = int(x[i]//grid_size_x)
-        gridy = int(y[i]//grid_size_y)
-        grid_counts[gridx,gridy] += 1
-    n_density = grid_counts / grid_area
-
-    var_density = np.std(n_density)**2
-
-    return var_density
 
 def local_density_var(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
     """
@@ -1101,8 +1057,8 @@ def critical_value_kavg(mode, nPart, phi, noise, K_avg_range, K_std, xTy, seed_r
     # KAVG_crit = (KAVG_range[i] + KAVG_range[i-1])/2
 
     # Equation of line method (more accurate)
-    grad = (p_ss[i]-p_ss[i-1])/(K_avg_range[i]-K_avg_range[i-1])
-    intercept = p_ss[i] - grad*K_avg_range[i]
+    grad = (p_ss[i]-p_ss[i-1])/(float(K_avg_range[i])-float(K_avg_range[i-1]))
+    intercept = p_ss[i] - grad*float(K_avg_range[i])
 
     KAVG_crit = (cutoff-intercept)/grad
     

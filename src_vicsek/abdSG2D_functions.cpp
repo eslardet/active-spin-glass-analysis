@@ -63,7 +63,7 @@ void checkParameters()
             break;
 
         case 'S' : // Starting from previous simulation
-            logFile << "Initializing in mode 'S', strating off from previous simulation" << endl;
+            logFile << "Initializing in mode 'S', starting off from previous simulation" << endl;
             break;
 
         default :
@@ -151,85 +151,85 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     rl = rc+0.5;
     rlsq = rl*rl;
 
-    // initialize particles positions & polarities
-    switch(initMode)
+    // // initialize particles positions & polarities
+    // switch(initMode)
+    // {
+    //     case 'R' : // Particles placed randomly in the box
+    initialConditionsRandom(x,y,p);
+
+    // Allocation of memory
+    allocateSRKmem();
+
+    // Initialize the coupling array
+    switch(couplingMode)
     {
-        case 'R' : // Particles placed randomly in the box
-            initialConditionsRandom(x,y,p);
-
-            // Allocation of memory
-            allocateSRKmem();
-
-            // Initialize the coupling array
-            switch(couplingMode)
-            {
-                case 'C' : // Constant coupling
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            K[i][j] = K0; 
-                            K[j][i] = K0; 
-                        }
-                    }
-                    break;
-
-                case 'T' : // Two-populations
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            if(i<nPart/2.0){
-                                if(j<nPart/2.0){
-                                    K[i][j] = KAA;
-                                    K[j][i] = KAA;
-                                }else{
-                                    K[i][j] = KAB;
-                                    K[j][i] = KAB;
-                                }
-                            }else{
-                                K[i][j] = KBB;
-                                K[j][i] = KBB;
-                            }
-                        }
-                    }
-                    break;
-
-                case 'G' : // Gaussian distributed couplings
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            KK = KAVG + STDK*normDist(rnd_gen);
-                            K[i][j] = KK;
-                            K[j][i] = KK;
-                        }
-                    }
-                    break;
-
-                case 'F' : // Normally distributed ferromagnetic couplings
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            do{
-                                KK = KAVG + STDK*normDist(rnd_gen);    
-                            }while (KK<0.0);
-                            K[i][j] = KK;
-                            K[j][i] = KK;
-                        }
-                    }
-                    break;
-
-                case 'A' : // Normally distributed antiferromagnetic couplings
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            do{
-                                KK = KAVG + STDK*normDist(rnd_gen);    
-                            }while (KK>0.0);
-                            K[i][j] = KK;
-                            K[j][i] = KK;
-                        }
-                    }
-                    break;
+        case 'C' : // Constant coupling
+            for(int i=0 ; i<nPart ; i++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
+                    K[i][j] = K0; 
+                    K[j][i] = K0; 
+                }
             }
+            break;
+
+        case 'T' : // Two-populations
+            for(int i=0 ; i<nPart ; i++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
+                    if(i<nPart/2.0){
+                        if(j<nPart/2.0){
+                            K[i][j] = KAA;
+                            K[j][i] = KAA;
+                        }else{
+                            K[i][j] = KAB;
+                            K[j][i] = KAB;
+                        }
+                    }else{
+                        K[i][j] = KBB;
+                        K[j][i] = KBB;
+                    }
+                }
+            }
+            break;
+
+        case 'G' : // Gaussian distributed couplings
+            for(int i=0 ; i<nPart ; i++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
+                    KK = KAVG + STDK*normDist(rnd_gen);
+                    K[i][j] = KK;
+                    K[j][i] = KK;
+                }
+            }
+            break;
+
+        case 'F' : // Normally distributed ferromagnetic couplings
+            for(int i=0 ; i<nPart ; i++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
+                    do{
+                        KK = KAVG + STDK*normDist(rnd_gen);    
+                    }while (KK<0.0);
+                    K[i][j] = KK;
+                    K[j][i] = KK;
+                }
+            }
+            break;
+
+        case 'A' : // Normally distributed antiferromagnetic couplings
+            for(int i=0 ; i<nPart ; i++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
+                    do{
+                        KK = KAVG + STDK*normDist(rnd_gen);    
+                    }while (KK>0.0);
+                    K[i][j] = KK;
+                    K[j][i] = KK;
+                }
+            }
+            break;
+    }
 
             // if (saveCoupling) {
             //     couplingFile.open("coupling",ios::out);
@@ -239,63 +239,68 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             //     saveCouplings(K,couplingFile);
             //     couplingFile.close();
             // }
-            break;
+            // break;
 
-        case 'S' : // Particles configured starting from previous simulation
-            // initial condition stuff (inc reading pos_exact file and coupling file)
-
-            initialConditionsSim(x,y,p);
-
-            allocateSRKmem();
-
-            // read coupling file (not necessary for constant mode)
-            switch(couplingMode)
-            {
-                case 'C' : // Constant coupling
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            K[i][j] = K0; 
-                            K[j][i] = K0; 
-                        }
-                    }
-                    break;
-
-                case 'T' : // Two-populations
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            if(i<nPart/2.0){
-                                if(j<nPart/2.0){
-                                    K[i][j] = KAA;
-                                    K[j][i] = KAA;
-                                }else{
-                                    K[i][j] = KAB;
-                                    K[j][i] = KAB;
-                                }
-                            }else{
-                                K[i][j] = KBB;
-                                K[j][i] = KBB;
-                            }
-                        }
-                    }
-                    break;
-
-                default : // Other random coupling modes
-                    couplingFile.open("coupling", ios::in);
-                    if(couplingFile.fail())
-                    {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-                    for(int i=0 ; i<nPart ; i++)
-                    {
-                        for(int j=i+1 ; j<nPart ; j++){
-                            couplingFile >> K[i][j];        
-                        }
-                    }
-                    couplingFile.close();
-                    break;
-
-            }
+    if (initMode == 'S') 
+    {
+        initialConditionsSim(x,y,p);
+        allocateSRKmem();
     }
+    //     case 'S' : // Particles configured starting from previous simulation
+    //         // initial condition stuff (inc reading pos_exact file and coupling file)
+
+    //         initialConditionsSim(x,y,p);
+
+    //         allocateSRKmem();
+
+    //         // read coupling file (not necessary for constant mode)
+    //         switch(couplingMode)
+    //         {
+    //             case 'C' : // Constant coupling
+    //                 for(int i=0 ; i<nPart ; i++){
+    //                     K[i][i] = 0.0;
+    //                     for(int j=i+1 ; j<nPart ; j++){
+    //                         K[i][j] = K0; 
+    //                         K[j][i] = K0; 
+    //                     }
+    //                 }
+    //                 break;
+
+    //             case 'T' : // Two-populations
+    //                 for(int i=0 ; i<nPart ; i++){
+    //                     K[i][i] = 0.0;
+    //                     for(int j=i+1 ; j<nPart ; j++){
+    //                         if(i<nPart/2.0){
+    //                             if(j<nPart/2.0){
+    //                                 K[i][j] = KAA;
+    //                                 K[j][i] = KAA;
+    //                             }else{
+    //                                 K[i][j] = KAB;
+    //                                 K[j][i] = KAB;
+    //                             }
+    //                         }else{
+    //                             K[i][j] = KBB;
+    //                             K[j][i] = KBB;
+    //                         }
+    //                     }
+    //                 }
+    //                 break;
+
+    //             default : // Other random coupling modes
+    //                 couplingFile.open("coupling", ios::in);
+    //                 if(couplingFile.fail())
+    //                 {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
+    //                 for(int i=0 ; i<nPart ; i++)
+    //                 {
+    //                     for(int j=i+1 ; j<nPart ; j++){
+    //                         couplingFile >> K[i][j];        
+    //                     }
+    //                 }
+    //                 couplingFile.close();
+    //                 break;
+
+    //         }
+    // }
 }
 
 void finalize(void)
