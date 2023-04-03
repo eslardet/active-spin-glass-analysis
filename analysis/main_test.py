@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek_rep as fun
+import analysis_functions_vicsek_new as fun
 import os
 import matplotlib.pyplot as plt
 import sys
@@ -15,30 +15,19 @@ import csv
 # seed = int(sys.argv[6])
 
 mode = "G"
-nPart = 100
-phi = 0.1
-noise = "0.60"
-K = "1.0_1.0"
+nPart = 50000
+phi = 1.0
+noise = "0.70"
+# K = "1.0_2.0"
+K_avg_range = [1.0]
+K_std_range = np.arange(0.0, 2.1, 1.0)
+Rp = 1.0
 xTy=5.0
-seed=22
+seed_range=np.arange(1,5,1)
+seed=1
+timestep_range=np.arange(0,11,1)
 
+# for t in timestep_range:
+#     fun.snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=False, show_color=True, save_in_folder=False, timestep=t)
+fun.plot_average_band_profile(mode=mode, nPart=nPart, phi=phi, noise=noise, K_avg_range=K_avg_range, K_std_range=K_std_range, Rp=Rp, xTy=xTy, seed_range=seed_range, pos_ex=False, timestep_range=timestep_range, min_grid_size=3)
 
-sim_dir = fun.get_sim_dir(mode, nPart, phi, noise, K, xTy, seed)
-couplingFile = os.path.join(sim_dir, "coupling")
-
-with open(couplingFile) as f:
-    reader = csv.reader(f, delimiter="\t")
-    r = list(reader)
-
-couplings = np.array(r).astype('float')
-
-print(couplings[:10])
-
-# fun.snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed, pos_ex=True)
-# fun.animate(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed)
-
-# fun.write_stats(mode, nPart, phi, Pe, K, xTy, seed, remove_pos=True)
-# fun.snapshot(mode, nPart, phi, Pe, K, xTy, seed, pos_ex=True, save_in_folder=True)
-
-# fun.plot_porder_time(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-# fun.write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, remove_pos=True)

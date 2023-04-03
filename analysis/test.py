@@ -28,7 +28,7 @@ xTy=5.0
 seed=1
 
 
-def get_velocity_fluctuations(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
+def plot_corr_vel_fluc(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, timestep=None):
     """
     Get velocity fluctations for each particle
     """
@@ -55,13 +55,13 @@ def get_velocity_fluctuations(mode, nPart, phi, noise, K, xTy, seed, min_grid_si
     velocity = [np.array([np.cos(p), np.sin(p)]) for p in theta]
     av_vel = np.mean(velocity, axis=0)
 
-    fluc_vel = [v - av_vel for v in velocity]
+    dv = [v - av_vel for v in velocity]
 
-    av_unit = av_vel / np.linalg.norm(av_vel)
+    # av_unit = av_vel / np.linalg.norm(av_vel)
     av_norm = np.array([-av_vel[1], av_vel[0]])
 
-    fluc_par = [np.dot(f, av_unit) * av_unit for f in fluc_vel]
-    fluc_perp = [np.dot(f, av_norm) * av_norm for f in fluc_vel]
+    # fluc_par = [np.dot(f, av_unit) * av_unit for f in fluc_vel]
+    dv_perp = [np.dot(f, av_norm) * av_norm for f in dv]
 
     ## Next: 
     # take Fourier transform
@@ -69,7 +69,40 @@ def get_velocity_fluctuations(mode, nPart, phi, noise, K, xTy, seed, min_grid_si
     # (Could just do in real space first as Fourier transform stuff has some inconsistencies in the Zhao et al. paper)
     # Plot!
 
+    fig, ax = plt.subplots()
+    
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
 
+    for i in range(nPart):
+        for j in range(i+1, nPart):
+            ## Can add time average here
+            corr = np.dot(dv_perp[i],dv_perp[j])
+    
+            xij = x[i] - x[j]
+            xij = xij - Lx*round(xij/Lx)
+            yij = y[i] - y[j]
+            yij = yij - Ly*round(yij/Ly)
+            rij = np.sqrt(xij**2 + yij**2)
+            
+            ax.plot(rij, corr, '+')
+    
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C_{\perp}(r)$")
+
+    ## Plot on log-log/ lin-log scale
+
+    plt.show()
+    # folder = os.path.abspath('../plots/dist_coupling/')
+    # filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    # if not os.path.exists(folder):
+    #     os.makedirs(folder)
+    # plt.savefig(os.path.join(folder, filename))
+
+
+
+plot_corr_vel_fluc(mode, nPart, phi, noise, K, xTy, seed)
 
 def get_velocity_fields(mode, nPart, phi, noise, K, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
     """

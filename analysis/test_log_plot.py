@@ -34,26 +34,39 @@ import matplotlib.pyplot as plt
 
 # print(vel_x - av_c)
 
-theta = [np.pi/4,np.pi]
-vel = [np.array([np.cos(t),np.sin(t)]) for t in theta]
-print(vel)
+# theta = [np.pi/4,np.pi]
+# vel = [np.array([np.cos(t),np.sin(t)]) for t in theta]
+# print(vel)
 
-av_vel = np.mean(vel, axis=0)
-print(av_vel)
+# av_vel = np.mean(vel, axis=0)
+# print(av_vel)
 
-av_vel = np.array([np.cos(np.pi/2),np.sin(np.pi/2)])
+# av_vel = np.array([np.cos(np.pi/2),np.sin(np.pi/2)])
 
-fluc_vel = [v - av_vel for v in vel]
-# print(fluc_vel)
+# fluc_vel = [v - av_vel for v in vel]
+# # print(fluc_vel)
 
-av_unit = av_vel / np.linalg.norm(av_vel)
-av_norm = np.array([-av_vel[1], av_vel[0]])
+# av_unit = av_vel / np.linalg.norm(av_vel)
+# av_norm = np.array([-av_vel[1], av_vel[0]])
 
-fluc_par = [np.dot(f, av_unit) * av_unit for f in fluc_vel]
-fluc_perp = [np.dot(f, av_norm) * av_norm for f in fluc_vel]
+# fluc_par = [np.dot(f, av_unit) * av_unit for f in fluc_vel]
+# fluc_perp = [np.dot(f, av_norm) * av_norm for f in fluc_vel]
 
-# print([np.dot(f, av_norm) for f in fluc_par])
-# print(fluc_par)
-# print(fluc_perp)
+# # print([np.dot(f, av_norm) for f in fluc_par])
+# # print(fluc_par)
+# # print(fluc_perp)
 
-print([1]+[2])
+# print([1]+[2])
+
+
+x_vals = np.arange(0,10)
+y_vals = np.exp(x_vals)
+
+fig, ax = plt.subplots()
+# ax.loglog(x_vals, y_vals, 'o-')
+
+ax.plot(x_vals, y_vals, 'o-')
+# ax.set_xscale('log')
+ax.set_yscale('log')
+
+plt.show()

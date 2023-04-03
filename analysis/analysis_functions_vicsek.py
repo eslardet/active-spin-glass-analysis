@@ -1092,6 +1092,154 @@ def plot_kcrit_kstd(mode, nPart, phi, noise_range, K_avg_range, K_std_range, xTy
     plt.savefig(os.path.join(folder, filename))
 
 
+
+#############
+# Couplings #
+#############
+def read_couplings(mode, nPart, phi, noise, K, xTy, seed):
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+    couplingFile = os.path.join(sim_dir, "coupling")
+
+    with open(couplingFile) as f:
+        reader = csv.reader(f, delimiter="\t")
+        r = list(reader)
+
+    couplings = np.array(r).astype('float')
+
+    return couplings
+
+## Add function to delete couplings file for after analysis finished
+
+def rij_ex(mode, nPart, phi, noise, K, xTy, seed):
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+    
+    rij_all = []
+    for i in range(nPart):
+        for j in range(i+1, nPart):
+            xij = x[i] - x[j]
+            xij = xij - Lx*round(xij/Lx)
+            yij = y[i] - y[j]
+            yij = yij - Ly*round(yij/Ly)
+            rij = np.sqrt(xij**2 + yij**2)
+            rij_all.append(rij)
+    return rij_all
+
+## Need function to get time average from pos file
+def plot_dist_coupling(mode, nPart, phi, noise, K, xTy, seed):
+    # rij = rij_ex(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+    couplingFile = os.path.join(sim_dir, "coupling")
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    fig, ax = plt.subplots(figsize=(10,10)) 
+    with open(couplingFile) as f:
+        line = 0
+        i = 0
+        j = i+1
+        k = nPart-1
+        start_row = 0
+        for Kij in f:
+            xij = x[i] - x[j]
+            xij = xij - Lx*round(xij/Lx)
+            yij = y[i] - y[j]
+            yij = yij - Ly*round(yij/Ly)
+            rij = np.sqrt(xij**2 + yij**2)
+            # ax.plot(float(Kij), rij[line], 'o', color='tab:blue' , alpha=0.2, ms=1)
+            ax.plot(float(Kij), rij, 'o', color='tab:blue' , alpha=0.2, ms=1)
+
+            line += 1
+
+            if line == start_row + k:
+                i += 1
+                j = i+1
+                k -= 1
+                start_row = line
+            else:
+                j += 1
+    
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(r"$K_{ij}$")
+    ax.set_ylabel(r"$\langle r_{ij}\rangle_t$")
+
+    # plt.show()
+    folder = os.path.abspath('../plots/dist_coupling/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+
+## Dist coupling without plotting to test if working 
+def dist_coupling(mode, nPart, phi, noise, K, xTy, seed):
+    # rij = rij_ex(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+    couplingFile = os.path.join(sim_dir, "coupling")
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    # fig, ax = plt.subplots(figsize=(10,10)) 
+    with open(couplingFile) as f:
+        line = 0
+        i = 0
+        j = i+1
+        k = nPart-1
+        start_row = 0
+        K_list = []
+        rij_list = []
+        for Kij in f:
+            K_list.append(Kij)
+            xij = x[i] - x[j]
+            xij = xij - Lx*round(xij/Lx)
+            yij = y[i] - y[j]
+            yij = yij - Ly*round(yij/Ly)
+            rij = np.sqrt(xij**2 + yij**2)
+            # ax.plot(float(Kij), rij[line], 'o', color='tab:blue' , alpha=0.2, ms=1)
+            # ax.plot(float(Kij), rij, 'o', color='tab:blue' , alpha=0.2, ms=1)
+            rij_list.append(rij)
+            line += 1
+
+            if line == start_row + k:
+                i += 1
+                j = i+1
+                k -= 1
+                start_row = line
+            else:
+                j += 1
+    print("done!")
+    # ax.set_ylim(bottom=0)
+    # ax.set_xlabel(r"$K_{ij}$")
+    # ax.set_ylabel(r"$\langle r_{ij}\rangle_t$")
+
+    # # plt.show()
+    # folder = os.path.abspath('../plots/dist_coupling/')
+    # filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    # if not os.path.exists(folder):
+    #     os.makedirs(folder)
+    # plt.savefig(os.path.join(folder, filename))
+
+
+################
+# Correlations #
+################
 def plot_correlation(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, seed_range, timestep_range, pos_ex=False):
     """
     Plot equal time 2-point correlation function, averaged over time and seeds
@@ -1142,6 +1290,190 @@ def plot_correlation(mode, nPart, phi, noise, K_avg_range, K_std_range, xTy, see
 
     folder = os.path.abspath('../plots/correlation/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+def scatter_corr_vel_fluc(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, timestep=None):
+    """
+    Plot correlation function for the velocity fluctations perpendicular to the mean heading angle as scatterplot
+    """
+    if pos_ex == True:
+        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+    else: 
+        inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+        inpar_dict = get_params(inparFile)
+        DT = inpar_dict["DT"]
+        simulT = inpar_dict["simulT"]
+        eqT = inpar_dict["eqT"]
+        if timestep == None:
+            timestep = int((simulT-eqT)/DT) 
+        x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    velocity = [np.array([np.cos(p), np.sin(p)]) for p in theta]
+    av_vel = np.mean(velocity, axis=0)
+
+    dv = [v - av_vel for v in velocity]
+
+    # av_unit = av_vel / np.linalg.norm(av_vel)
+    av_norm = np.array([-av_vel[1], av_vel[0]])
+
+    # fluc_par = [np.dot(f, av_unit) * av_unit for f in fluc_vel]
+    dv_perp = [np.dot(f, av_norm) * av_norm for f in dv]
+
+
+    ## Plot!
+    fig, ax = plt.subplots()
+
+    for i in range(nPart):
+        for j in range(i+1, nPart):
+            ## Can add time average here later
+            corr = np.dot(dv_perp[i],dv_perp[j])
+    
+            xij = x[i] - x[j]
+            xij = xij - Lx*round(xij/Lx)
+            yij = y[i] - y[j]
+            yij = yij - Ly*round(yij/Ly)
+            rij = np.sqrt(xij**2 + yij**2)
+            # Discount if rij is about a certain distance??
+            
+            ax.plot(rij, corr, '+', color='tab:blue', alpha=0.2)
+    
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C_{\perp}(r)$")
+
+    ## Plot on lin-lin scale
+    folder = os.path.abspath('../plots/correlation/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+    ## Plot on log-log
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+
+    folder = os.path.abspath('../plots/correlation/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '_loglog.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+    ## Plot on log-lin scale
+    ax.set_xscale('linear')
+    ax.set_yscale('log')
+
+    folder = os.path.abspath('../plots/correlation/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '_loglin.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def plot_corr_vel_fluc(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, timestep=None, scatter=False):
+    """
+    Plot correlation function for the velocity fluctations perpendicular to the mean heading angle with line from scatterplot
+    """
+    if pos_ex == True:
+        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+    else: 
+        inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+        inpar_dict = get_params(inparFile)
+        DT = inpar_dict["DT"]
+        simulT = inpar_dict["simulT"]
+        eqT = inpar_dict["eqT"]
+        if timestep == None:
+            timestep = int((simulT-eqT)/DT) 
+        x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    velocity = [np.array([np.cos(p), np.sin(p)]) for p in theta]
+    av_vel = np.mean(velocity, axis=0)
+
+    dv = [v - av_vel for v in velocity]
+
+    # av_unit = av_vel / np.linalg.norm(av_vel)
+    av_norm = np.array([-av_vel[1], av_vel[0]])
+
+    # fluc_par = [np.dot(f, av_unit) * av_unit for f in fluc_vel]
+    dv_perp = [np.dot(f, av_norm) * av_norm for f in dv]
+
+
+    fig, ax = plt.subplots()
+
+    rij_all = []
+    corr_all = []
+    r_max = 20
+
+    for i in range(nPart):
+        for j in range(i+1, nPart):
+            xij = x[i] - x[j]
+            xij = xij - Lx*round(xij/Lx)
+            yij = y[i] - y[j]
+            yij = yij - Ly*round(yij/Ly)
+            rij = np.sqrt(xij**2 + yij**2)
+            if rij < r_max:
+                rij_all.append(rij)
+                corr_all.append(np.dot(dv_perp[i],dv_perp[j]))
+            
+            # ax.plot(rij, corr, '+', color='tab:blue', alpha=0.2)
+    
+    corr_all = np.array(corr_all)
+    rij_all = np.array(rij_all)
+    r_bin_num = int(r_max)
+    corr_bin_av = []
+    bin_size = r_max / r_bin_num
+    for i in range(r_bin_num):
+        lower = bin_size*i
+        upper = bin_size*(i+1)
+        idx = np.where((rij_all>lower)&(rij_all<upper))
+        corr = np.mean(corr_all[idx])
+        corr_bin_av.append(corr)
+
+    r_plot = np.linspace(0, r_max, num=r_bin_num, endpoint=False) + bin_size/2
+
+    if scatter == True:
+        ax.plot(rij_all, corr_all, '+', alpha=0.2)
+    ax.plot(r_plot, corr_bin_av, '-')
+    
+
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C_{\perp}(r)$")
+
+    # plt.show()
+
+    ## Plot on lin-lin scale
+    folder = os.path.abspath('../plots/correlation/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+    ## Plot on log-log
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+
+    folder = os.path.abspath('../plots/correlation/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '_loglog.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+    ## Plot on log-lin scale
+    ax.set_xscale('linear')
+    ax.set_yscale('log')
+
+    folder = os.path.abspath('../plots/correlation/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '_loglin.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
