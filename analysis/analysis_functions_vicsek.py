@@ -228,6 +228,8 @@ def snapshot(mode, nPart, phi, noise, K, xTy, seed, view_time=None, pos_ex=False
     ax.set_aspect('equal')
     ax.set_title("t=" + str(round(view_time)))
 
+    # plt.show()
+
     if save_in_folder == True:
         folder = get_sim_dir(mode, nPart, phi, noise, K, xTy, seed)
         filename = 'snapshot.png'
@@ -356,12 +358,17 @@ def plot_porder_time(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=No
     plt.savefig(os.path.join(folder, filename))
 
 
-def del_pos(mode, nPart, phi, noise, K, xTy, seed):
+def del_files(mode, nPart, phi, noise, K, xTy, seed, files):
     """
     Delete position file to save space
     """
     sim_dir = get_sim_dir(mode, nPart, phi, noise, K, xTy, seed)
-    os.remove(os.path.join(sim_dir, "pos"))
+    for file in files:
+        path = os.path.join(sim_dir, file)
+        if os.path.exists(path):
+            os.remove(path)
+        else:
+            print("No file with name '" + file + "' to delete")
 
 def write_stats(mode, nPart, phi, noise, K, xTy, seed, min_T=None, max_T=None, remove_pos=False, density_var=False):
     """
@@ -1108,8 +1115,6 @@ def read_couplings(mode, nPart, phi, noise, K, xTy, seed):
 
     return couplings
 
-## Add function to delete couplings file for after analysis finished
-
 def rij_ex(mode, nPart, phi, noise, K, xTy, seed):
     posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
     x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
@@ -1180,23 +1185,26 @@ def plot_dist_coupling(mode, nPart, phi, noise, K, xTy, seed):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-
-
-## Dist coupling without plotting to test if working 
-def dist_coupling(mode, nPart, phi, noise, K, xTy, seed):
+## TO DO
+# Add time averaging
+def plot_dist_coupling_hist(mode, nPart, phi, noise, K, xTy, seed, bin_size=100, bin_ratio=1, r_max=None, K_max=None, diff=False):
     # rij = rij_ex(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
 
     posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
     x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
-
     sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+    if diff == True:
+        initPosFile = os.path.join(sim_dir, "initpos")
+        x_init, y_init, theta_init = get_pos_snapshot(posFile=initPosFile, nPart=nPart, timestep=0)
     couplingFile = os.path.join(sim_dir, "coupling")
 
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
     Lx = L*xTy
 
-    # fig, ax = plt.subplots(figsize=(10,10)) 
+    if r_max == None:
+        r_max = Lx
+
     with open(couplingFile) as f:
         line = 0
         i = 0
@@ -1205,8 +1213,8 @@ def dist_coupling(mode, nPart, phi, noise, K, xTy, seed):
         start_row = 0
         K_list = []
         rij_list = []
+        rij_init_list = []
         for Kij in f:
-            K_list.append(Kij)
             xij = x[i] - x[j]
             xij = xij - Lx*round(xij/Lx)
             yij = y[i] - y[j]
@@ -1214,7 +1222,18 @@ def dist_coupling(mode, nPart, phi, noise, K, xTy, seed):
             rij = np.sqrt(xij**2 + yij**2)
             # ax.plot(float(Kij), rij[line], 'o', color='tab:blue' , alpha=0.2, ms=1)
             # ax.plot(float(Kij), rij, 'o', color='tab:blue' , alpha=0.2, ms=1)
-            rij_list.append(rij)
+            if rij < r_max:
+                K_list.append(float(Kij))
+                rij_list.append(rij)
+
+                if diff == True:
+                    xij_init = x_init[i] - x_init[j]
+                    xij_init = xij_init - Lx*round(xij_init/Lx)
+                    yij_init = y_init[i] - y_init[j]
+                    yij_init = yij_init - Ly*round(yij_init/Ly)
+                    rij_init = np.sqrt(xij_init**2 + yij_init**2)
+                    rij_init_list.append(rij_init)
+
             line += 1
 
             if line == start_row + k:
@@ -1224,17 +1243,114 @@ def dist_coupling(mode, nPart, phi, noise, K, xTy, seed):
                 start_row = line
             else:
                 j += 1
-    print("done!")
-    # ax.set_ylim(bottom=0)
-    # ax.set_xlabel(r"$K_{ij}$")
-    # ax.set_ylabel(r"$\langle r_{ij}\rangle_t$")
 
-    # # plt.show()
-    # folder = os.path.abspath('../plots/dist_coupling/')
-    # filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
-    # if not os.path.exists(folder):
-    #     os.makedirs(folder)
-    # plt.savefig(os.path.join(folder, filename))
+
+    fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 
+    # plt.tight_layout()
+    if diff == True:
+        if K_max != None:
+            h1, xedges1, yedges1, image_1 = plt.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), range= [[-K_max,K_max], [0,r_max]], cmap=cm.jet)
+        else: 
+            h1, xedges1, yedges1, image_1 = plt.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), cmap=cm.jet)
+        h0, xedges0, yedges0, image_0 = plt.hist2d(K_list, rij_init_list, bins=(xedges1, yedges1), cmap=cm.jet)
+        ax.clear()
+        ax.pcolormesh(xedges1, yedges1, (h1-h0).T)
+    else:
+        if K_max != None:
+            ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), range=[[-K_max,K_max], [0,r_max]], cmap=cm.jet)
+        else:
+            ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), cmap=cm.jet)
+        
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(r"$K_{ij}$")
+    ax.set_ylabel(r"$\langle r_{ij}\rangle_t$")
+
+    # plt.show()
+    folder = os.path.abspath('../plots/dist_coupling/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K, xTy, seed, bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
+    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+    couplingFile = os.path.join(sim_dir, "coupling")
+    initPosFile = os.path.join(sim_dir, "initpos")
+    x_init, y_init, theta_init = get_pos_snapshot(posFile=initPosFile, nPart=nPart, timestep=0)
+
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    if r_max == None:
+        r_max = Lx
+
+    with open(couplingFile) as f:
+        line = 0
+        i = 0
+        j = i+1
+        k = nPart-1
+        start_row = 0
+        K_list = []
+        rij_list = []
+        rij_init_list = []
+        for Kij in f:
+            xij = x[i] - x[j]
+            xij = xij - Lx*round(xij/Lx)
+            yij = y[i] - y[j]
+            yij = yij - Ly*round(yij/Ly)
+            rij = np.sqrt(xij**2 + yij**2)
+
+            if rij < r_max:
+                K_list.append(float(Kij))
+                rij_list.append(rij)
+                
+                xij_init = x_init[i] - x_init[j]
+                xij_init = xij_init - Lx*round(xij_init/Lx)
+                yij_init = y_init[i] - y_init[j]
+                yij_init = yij_init - Ly*round(yij_init/Ly)
+                rij_init = np.sqrt(xij_init**2 + yij_init**2)
+                rij_init_list.append(rij_init)
+
+            line += 1
+
+            if line == start_row + k:
+                i += 1
+                j = i+1
+                k -= 1
+                start_row = line
+            else:
+                j += 1
+
+
+    fig, ax = plt.subplots(3, figsize=(3,9))
+
+    # plt.tight_layout()
+    if K_max != None:
+        h1, xedges1, yedges1, image_1 = ax[1].hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), range= [[-K_max,K_max], [0,r_max]], cmap=cm.jet)
+    else: 
+        h1, xedges1, yedges1, image_1 = ax[1].hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), cmap=cm.jet)
+    h0, xedges0, yedges0, image_0 = ax[0].hist2d(K_list, rij_init_list, bins=(xedges1, yedges1), cmap=cm.jet)
+
+    ax[2].pcolormesh(xedges1, yedges1, (h1-h0).T)
+    
+    for a in ax:
+        a.set_ylim(bottom=0)
+        a.set_xlabel(r"$K_{ij}$")
+        a.set_ylabel(r"$\langle r_{ij}\rangle_t$")
+
+    # plt.show()
+    folder = os.path.abspath('../plots/dist_coupling/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '_histdiff.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
 
 ################
@@ -1375,9 +1491,18 @@ def scatter_corr_vel_fluc(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, ti
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_corr_vel_fluc(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, timestep=None, scatter=False):
+
+## TO DO: 
+# Bin r according to scale used - y
+# Check C-> 1 as r-> when r bin small enough (only for vel corr not fluctuations)
+# Make function with different modes - y
+# Create pipeline
+def plot_corr_vel(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, timestep=None, scatter=False, xscale='lin', yscale='lin', type='v', r_max=10, r_bin_num=20):
     """
     Plot correlation function for the velocity fluctations perpendicular to the mean heading angle with line from scatterplot
+
+    Type can be: v (usual velocity correlation), dv (fluctuation from mean heading angle), dv_par (flucation parallel to mean heading angle),
+    or dv_perp (fluctuation perpendicular to mean heading angle)
     """
     if pos_ex == True:
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name='pos_exact')
@@ -1401,18 +1526,22 @@ def plot_corr_vel_fluc(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, times
 
     dv = [v - av_vel for v in velocity]
 
-    # av_unit = av_vel / np.linalg.norm(av_vel)
+    av_unit = av_vel / np.linalg.norm(av_vel)
     av_norm = np.array([-av_vel[1], av_vel[0]])
 
-    # fluc_par = [np.dot(f, av_unit) * av_unit for f in fluc_vel]
-    dv_perp = [np.dot(f, av_norm) * av_norm for f in dv]
-
-
-    fig, ax = plt.subplots()
+    if type == 'v':
+        corr_dot = velocity
+    elif type == 'dv':
+        corr_dot = dv
+    elif type == 'dv_par':
+        corr_dot = [np.dot(f, av_unit) * av_unit for f in dv]
+    elif type == 'dv_perp':
+        corr_dot = [np.dot(f, av_norm) * av_norm for f in dv]
+    else:
+        raise Exception("Type not valid. Must be 'v', 'dv', 'dv_par', or 'dv_perp'")
 
     rij_all = []
     corr_all = []
-    r_max = 20
 
     for i in range(nPart):
         for j in range(i+1, nPart):
@@ -1423,57 +1552,191 @@ def plot_corr_vel_fluc(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, times
             rij = np.sqrt(xij**2 + yij**2)
             if rij < r_max:
                 rij_all.append(rij)
-                corr_all.append(np.dot(dv_perp[i],dv_perp[j]))
+                corr_all.append(np.dot(corr_dot[i],corr_dot[j]))
             
             # ax.plot(rij, corr, '+', color='tab:blue', alpha=0.2)
     
     corr_all = np.array(corr_all)
     rij_all = np.array(rij_all)
-    r_bin_num = int(r_max)
     corr_bin_av = []
     bin_size = r_max / r_bin_num
+
+    if xscale == 'lin':
+        r_plot = np.linspace(0, r_max, num=r_bin_num, endpoint=False) + bin_size/2
+    elif xscale == 'log':
+        r_plot = np.logspace(-5, np.log10(r_max), num=r_bin_num, endpoint=True)
+    else:
+        raise Exception("xscale type not valid")
+
     for i in range(r_bin_num):
-        lower = bin_size*i
-        upper = bin_size*(i+1)
+        lower = r_plot[i]
+        try:
+            upper = r_plot[i+1]
+        except:
+            upper = r_max+1
         idx = np.where((rij_all>lower)&(rij_all<upper))
         corr = np.mean(corr_all[idx])
         corr_bin_av.append(corr)
 
-    r_plot = np.linspace(0, r_max, num=r_bin_num, endpoint=False) + bin_size/2
-
+    fig, ax = plt.subplots()
     if scatter == True:
         ax.plot(rij_all, corr_all, '+', alpha=0.2)
-    ax.plot(r_plot, corr_bin_av, '-')
-    
+    ax.plot(r_plot, np.abs(corr_bin_av), '-')
+
+    if xscale == 'log':
+        ax.set_xscale('log')
+    if yscale == 'log':
+        ax.set_yscale('log')
+    else:
+        ax.set_ylim(bottom=0)
 
     ax.set_xlabel(r"$r$")
-    ax.set_ylabel(r"$C_{\perp}(r)$")
+    ax.set_ylabel(r"$C(r)$ for " + type)
+
 
     # plt.show()
 
-    ## Plot on lin-lin scale
     folder = os.path.abspath('../plots/correlation/')
+    filename = str(type) + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+###############################
+## Average neighbour numbers ##
+###############################
+def neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
+    
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    inparFile, posFile = get_files(mode, nPart, phi, noise, K, xTy, seed)
+    inpar_dict = get_params(inparFile)
+
+    r_max_sq = r_max**2
+    
+    if pos_ex == True:
+        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name="pos_exact")
+        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+
+    nei = np.zeros(nPart)
+
+    for t in timestep_range:
+        if pos_ex == False:
+            x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
+        for i in range(nPart):
+            for j in range(i+1, nPart):
+                xij = x[i]-x[j]
+                xij = pbc_wrap(xij, Lx)
+                if np.abs(xij) < r_max:
+                    yij = y[i]-y[j]
+                    yij = pbc_wrap(yij, Ly)
+                    rij_sq = xij**2+yij**2
+                    if rij_sq <= r_max_sq:
+                        nei[i] += 1
+                        nei[j] += 1
+    av_nei_i = nei / (len(timestep_range))
+
+    return av_nei_i
+
+def neighbour_stats(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
+    
+    av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex, timestep_range)
+
+    nei_av = np.mean(av_nei_i)
+    nei_std = np.std(av_nei_i)
+    nei_max = np.max(av_nei_i)
+
+    return nei_av, nei_std, nei_max
+
+def neighbour_hist(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
+    
+    av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex, timestep_range)
+
+    fig, ax = plt.subplots()
+
+    ax.hist(av_nei_i, bins=np.arange(0, np.max(av_nei_i)+1))
+
+    folder = os.path.abspath('../plots/neighbour_hist/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-    ## Plot on log-log
-    ax.set_xscale('log')
-    ax.set_yscale('log')
 
-    folder = os.path.abspath('../plots/correlation/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '_loglog.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
 
-    ## Plot on log-lin scale
-    ax.set_xscale('linear')
-    ax.set_yscale('log')
+###############################
+## Average neighbour numbers ##
+###############################
+def neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
+    
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
 
-    folder = os.path.abspath('../plots/correlation/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '_loglin.png'
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+    inpar_dict = get_params(inparFile)
+
+    r_max_sq = r_max**2
+    
+    if pos_ex == True:
+        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name="pos_exact")
+        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+
+    nei = np.zeros(nPart)
+
+    for t in timestep_range:
+        if pos_ex == False:
+            x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
+        for i in range(nPart):
+            for j in range(i+1, nPart):
+                xij = x[i]-x[j]
+                xij = pbc_wrap(xij, Lx)
+                if np.abs(xij) < r_max:
+                    yij = y[i]-y[j]
+                    yij = pbc_wrap(yij, Ly)
+                    rij_sq = xij**2+yij**2
+                    if rij_sq <= r_max_sq:
+                        nei[i] += 1
+                        nei[j] += 1
+    av_nei_i = nei / (len(timestep_range))
+
+    return av_nei_i
+
+def neighbour_stats(mode, nPart, phi, noise, K,xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
+    
+    av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex, timestep_range)
+
+    nei_av = np.mean(av_nei_i)
+    nei_median = np.median(av_nei_i)
+    nei_std = np.std(av_nei_i)
+    nei_max = np.max(av_nei_i)
+
+    return nei_av, nei_median, nei_std, nei_max
+
+def neighbour_hist(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex=True, timestep_range=[1], print_stats=True):
+    
+    av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex, timestep_range)
+
+    if print_stats == True:
+        print(np.mean(av_nei_i), np.median(av_nei_i), np.std(av_nei_i), np.max(av_nei_i))
+
+    fig, ax = plt.subplots()
+
+    # ax.hist(av_nei_i, bins=np.arange(0, np.max(av_nei_i)+1))
+    unique, counts = np.unique(av_nei_i, return_counts=True)
+    ax.bar(unique, counts)
+
+    ax.set_xlabel(r"$\langle N_i\rangle$")
+    ax.set_ylabel("Count")
+    ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K=$" + str(K) + r"; $r_{max}=$" + str(r_max))
+
+    folder = os.path.abspath('../plots/neighbour_hist/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp1.0' + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))

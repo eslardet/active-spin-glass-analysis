@@ -806,7 +806,6 @@ def plot_band_profiles(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size=
     plt.savefig(os.path.join(folder, filename))
 
 
-## Would need to perform before deleting pos file
 def plot_average_band_profile(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, timestep_range=[1], pos_ex=True, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
     """
     Plot x-directional density profile for the final snapshot shifted to the origin
@@ -1220,6 +1219,78 @@ def plot_correlation(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy,
 
     folder = os.path.abspath('../plots/correlation/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+###############################
+## Average neighbour numbers ##
+###############################
+def neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
+    
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    inpar_dict = get_params(inparFile)
+
+    r_max_sq = r_max**2
+    
+    if pos_ex == True:
+        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
+        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+
+    nei = np.zeros(nPart)
+
+    for t in timestep_range:
+        if pos_ex == False:
+            x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
+        for i in range(nPart):
+            for j in range(i+1, nPart):
+                xij = x[i]-x[j]
+                xij = pbc_wrap(xij, Lx)
+                if np.abs(xij) < r_max:
+                    yij = y[i]-y[j]
+                    yij = pbc_wrap(yij, Ly)
+                    rij_sq = xij**2+yij**2
+                    if rij_sq <= r_max_sq:
+                        nei[i] += 1
+                        nei[j] += 1
+    av_nei_i = nei / (len(timestep_range))
+
+    return av_nei_i
+
+def neighbour_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
+    
+    av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex, timestep_range)
+
+    nei_av = np.mean(av_nei_i)
+    nei_median = np.median(av_nei_i)
+    nei_std = np.std(av_nei_i)
+    nei_max = np.max(av_nei_i)
+
+    return nei_av, nei_median, nei_std, nei_max
+
+def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1], print_stats=True):
+    
+    av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex, timestep_range)
+
+    if print_stats == True:
+        print(np.mean(av_nei_i), np.median(av_nei_i), np.std(av_nei_i), np.max(av_nei_i))
+
+    fig, ax = plt.subplots()
+
+    # ax.hist(av_nei_i, bins=np.arange(0, np.max(av_nei_i)+1))
+    unique, counts = np.unique(av_nei_i, return_counts=True)
+    ax.bar(unique, counts)
+    ax.set_xlabel(r"$\langle N_i\rangle$")
+    ax.set_ylabel("Count")
+    ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K=$" + str(K) + r"; $r_{max}=$" + str(r_max))
+
+    folder = os.path.abspath('../plots/neighbour_hist/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))

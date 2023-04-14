@@ -326,13 +326,13 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
 
     startT = 0.0;
 
-    // // Open file to write initial conditions
-    // if (savePos) {
-    //     initposFile.open("initpos",ios::out);
-    //     if (initposFile.fail()) 
-    //     {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
-    //     initposFile.precision(8);
-    // }
+    // Open file to write initial conditions
+    if (saveInitPos) {
+        initposFile.open("initpos",ios::out);
+        if (initposFile.fail()) 
+        {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
+        initposFile.precision(8);
+    }
 
     // Calculate size of the box
     L = sqrt(double(nPart)/(phi*xTy));
@@ -361,9 +361,10 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     }
 
     // Save initial conditions
-    // if (savePos) {
-    //     saveInitFrame(x,y,p,initposFile);
-    // }
+    if (saveInitPos) {
+        saveInitFrame(x,y,p,initposFile);
+    }
+
     // Initialize lengthscales related to the cell list
     lx = rl; 
     ly = rl;
@@ -384,10 +385,10 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
 
     // Save initial conditions
-    // if (savePos) {
-    //     saveInitFrame(x,y,p,initposFile);
-    //     initposFile.close();
-    // }
+    if (saveInitPos) {
+        saveInitFrame(x,y,p,initposFile);
+        initposFile.close();
+    }
     return; 
 }
 

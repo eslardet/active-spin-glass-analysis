@@ -178,6 +178,9 @@ for (sig=1; sig<=32; sig++)
     inputFile >> savePos; 
     logFile << " --> savePos = " << savePos << endl;
 
+    inputFile >> saveInitPos;
+    logFile << " --> saveInitPos = " << saveInitPos << endl;
+
     inputFile >> saveForce; 
     logFile << " --> saveForce = " << saveForce << endl;
 

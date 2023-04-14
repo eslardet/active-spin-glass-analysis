@@ -1,0 +1,66 @@
+#!/bin/bash
+#PBS -lwalltime=08:00:00
+#PBS -lselect=1:ncpus=4:mem=8gb
+#PBS -N V2D_N10k_coupling_analysis
+#PBS -J 0-7
+
+#PBS -o output/
+#PBS -e output/
+
+num_s=1
+num_Kstd=8
+
+mode="G"
+intMethod="E"
+initMode="R"
+
+N=10000
+
+##phi_arr=($(seq 0.1 0.1 2.0))
+##phi=${phi_arr[$(($PBS_ARRAY_INDEX / $num_s))]}
+phi=1.0
+
+Rp=1.0
+vp=1.0
+
+noise_arr=($(seq 0.20 0.20 0.85))
+##noise=${noise_arr[$(($PBS_ARRAY_INDEX / $num_s))]}
+noise=0.20
+
+seed_arr=($(seq 1 1 20))
+##seed=${seed_arr[$(($PBS_ARRAY_INDEX % $num_s))]}
+seed=1
+
+K_arr=($(seq 0.4 0.01 0.6))
+##K_arr=(0.5 0.8 1.0 1.2 1.5 1.8)
+##K_AVG=${K_arr[$(($PBS_ARRAY_INDEX / $num_s / $num_Kstd))]}
+K_AVG=1.0
+
+K_std_arr=($(seq 1.0 1.0 8.0))
+K_STD=${K_std_arr[$((($PBS_ARRAY_INDEX / $num_s) % $num_Kstd))]}
+##K_STD=0.0
+
+xTy=5.0
+
+dt=0.005
+DT=1.0
+DTex=1000.0
+eqT=0.0
+simulT=0.01
+
+savePos=1
+saveCoupling=1
+
+cd $PBS_O_WORKDIR
+
+module load boost
+
+bash runV_old.sh $N $phi $noise $seed $vp $Rp $xTy $initMode $mode $K_AVG $K_STD $dt $DT $DTex $eqT $simulT $savePos $saveCoupling $intMethod
+
+cd $PBS_O_WORKDIR/analysis
+
+module load anaconda3/personal
+source activate asg
+
+python3 main_coupling.py $mode $N $phi $noise $K_AVG $K_STD $xTy $seed $simulT
+##python3 main.py $mode $N $phi $noise $K_AVG $xTy $seed $simulT
