@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import cm, colors
 from decimal import Decimal
+import freud
 
 import csv
 import os
@@ -174,7 +175,7 @@ def get_pos_ex_snapshot(file):
     return x, y, theta, view_time
 
 
-def snapshot(mode, nPart, phi, noise, K, xTy, seed, view_time=None, pos_ex=False, show_color=True, save_in_folder=False):
+def snapshot(mode, nPart, phi, noise, K, xTy, seed, view_time=None, pos_ex=False, show_color=True, save_in_folder=False, neigh_col=False, r_max=None):
     """
     Get static snapshot at specified time from the positions file
     """
@@ -192,6 +193,7 @@ def snapshot(mode, nPart, phi, noise, K, xTy, seed, view_time=None, pos_ex=False
     eqT = inpar_dict["eqT"]
     xTy = inpar_dict["xTy"]
     simulT = inpar_dict["simulT"]
+    Rp = inpar_dict["Rp"]
 
     beta = 2**(1/6)
 
@@ -213,19 +215,31 @@ def snapshot(mode, nPart, phi, noise, K, xTy, seed, view_time=None, pos_ex=False
     y = pbc_wrap(y,Ly)
     u = np.cos(theta)
     v = np.sin(theta)
-
-    norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
-    mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
 
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /L * beta
     
-    if show_color == True:
+    if neigh_col == True:
+        if r_max == None:
+            r_max = Rp
+        num_nei = neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max)
+        norm = colors.Normalize(vmin=0.0, vmax=np.max(num_nei), clip=True)
+        mapper = cm.ScalarMappable(norm=norm, cmap=cm.plasma)
+        for i in range(nPart):
+            color = mapper.to_rgba(num_nei[i])
+            ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
+        cbar = plt.colorbar(mappable=mapper, ax=ax)
+        cbar.set_label('# neighbours', rotation=270)
+
+    elif show_color == True:
+        norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
+        mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
         for i in range(nPart):
             color = mapper.to_rgba(theta[i]%(2*np.pi))
             ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
         plt.colorbar(mappable=mapper, ax=ax)
+
     else:
         ax.plot(x, y, 'o', ms=diameter)
         ax.quiver(x, y, u, v)
@@ -1157,30 +1171,23 @@ def neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex=True, 
     inparFile, posFile = get_files(mode, nPart, phi, noise, K, xTy, seed)
     inpar_dict = get_params(inparFile)
 
-    r_max_sq = r_max**2
     
     if pos_ex == True:
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name="pos_exact")
         x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
 
 
-    nei = np.zeros(nPart)
-
     for t in timestep_range:
         if pos_ex == False:
             x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
-        for i in range(nPart):
-            for j in range(i+1, nPart):
-                xij = x[i]-x[j]
-                xij = pbc_wrap(xij, Lx)
-                if np.abs(xij) < r_max:
-                    yij = y[i]-y[j]
-                    yij = pbc_wrap(yij, Ly)
-                    rij_sq = xij**2+yij**2
-                    if rij_sq <= r_max_sq:
-                        nei[i] += 1
-                        nei[j] += 1
-    av_nei_i = nei / (len(timestep_range))
+        points = np.zeros((nPart, 3))
+        points[:,0] = x
+        points[:,1] = y
+        box = freud.Box.from_box([Lx, Ly])
+        points = box.wrap(points)
+        ld = freud.density.LocalDensity(r_max=r_max, diameter=0)
+        n_nei = ld.compute(system=(box, points)).num_neighbors
+    av_nei_i = n_nei / (len(timestep_range))
 
     return av_nei_i
 
@@ -1215,3 +1222,4 @@ def neighbour_hist(mode, nPart, phi, noise, K, xTy, seed, r_max, pos_ex=True, ti
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+

@@ -4,6 +4,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib import cm, colors
 from decimal import Decimal
 import freud
+import scipy.stats as sps
 
 import csv
 import os
@@ -174,7 +175,7 @@ def get_pos_ex_snapshot(file):
     return x, y, theta, view_time
 
 
-def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=False, show_color=True, save_in_folder=False, timestep=None):
+def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=True, show_color=True, save_in_folder=False, timestep=None, neigh_col=False, r_max=None):
     """
     Get static snapshot at specified time from the positions file
     """
@@ -212,14 +213,24 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=F
     y = pbc_wrap(y,Ly)
     u = np.cos(theta)
     v = np.sin(theta)
-
-    norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
-    mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
-    cols = mapper.to_rgba(np.mod(theta, 2*np.pi))
     
     fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
     
-    if show_color == True:
+    if neigh_col == True:
+        if r_max == None:
+            r_max = Rp
+        num_nei = neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max)
+        norm = colors.Normalize(vmin=0.0, vmax=np.max(num_nei), clip=True)
+        mapper = cm.ScalarMappable(norm=norm, cmap=cm.plasma)
+        cols = mapper.to_rgba(num_nei)
+        ax.quiver(x, y, u, v, color=cols)
+        cbar = plt.colorbar(mappable=mapper, ax=ax)
+        cbar.set_label('# neighbours', rotation=270)
+
+    elif show_color == True:
+        norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
+        mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
+        cols = mapper.to_rgba(np.mod(theta, 2*np.pi))
         ax.quiver(x, y, u, v, color=cols)
         plt.colorbar(mappable=mapper, ax=ax)
     else:
@@ -999,49 +1010,6 @@ def local_density_var(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size=2
 
     return var_density
 
-def local_density_var(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size=2, pos_ex=True, timestep=None):
-    """
-    Calculate the variance in the local densities of smaller grids from the final snapshot
-    """
-    if pos_ex == True:
-        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
-        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
-    else: 
-        inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
-        inpar_dict = get_params(inparFile)
-        DT = inpar_dict["DT"]
-        simulT = inpar_dict["simulT"]
-        eqT = inpar_dict["eqT"]
-        if timestep == None:
-            timestep = int((simulT-eqT)/DT) 
-        x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
-
-    L = np.sqrt(nPart / (phi*xTy))
-    Ly = L
-    Lx = L*xTy
-
-    x = pbc_wrap(x,Lx)
-    y = pbc_wrap(y,Ly)
-
-    ngrid_x = int(Lx // min_grid_size)
-    grid_size_x = Lx / ngrid_x
-    ngrid_y = int(Ly // min_grid_size)
-    grid_size_y = Ly / ngrid_y
-
-    grid_area = grid_size_x*grid_size_y
-
-    grid_counts = np.zeros((ngrid_x, ngrid_y))
-
-    for i in range(nPart):
-        gridx = int(x[i]//grid_size_x)
-        gridy = int(y[i]//grid_size_y)
-        grid_counts[gridx,gridy] += 1
-    n_density = grid_counts / grid_area
-
-    var_density = np.std(n_density)**2
-
-    return var_density
-
 def plot_var_density_noise(mode, nPart, phi, noise_range, K, Rp, xTy, seed_range, min_grid_size=2):
     """
     Plot the local density variance against noise
@@ -1226,6 +1194,7 @@ def plot_correlation(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy,
 ###############################
 ## Average neighbour numbers ##
 ###############################
+
 def neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
     
     L = np.sqrt(nPart / (phi*xTy))
@@ -1234,31 +1203,23 @@ def neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=Tr
 
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     inpar_dict = get_params(inparFile)
-
-    r_max_sq = r_max**2
     
     if pos_ex == True:
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
         x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
 
 
-    nei = np.zeros(nPart)
-
     for t in timestep_range:
         if pos_ex == False:
             x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
-        for i in range(nPart):
-            for j in range(i+1, nPart):
-                xij = x[i]-x[j]
-                xij = pbc_wrap(xij, Lx)
-                if np.abs(xij) < r_max:
-                    yij = y[i]-y[j]
-                    yij = pbc_wrap(yij, Ly)
-                    rij_sq = xij**2+yij**2
-                    if rij_sq <= r_max_sq:
-                        nei[i] += 1
-                        nei[j] += 1
-    av_nei_i = nei / (len(timestep_range))
+        points = np.zeros((nPart, 3))
+        points[:,0] = x
+        points[:,1] = y
+        box = freud.Box.from_box([Lx, Ly])
+        points = box.wrap(points)
+        ld = freud.density.LocalDensity(r_max=r_max, diameter=0)
+        n_nei = ld.compute(system=(box, points)).num_neighbors
+    av_nei_i = n_nei / (len(timestep_range))
 
     return av_nei_i
 
@@ -1294,3 +1255,116 @@ def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+
+
+#########################
+## Steady state checks ##
+#########################
+
+def local_density_distribution(mode, nPart, phi, noise, K, Rp, xTy, seed, timestep_range, min_grid_size=2):
+    """
+    Plot local density distribution for various snapshots over time
+    """
+
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    inpar_dict = get_params(inparFile)
+    DT = inpar_dict["DT"]
+    eqT = inpar_dict["eqT"]
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    fig, ax = plt.subplots()
+
+    for timestep in timestep_range:
+        x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+
+        x = pbc_wrap(x,Lx)
+        y = pbc_wrap(y,Ly)
+
+        ngrid_x = int(Lx // min_grid_size)
+        grid_size_x = Lx / ngrid_x
+        ngrid_y = int(Ly // min_grid_size)
+        grid_size_y = Ly / ngrid_y
+
+        grid_area = grid_size_x*grid_size_y
+
+        grid_counts = np.zeros((ngrid_x, ngrid_y))
+
+        for i in range(nPart):
+            gridx = int(x[i]//grid_size_x)
+            gridy = int(y[i]//grid_size_y)
+            grid_counts[gridx,gridy] += 1
+        n_density = grid_counts / grid_area
+
+        view_time = eqT + timestep*DT
+        n,x = np.histogram(n_density, bins=100)
+        bin_centers = 0.5*(x[1:]+x[:-1])
+        ax.plot(bin_centers, n, label="t=" + str(int(view_time)))
+
+
+    ax.set_xlabel("Number density")
+    ax.set_ylabel("Probability density")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/density_distribution/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_box.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, timestep_range, time_av=[0]):
+    """
+    Plot local density distribution for various snapshots over time
+    """
+
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    inpar_dict = get_params(inparFile)
+    DT = inpar_dict["DT"]
+    eqT = inpar_dict["eqT"]
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+    box = freud.Box.from_box([Lx, Ly])
+    ld = freud.density.LocalDensity(r_max=r_max, diameter=0)
+
+    fig, ax = plt.subplots()
+
+    for timestep in timestep_range:
+        n_density = []
+        for time_shift in time_av:
+            
+            x, y, theta = get_pos_snapshot(posFile, nPart, timestep+time_shift)
+
+            points = np.zeros((nPart, 3))
+            points[:,0] = x
+            points[:,1] = y
+            points = box.wrap(points)
+            n_density_t = ld.compute(system=(box, points)).density # array of size nPart with all number densities
+            n_density = n_density.append(n_density_t)
+
+        unique, counts = np.unique(n_density, return_counts=True)
+        counts = counts/len(time_av)
+
+        view_time = eqT + timestep*DT
+        ax.plot(unique, counts, label="t=" + str(int(view_time)))
+        # ax.hist(n_density, bins=100)
+
+        # n,x = np.histogram(n_density, bins=100)
+        # bin_centers = 0.5*(x[1:]+x[:-1])
+        # ax.plot(bin_centers, n, label="t=" + str(int(view_time)))
+
+    ax.set_title(r"Number densities for $r_{max}=$" + str(r_max))
+    ax.set_xlabel("Number density")
+    ax.set_ylabel("Count")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/density_distribution/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+## Make same function but only for transverse density (to spot banding)?

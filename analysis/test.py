@@ -2,90 +2,78 @@ import numpy as np
 import analysis_functions_vicsek as fun
 import matplotlib.pyplot as plt
 import time
+import scipy.stats as sps
+import os
+import freud
 
+mode = "G"
+nPart = 1000
+phi = 1.0
+noise = "0.20"
+K = "1.0_0.0"
+xTy = 5.0
+seed = 1
+min_grid_size=2
 
-# mode = "G"
-# nPart = 10000
-# phi = 1.0
-# noise = "0.20"
-# K = "0.0_8.0"
-# xTy=5.0
-# seed=1
+# posFileExact = fun.get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name="pos_exact")
 
-# t0 = time.time()
-# print(fun.neighbour_stats(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True))
-
-# print(time.time()-t0)
-
-nPart = 2
-
-Lx = 5
-Ly = 5
-
-x = [0, 0]
-y = [0, 0]
-theta = [0, np.pi/2]
 
 # L = np.sqrt(nPart / (phi*xTy))
 # Ly = L
 # Lx = L*xTy
 
-velocity = [np.array([np.cos(p), np.sin(p)]) for p in theta]
-av_vel = np.mean(velocity, axis=0)
+# fig, ax = plt.subplots()
 
-dv = [v - av_vel for v in velocity]
-
-av_unit = av_vel / np.linalg.norm(av_vel)
-av_norm = np.array([-av_vel[1], av_vel[0]])
-
-# fluc_par = [np.dot(f, av_unit) * av_unit for f in fluc_vel]
-dv_par = [np.dot(f, av_unit) * av_unit for f in dv] 
-dv_perp = [np.dot(f, av_norm) * av_norm for f in dv]
+# x, y, theta, viewtime = fun.get_pos_ex_snapshot(posFileExact)
 
 
-fig, ax = plt.subplots()
+# r_max = 2
+# r_max_sq = r_max**2
 
-rij_all = []
-corr_all = []
-r_max = 20
+# t0 = time.time()
+# points = np.zeros((nPart, 3))
+# points[:,0] = x
+# points[:,1] = y
+# box = freud.Box.from_box([Lx, Ly])
+# points = box.wrap(points)
+# ld = freud.density.LocalDensity(r_max=r_max, diameter=0)
+# n_nei = ld.compute(system=(box, points)).num_neighbors
+# print(n_nei[:10])
+# print("time=" + str(time.time()-t0))
 
-for i in range(nPart):
-    for j in range(0, nPart):
-        xij = x[i] - x[j]
-        xij = xij - Lx*round(xij/Lx)
-        yij = y[i] - y[j]
-        yij = yij - Ly*round(yij/Ly)
-        rij = np.sqrt(xij**2 + yij**2)
-        if rij < r_max:
-            rij_all.append(rij)
-            corr_all.append(np.dot(dv_perp[i],dv_perp[j]))
-        #     print(i,j,dv_perp[i],dv_perp[j],np.dot(dv_perp[i],dv_perp[j]))
-        #     print(i,j,velocity[i],velocity[j],np.dot(velocity[i],velocity[j]))
-        # ax.plot(rij, corr, '+', color='tab:blue', alpha=0.2)
-
-# corr_all = np.array(corr_all)
-# rij_all = np.array(rij_all)
-# r_bin_num = int(r_max)
-# print(r_bin_num)
-# corr_bin_av = []
-# bin_size = r_max / r_bin_num
-# for i in range(r_bin_num):
-#     lower = bin_size*i
-#     upper = bin_size*(i+1)
-#     idx = np.where((rij_all>lower)&(rij_all<upper))
-#     corr = np.mean(corr_all[idx])
-#     corr_bin_av.append(corr)
-
-# r_plot = np.linspace(0, r_max, num=r_bin_num, endpoint=False) + bin_size/2
-
-# # if scatter == True:
-# ax.plot(rij_all, corr_all, '+', alpha=0.2)
-# ax.plot(r_plot, corr_bin_av, '-')
+# t0 = time.time()
+# nei = np.zeros(nPart)
+# for i in range(nPart):
+#     for j in range(i+1, nPart):
+#         xij = x[i]-x[j]
+#         xij = fun.pbc_wrap(xij, Lx)
+#         if np.abs(xij) < r_max:
+#             yij = y[i]-y[j]
+#             yij = fun.pbc_wrap(yij, Ly)
+#             rij_sq = xij**2+yij**2
+#             if rij_sq <= r_max_sq:
+#                 nei[i] += 1
+#                 nei[j] += 1
+# print(nei[:10])
+# print("time=" + str(time.time()-t0))
 
 
-# ax.set_xlabel(r"$r$")
-# ax.set_ylabel(r"$C_{\perp}(r)$")
+# fig, ax = plt.subplots()
+# ax.hist(n_density, bins=100)
 
-# plt.show()
+# n,x = np.hist(n_density, bins=100)
+# bin_centers = 0.5*(x[1:]+x[:-1])
+# ax.plot(bin_centers,n)
 
-print(np.logspace(-5, np.log10(10), num=7, endpoint=True))
+
+# ax.set_xlabel("Number density")
+# ax.set_ylabel("Probability density")
+
+# folder = os.path.abspath('../plots/density_distribution/')
+# filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+# if not os.path.exists(folder):
+#     os.makedirs(folder)
+# plt.savefig(os.path.join(folder, filename))
+
+
+print(np.unique([[1,2],[2,4]]))
