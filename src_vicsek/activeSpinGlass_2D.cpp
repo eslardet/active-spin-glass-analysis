@@ -196,19 +196,6 @@ for (sig=1; sig<=32; sig++)
     
     inputFile.close();
 
-    // Tape Files
-    if (savePos) {
-        posFile.open("pos",ios::out);
-        if(posFile.fail())
-        {cerr<<"Failed to open positions file!"<<endl; exit(1);}
-        posFile.precision(8);
-    }
-    if (saveForce) {
-        forceFile.open("force",ios::out);
-        if(forceFile.fail())
-        {cerr<<"Failed to open forces file!"<<endl; exit(1);}
-        forceFile.precision(8);
-    }
 
 	///////////////////////
     // Declare Variables //
@@ -236,10 +223,35 @@ for (sig=1; sig<=32; sig++)
     logFile << "Check on the simulation after initialization: " << endl;
     logFile << " --> Volume fraction = " << tphi << endl;
 
+    // Tape Files
+    bool append_pos = false;
     if (savePos) {
-        saveHeader(posFile);
+        ifstream ifile;
+        ifile.open("pos");
+        if(ifile && initMode == 'S' && eqT == 0) {
+            append_pos = true;
+        }
+
+        if (append_pos == true) {
+            posFile.open("pos",ios::app);
+            if(posFile.fail())
+            {cerr<<"Failed to open positions file!"<<endl; exit(1);}
+            posFile.precision(8);
+        }
+        else {
+            posFile.open("pos",ios::out);
+            if(posFile.fail())
+            {cerr<<"Failed to open positions file!"<<endl; exit(1);}
+            posFile.precision(8);
+            saveHeader(posFile);
+        }
+        
     }
     if (saveForce) {
+        forceFile.open("force",ios::out);
+        if(forceFile.fail())
+        {cerr<<"Failed to open forces file!"<<endl; exit(1);}
+        forceFile.precision(8);
         saveHeader(forceFile);
     }
 
@@ -255,7 +267,7 @@ for (sig=1; sig<=32; sig++)
     }
 
     // t0 = t;
-    if (savePos) {
+    if (savePos && append_pos==0) {
 		saveFrame(x,y,p,t,posFile);
         saveFrame(x,y,p,t,posExactFile);
     }

@@ -566,49 +566,50 @@ def plot_porder_K0(mode, nPart, phi, noise, K_range, Rp, xTy, seed_range):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp, xTy, seed_range):
+def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
     """
     Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
     Averaged over a number of realizations
     """
     fig, ax = plt.subplots()
-    for noise in noise_range:
-        for K_std in K_std_range:
-            p_ss = []
-            for K_avg in K_avg_range:
-                K = str(K_avg) + "_" + str(K_std)
-                p_ss_sum = 0
-                error_count = 0
-                for seed in seed_range:
-                    # sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
-                    # if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                        # print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                        # error_count += 1
-                        # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
-                    try:
-                        p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
-                        if p_mean > 1.0:
-                            print("p_mean is bigger than 1!!")
+    for Rp in Rp_range:
+        for noise in noise_range:
+            for K_std in K_std_range:
+                p_ss = []
+                for K_avg in K_avg_range:
+                    K = str(K_avg) + "_" + str(K_std)
+                    p_ss_sum = 0
+                    error_count = 0
+                    for seed in seed_range:
+                        # sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                        # if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                            # print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                            # error_count += 1
+                            # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                        try:
+                            p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                            if p_mean > 1.0:
+                                print("p_mean is bigger than 1!!")
+                                print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                error_count += 1
+                            elif p_mean < 0.0:
+                                print("p_mean is smaller than 0!!")
+                                print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                error_count += 1                            
+                            else:
+                                p_ss_sum += p_mean
+                        except:
+                            print("No stats file to read")
                             print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
                             error_count += 1
-                        elif p_mean < 0.0:
-                            print("p_mean is smaller than 0!!")
-                            print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                            error_count += 1                            
-                        else:
-                            p_ss_sum += p_mean
-                    except:
-                        print("No stats file to read")
+                    p_ss_av = p_ss_sum/(len(seed_range)-error_count)
+                    if p_ss_av > 1.0:
+                        print("Average is greater than 1!")
                         print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                        error_count += 1
-                p_ss_av = p_ss_sum/(len(seed_range)-error_count)
-                if p_ss_av > 1.0:
-                    print("Average is greater than 1!")
-                    print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                    print(p_ss_sum, len(seed_range), error_count)
-                p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+                        print(p_ss_sum, len(seed_range), error_count)
+                    p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-            ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $\phi=$" + str(phi))
+                ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $\phi=$" + str(phi) + r"; $R_p=$" + str(Rp))
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])

@@ -75,5 +75,21 @@ min_grid_size=2
 #     os.makedirs(folder)
 # plt.savefig(os.path.join(folder, filename))
 
+# num = 50000
+# rng = np.random.default_rng(seed=1)
 
-print(np.unique([[1,2],[2,4]]))
+# t0 = time.time()
+# for i in range(num):
+#     a = rng.uniform(0,5,1)
+
+# print(time.time()-t0)
+
+# t0 = time.time()
+# a = rng.uniform(0,5,num)
+# for i in range(num):
+#     b = a[i]
+
+# print(time.time()-t0)
+
+
+print(np.ones(10))

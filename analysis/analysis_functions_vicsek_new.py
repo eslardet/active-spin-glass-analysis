@@ -219,7 +219,7 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=T
     if neigh_col == True:
         if r_max == None:
             r_max = Rp
-        num_nei = neighbour_counts(mode, nPart, phi, noise, K, xTy, seed, r_max)
+        num_nei = neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max)
         norm = colors.Normalize(vmin=0.0, vmax=np.max(num_nei), clip=True)
         mapper = cm.ScalarMappable(norm=norm, cmap=cm.plasma)
         cols = mapper.to_rgba(num_nei)
@@ -377,7 +377,7 @@ def del_pos(mode, nPart, phi, noise, K, Rp, xTy, seed):
     sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
     os.remove(os.path.join(sim_dir, "pos"))
 
-def write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None, remove_pos=False, density_var=False):
+def write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None, remove_pos=False, density_var=False, moments=False):
     """
     Write a file with various statistics from the simulation data (Vicsek order parameter mean, standard deviation, susceptibility)
     """
@@ -418,6 +418,9 @@ def write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=Non
     p_sus = nPart*np.std(p_order)**2
     n_mean = np.mean(n_order)
     n_sus = nPart*np.std(n_order)**2
+    p_second = np.mean([p**2 for p in p_order])
+    p_third = np.mean([p**3 for p in p_order])
+    p_fourth = np.mean([p**4 for p in p_order])
 
 
     sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
@@ -427,15 +430,12 @@ def write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=Non
     statsFile.write(str(n_mean) + '\n')
     statsFile.write(str(n_sus) + '\n')
 
-    if density_var == True:
-        # d_var_list = []
-        # timestep_min = int(min_T//DT)
-        # timestep_max = int(max_T//DT)
-        # for timestep in range(timestep_min, timestep_max, 10):
-        #     d_var_list.append(local_density_var(mode, nPart, phi, noise, K, xTy, seed, pos_ex=False, timestep=timestep))
-        # d_var_mean = d_var_list/(len(d_var_list))
-        # statsFile.write(str(d_var_mean) + '\n')
+    if moments == True:
+        statsFile.write(str(p_second) + '\n')
+        statsFile.write(str(p_third) + '\n')
+        statsFile.write(str(p_fourth) + '\n')
 
+    if density_var == True:
         d_var = local_density_var(mode, nPart, phi, noise, K, Rp, xTy, seed)
         statsFile.write(str(d_var + '\n'))
 
@@ -462,8 +462,15 @@ def read_stats(mode, nPart, phi, noise, K, Rp, xTy, seed):
     stats_dict["p_sus"] = float(r[1][0])
     stats_dict["n_mean"] = float(r[2][0])
     stats_dict["n_sus"] = float(r[3][0])
+
     try:
-        stats_dict["d_var"] = float(r[4][0])
+        stats_dict["p_2"] = float(r[4][0])
+        stats_dict["p_3"] = float(r[5][0])
+        stats_dict["p_4"] = float(r[6][0])
+    except Exception:
+        pass
+    try:
+        stats_dict["d_var"] = float(r[7][0])
     except Exception:
         pass
         # print("No d_var for rho=" + str(phi) + ", noise=" + str(noise) + ", K=" + str(K) + ", s=" + str(seed))
@@ -554,30 +561,32 @@ def plot_porder_K0(mode, nPart, phi, noise, K_range, Rp, xTy, seed_range):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp, xTy, seed_range):
+def plot_porder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
     """
     Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
     Averaged over a number of realizations
     """
     fig, ax = plt.subplots()
-    for noise in noise_range:
-        for K_std in K_std_range:
-            p_ss = []
-            error_count = 0
-            for K_avg in K_avg_range:
-                K = str(K_avg) + "_" + str(K_std)
-                p_ss_sum = 0
-                for seed in seed_range:
-                    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
-                    if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                        print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                        error_count += 1
-                        # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-                    else:
-                        p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
-                p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+    for nPart in nPart_range:
+        for Rp in Rp_range:
+            for noise in noise_range:
+                for K_std in K_std_range:
+                    p_ss = []
+                    error_count = 0
+                    for K_avg in K_avg_range:
+                        K = str(K_avg) + "_" + str(K_std)
+                        p_ss_sum = 0
+                        for seed in seed_range:
+                            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                            if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                                print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                error_count += 1
+                                # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                            else:
+                                p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                        p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-            ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise))
+                    ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
@@ -1314,7 +1323,7 @@ def local_density_distribution(mode, nPart, phi, noise, K, Rp, xTy, seed, timest
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, timestep_range, time_av=[0]):
+def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, timestep_range, time_av=[0], random_sample=False, samples=None, bins=100):
     """
     Plot local density distribution for various snapshots over time
     """
@@ -1330,6 +1339,15 @@ def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, 
     box = freud.Box.from_box([Lx, Ly])
     ld = freud.density.LocalDensity(r_max=r_max, diameter=0)
 
+    if random_sample:
+        rng = np.random.default_rng(seed=1)
+        if samples == None:
+            samples = nPart
+
+        rand_points = np.zeros((samples, 3))
+        rand_points[:,0] = rng.uniform(-Lx/2,Lx/2,samples)
+        rand_points[:,1] = rng.uniform(-Ly/2,Ly/2,samples)
+
     fig, ax = plt.subplots()
 
     for timestep in timestep_range:
@@ -1342,23 +1360,35 @@ def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, 
             points[:,0] = x
             points[:,1] = y
             points = box.wrap(points)
-            n_density_t = ld.compute(system=(box, points)).density # array of size nPart with all number densities
-            n_density = n_density.append(n_density_t)
+
+            if random_sample == True:
+                query_points = rand_points
+            else:
+                query_points = None
+
+            n_density_t = ld.compute(system=(box, points), query_points=query_points).density
+            n_density.append(n_density_t)
 
         unique, counts = np.unique(n_density, return_counts=True)
         counts = counts/len(time_av)
 
         view_time = eqT + timestep*DT
-        ax.plot(unique, counts, label="t=" + str(int(view_time)))
+
+        window_width = len(unique) / bins
+        # cumsum_vec = np.cumsum(np.insert(counts, 0, 0)) 
+        # ma_vec = (cumsum_vec[window_width:] - cumsum_vec[:-window_width]) / window_width
+        window = np.ones(int(window_width))/float(window_width)
+        count_av = np.convolve(counts, window, 'same')
+        ax.plot(unique, count_av, label="t=" + str(int(view_time)))
         # ax.hist(n_density, bins=100)
 
-        # n,x = np.histogram(n_density, bins=100)
+        # n,x = np.histogram(n_density, bins=bins)
         # bin_centers = 0.5*(x[1:]+x[:-1])
         # ax.plot(bin_centers, n, label="t=" + str(int(view_time)))
 
     ax.set_title(r"Number densities for $r_{max}=$" + str(r_max))
     ax.set_xlabel("Number density")
-    ax.set_ylabel("Count")
+    ax.set_ylabel("Density")
     ax.legend()
 
     folder = os.path.abspath('../plots/density_distribution/')
@@ -1367,4 +1397,54 @@ def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, 
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-## Make same function but only for transverse density (to spot banding)?
+
+def local_density_distribution_voronoi(mode, nPart, phi, noise, K, Rp, xTy, seed, timestep_range, time_av=[0], bins=50):
+    """
+    Plot local density distribution for various snapshots over time using Voronoi method
+    """
+
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    inpar_dict = get_params(inparFile)
+    DT = inpar_dict["DT"]
+    eqT = inpar_dict["eqT"]
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+    box = freud.Box.from_box([Lx, Ly])
+    voro = freud.locality.Voronoi()
+
+
+    fig, ax = plt.subplots()
+
+    for timestep in timestep_range:
+        n_density = []
+        for time_shift in time_av:
+            
+            x, y, theta = get_pos_snapshot(posFile, nPart, timestep+time_shift)
+
+            points = np.zeros((nPart, 3))
+            points[:,0] = x
+            points[:,1] = y
+            points = box.wrap(points)
+
+            voro.compute((box,points))
+            n_density_t = voro.volumes
+            n_density.append(n_density_t)
+
+        view_time = eqT + timestep*DT
+        # ax.hist(n_density, bins=50, label="t=" + str(view_time))
+        n,x = np.histogram(n_density, bins=bins)
+        bin_centers = 0.5*(x[1:]+x[:-1])
+        ax.plot(bin_centers, n, label="t=" + str(int(view_time)))
+        
+    ax.set_title(r"Areas from Voronoi")
+    ax.set_xlabel("Area")
+    ax.set_ylabel("Density")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/density_distribution_voronoi/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
