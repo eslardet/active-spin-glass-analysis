@@ -281,7 +281,7 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
     if repulsion == 'W':
         beta = 2**(1/6)
     if repulsion == 'H':
-        beta = 2
+        beta = 1
     if repulsion == 'C':
         beta = 1
     else:

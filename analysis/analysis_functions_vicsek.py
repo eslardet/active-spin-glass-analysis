@@ -1355,7 +1355,8 @@ def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, 
     # for a in ax:
     ax.set_ylim(bottom=0)
     ax.set_xlabel(r"$K_{ij}$")
-    ax.set_ylabel(r"$\langle r_{ij}\rangle_t$")
+    ax.set_ylabel(r"$r_{ij}")
+    # ax.set_ylabel(r"$\langle r_{ij}\rangle_t$") ## when time average uncomment
 
     # plt.show()
     folder = os.path.abspath('../plots/dist_coupling/')

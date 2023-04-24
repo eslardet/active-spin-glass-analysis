@@ -15,7 +15,7 @@ extern std::fstream initposFile,logFile,couplingFile, posExactFile;
 extern int nPart;
 extern unsigned int seed;
 extern double phi,noise,vp,gx;
-extern bool saveCoupling;
+extern bool saveCoupling, savePos, saveInitPos;
 extern char initMode,potMode,couplingMode,intMethod;
 extern double dT,DT,DTex,eqT,simulT,startT;
 extern int Nsimul,Neq,Nskip,Nskipexact;
@@ -146,6 +146,7 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
     File << Rr << '\t' << Rp << std::endl; 
     File << xmin << '\t' << xmax << std::endl;
     File << ymin << '\t' << ymax << std::endl;
+    File << 0 << std::endl;
 
     for(int i=0 ; i<nPart ; i++)
     {

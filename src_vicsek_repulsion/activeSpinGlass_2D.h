@@ -15,7 +15,7 @@ int nPart;
 unsigned int seed;
 double phi,noise,vp;
 double Rp,Rr,gx;
-bool savePos,saveForce,saveCoupling;
+bool savePos,saveForce,saveCoupling, saveInitPos;
 char initMode,couplingMode,intMethod,potMode;
 double dT,DT,DTex,eqT,simulT,startT;
 int Nsimul,Neq,Nskip,Nskipexact;

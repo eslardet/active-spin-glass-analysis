@@ -58,23 +58,24 @@ eqT=0.0
 simulT=110.0
 
 savePos=1
+saveInitPos=0
 saveForce=0
-saveCoupling=1
+saveCoupling=0
 
 intMethod='E'
 potMode='W'
 
 # Local
 if [ "${couplingMode}" == "C" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/TwoPopulations/N${nPart}/phi${phi}_n${noise}/K${KAA}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/TwoPopulations/N${nPart}/phi${phi}_n${noise}/K${KAA}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Ferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Ferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data_v/Antiferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
 
 

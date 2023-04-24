@@ -57,10 +57,11 @@ eqT=${15}
 simulT=${16}
 
 savePos=${17}
+saveInitPos=${18}
 saveForce=0
-saveCoupling=${18} # Need to save couplings to be able to restart sim later for e.g. mode 'G'
+saveCoupling=${19} # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
-intMethod=${19}
+intMethod=${20}
 
 if [ "${couplingMode}" == "C" ]; then
     run_dir=$HOME/Vicsek_2D/simulation_data/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/Rp${Rp}/xTy${xTy}/s${seed}
@@ -162,6 +163,7 @@ else
     echo ${simulT} >> 'inpar'
 
     echo ${savePos} >> 'inpar'
+    echo ${saveInitPos} >> 'inpar'
     echo ${saveForce} >> 'inpar'
     echo ${saveCoupling} >> 'inpar'
 
