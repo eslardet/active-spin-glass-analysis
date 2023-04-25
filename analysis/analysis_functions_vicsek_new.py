@@ -5,6 +5,7 @@ from matplotlib import cm, colors
 from decimal import Decimal
 import freud
 import scipy.stats as sps
+import bisect
 
 import csv
 import os
@@ -1323,7 +1324,7 @@ def local_density_distribution(mode, nPart, phi, noise, K, Rp, xTy, seed, timest
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, timestep_range, time_av=[0], random_sample=False, samples=None, bins=100):
+def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, timestep_range, time_av=[0], random_sample=False, samples=None, density_cap=10):
     """
     Plot local density distribution for various snapshots over time
     """
@@ -1372,14 +1373,20 @@ def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, 
         unique, counts = np.unique(n_density, return_counts=True)
         counts = counts/len(time_av)
 
+        index_cap = bisect.bisect_left(unique, density_cap)
+        unique = unique[:index_cap]
+        counts = counts[:index_cap]
+
         view_time = eqT + timestep*DT
 
-        window_width = len(unique) / bins
+        # window_width = len(unique) / bins
         # cumsum_vec = np.cumsum(np.insert(counts, 0, 0)) 
         # ma_vec = (cumsum_vec[window_width:] - cumsum_vec[:-window_width]) / window_width
-        window = np.ones(int(window_width))/float(window_width)
-        count_av = np.convolve(counts, window, 'same')
-        ax.plot(unique, count_av, label="t=" + str(int(view_time)))
+
+        # window = np.ones(int(window_width))/float(window_width)
+        # count_av = np.convolve(counts, window, 'same')
+        ax.plot(unique, counts, label="t=" + str(int(view_time)))
+
         # ax.hist(n_density, bins=100)
 
         # n,x = np.histogram(n_density, bins=bins)
@@ -1388,7 +1395,7 @@ def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, 
 
     ax.set_title(r"Number densities for $r_{max}=$" + str(r_max))
     ax.set_xlabel("Number density")
-    ax.set_ylabel("Density")
+    ax.set_ylabel("Count")
     ax.legend()
 
     folder = os.path.abspath('../plots/density_distribution/')
@@ -1397,8 +1404,67 @@ def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, 
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
+def local_density_distribution_diff_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, timestep_range, time_av=[0], density_cap=10):
+    """
+    Plot local density distribution for various snapshots over time by taking their differences
+    """
 
-def local_density_distribution_voronoi(mode, nPart, phi, noise, K, Rp, xTy, seed, timestep_range, time_av=[0], bins=50):
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    inpar_dict = get_params(inparFile)
+    DT = inpar_dict["DT"]
+    eqT = inpar_dict["eqT"]
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+    box = freud.Box.from_box([Lx, Ly])
+    ld = freud.density.LocalDensity(r_max=r_max, diameter=0)
+
+    fig, ax = plt.subplots()
+
+    for i, timestep in enumerate(timestep_range):
+        n_density = []
+        for time_shift in time_av:
+            
+            x, y, theta = get_pos_snapshot(posFile, nPart, timestep+time_shift)
+
+            points = np.zeros((nPart, 3))
+            points[:,0] = x
+            points[:,1] = y
+            points = box.wrap(points)
+
+            n_density_t = ld.compute(system=(box, points)).density
+            n_density.append(n_density_t)
+
+
+        unique, counts = np.unique(n_density, return_counts=True)
+        counts = counts/len(time_av)
+
+        index_cap = bisect.bisect_left(unique, density_cap)
+        unique = unique[:index_cap]
+        counts = counts[:index_cap]
+
+        view_time = eqT + timestep*DT
+        if i == 0:
+            counts_old = counts
+            view_time_old = view_time
+        else:
+            ax.plot(unique, counts-counts_old, label="t=" + str(int(view_time_old)) + " vs t=" + str(int(view_time)))
+            counts_old = counts
+            view_time_old = view_time
+
+    ax.set_title(r"Number densities for $r_{max}=$" + str(r_max))
+    ax.set_xlabel("Number density")
+    ax.set_ylabel("Difference")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/density_distribution/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_diff.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def local_density_distribution_voronoi(mode, nPart, phi, noise, K, Rp, xTy, seed, timestep_range, time_av=[0], bins=50, density_cap=10):
     """
     Plot local density distribution for various snapshots over time using Voronoi method
     """
@@ -1429,17 +1495,17 @@ def local_density_distribution_voronoi(mode, nPart, phi, noise, K, Rp, xTy, seed
             points = box.wrap(points)
 
             voro.compute((box,points))
-            n_density_t = voro.volumes
+            n_density_t = 1/voro.volumes
             n_density.append(n_density_t)
 
         view_time = eqT + timestep*DT
         # ax.hist(n_density, bins=50, label="t=" + str(view_time))
-        n,x = np.histogram(n_density, bins=bins)
+        n,x = np.histogram(n_density, bins=bins, range=(0,density_cap))
         bin_centers = 0.5*(x[1:]+x[:-1])
         ax.plot(bin_centers, n, label="t=" + str(int(view_time)))
         
-    ax.set_title(r"Areas from Voronoi")
-    ax.set_xlabel("Area")
+    ax.set_title(r"Number densities from Voronoi")
+    ax.set_xlabel("Number density")
     ax.set_ylabel("Density")
     ax.legend()
 
@@ -1504,6 +1570,157 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
 
     folder = os.path.abspath('../plots/binder_vs_Kavg/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+
+## TO DO
+# Add time averaging
+# Change difference to be with K_std=0 instead!
+def plot_dist_coupling_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+    # rij = rij_ex(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
+    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    couplingFile = os.path.join(sim_dir, "coupling")
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    if r_max == None:
+        r_max = Lx
+
+    with open(couplingFile) as f:
+        line = 0
+        i = 0
+        j = i+1
+        k = nPart-1
+        start_row = 0
+        K_list = []
+        rij_list = []
+        rij_init_list = []
+        for Kij in f:
+            xij = x[i] - x[j]
+            xij = xij - Lx*round(xij/Lx)
+            yij = y[i] - y[j]
+            yij = yij - Ly*round(yij/Ly)
+            rij = np.sqrt(xij**2 + yij**2)
+            # ax.plot(float(Kij), rij[line], 'o', color='tab:blue' , alpha=0.2, ms=1)
+            # ax.plot(float(Kij), rij, 'o', color='tab:blue' , alpha=0.2, ms=1)
+            if rij < r_max:
+                K_list.append(float(Kij))
+                rij_list.append(rij)
+
+            line += 1
+
+            if line == start_row + k:
+                i += 1
+                j = i+1
+                k -= 1
+                start_row = line
+            else:
+                j += 1
+
+
+    fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 
+    # plt.tight_layout()
+    
+    if K_max != None:
+        ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), range=[[-K_max,K_max], [0,r_max]], cmap=cm.jet)
+    else:
+        ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), cmap=cm.jet)
+        
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(r"$K_{ij}$")
+    ax.set_ylabel(r"$r_{ij}$")
+
+    # plt.show()
+    folder = os.path.abspath('../plots/dist_coupling/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None):
+    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
+    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    couplingFile = os.path.join(sim_dir, "coupling")
+
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    if r_max == None:
+        r_max = Lx
+
+    with open(couplingFile) as f:
+        line = 0
+        i = 0
+        j = i+1
+        k = nPart-1
+        start_row = 0
+        K_list = []
+        rij_list = []
+        for Kij in f:
+            xij = x[i] - x[j]
+            xij = xij - Lx*round(xij/Lx)
+            yij = y[i] - y[j]
+            yij = yij - Ly*round(yij/Ly)
+            rij = np.sqrt(xij**2 + yij**2)
+
+            if rij < r_max:
+                K_list.append(float(Kij))
+                rij_list.append(rij)
+
+            line += 1
+
+            if line == start_row + k:
+                i += 1
+                j = i+1
+                k -= 1
+                start_row = line
+            else:
+                j += 1
+    return K_list, rij_list
+
+# Change difference to be with different K_avg shifted to origin instead!
+def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, K_std, Rp, xTy, seed, bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+
+    K = str(K_avg) + "_" + str(K_std)
+    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max)
+    K = str(K_avg_compare) + "_" + str(K_std)
+    K_list_compare, rij_list_compare = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max)
+    ## Shift to origin
+    K_list_compare = [k - K_avg_compare for k in K_list_compare]
+
+    # fig, ax = plt.subplots(3, figsize=(3,9))
+    fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 
+
+    # plt.tight_layout()
+    if K_max != None:
+        h1, xedges1, yedges1, image_1 = plt.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), range= [[-K_max,K_max], [0,r_max]], cmap=cm.jet)
+    else: 
+        h1, xedges1, yedges1, image_1 = plt.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), cmap=cm.jet)
+    h0, xedges0, yedges0, image_0 = plt.hist2d(K_list_compare, rij_list_compare, bins=(xedges1, yedges1), cmap=cm.jet)
+    ax.clear()
+    ax.pcolormesh(xedges1, yedges1, (h1-h0).T)
+    
+    # for a in ax:
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(r"$K_{ij}$")
+    ax.set_ylabel(r"$r_{ij}$")
+    # ax.set_ylabel(r"$\langle r_{ij}\rangle_t$") ## when time average uncomment
+
+    # plt.show()
+    folder = os.path.abspath('../plots/dist_coupling/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_histdiff.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))

@@ -91,5 +91,9 @@ min_grid_size=2
 
 # print(time.time()-t0)
 
+import bisect
+a = [0,1,2,3,4,5,6,7,8]
+b = [1,2,3,4,5,6,7,8,9]
 
-print(np.ones(10))
+index = bisect.bisect_left(a, 5.5)
+print(a[:index])

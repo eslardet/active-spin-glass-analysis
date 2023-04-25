@@ -16,21 +16,22 @@ import time
 # simulT = float(sys.argv[9])
 
 mode = "G"
-nPart = 1000
+nPart = 10000
 phi = 1.0
 noise = "0.20"
 K = "0.0_8.0"
+Rp = 2.0
 xTy = 5.0
 seed = 1
-bin_size = 100
-bin_ratio = 1
-r_max = None
+bin_size = 160
+bin_ratio = 16
+r_max = 4
 
 K_avg = 0.0
 K_avg_compare = -1.0
 K_std = 8.0
 
 fun.plot_dist_coupling_hist(mode, nPart, phi, noise, K, xTy, seed, bin_size=bin_size, bin_ratio=bin_ratio, r_max=r_max)
-# fun.plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, K_std, xTy, seed, bin_size=bin_size, bin_ratio=bin_ratio, r_max=r_max)
+# fun.plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, K_std, Rp, xTy, seed, bin_size=bin_size, bin_ratio=bin_ratio, r_max=r_max)
 # fun.del_files(mode, nPart, phi, noise, K, xTy, seed, files=["coupling", "initpos", "pos"])
 
