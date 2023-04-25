@@ -868,7 +868,7 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
                             break;
 
                         case 'H':
-                            ff = gx*(2-rij);
+                            ff = gx*(1-rij);
                             break;
                         
                         default:

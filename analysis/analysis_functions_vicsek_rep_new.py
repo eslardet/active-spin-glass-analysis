@@ -280,16 +280,17 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
 
     if repulsion == 'W':
         beta = 2**(1/6)
-    if repulsion == 'H':
+    elif repulsion == 'H':
         beta = 1
-    if repulsion == 'C':
+    elif repulsion == 'C':
         beta = 1
     else:
         beta = 2**(1/6)
     L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
     Ly = L
     Lx = L*xTy
-    
+    print(repulsion == "H")
+    print(beta, repulsion, Lx,Ly)
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /L * beta
 
     # norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
@@ -302,7 +303,7 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
     y = pbc_wrap(y_all[0],Ly)
     theta = theta_all[0]
     # cols = np.mod(theta, 2*np.pi)
-    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta))
+    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta), zorder=2)
     points, = plt.plot([], [], 'o', ms=diameter, zorder=1)
 
     def init():
@@ -325,7 +326,7 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=10, blit=True)
 
     folder = os.path.abspath('../animations')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) +  '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
+    filename = repulsion + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) +  '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))
@@ -340,9 +341,10 @@ def plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_
     DT = inpar_dict["DT"]
     simulT = inpar_dict["simulT"]
 
-    with open(posFile) as f:
-        reader = csv.reader(f, delimiter="\t")
-        startT = float(list(reader)[6][0])
+    # with open(posFile) as f:
+    #     reader = csv.reader(f, delimiter="\t")
+    #     startT = float(list(reader)[6][0])
+    startT = 0
 
     if min_T == None:
         min_T = 0

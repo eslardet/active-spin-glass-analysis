@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=100
+nPart=1000
 phi=1.0
 noise=0.20
 
@@ -28,12 +28,12 @@ vp=1.0
 Rp=1.0
 xTy=1.0
 
-initMode='S'
+initMode='R'
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='G'
+couplingMode='C'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -41,7 +41,7 @@ couplingMode='G'
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
 
-K0=0.0
+K0=1.1
 
 # KAA=10.0
 # KAB=0.0
@@ -52,9 +52,9 @@ STDK=1.0
 
 dT=0.005
 DT=1.0
-DTex=10.0
-eqT=0.0
-simulT=80.0
+DTex=100.0
+eqT=400.0
+simulT=100.0
 
 savePos=1
 saveInitPos=0

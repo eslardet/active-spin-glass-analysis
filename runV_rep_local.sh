@@ -17,19 +17,19 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=100
-phi=0.1
-seed=22
+nPart=10000
+phi=0.3
+seed=1
 
-noise=0.60
-gx=1.0
+noise=0.20
+gx=5.0
 vp=1.0
 
 Rr=1.0
 Rp=2.0
-xTy=5.0
+xTy=1.0
 
-initMode='S'
+initMode='R'
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
@@ -51,11 +51,11 @@ couplingMode='G'
 KAVG=1.0
 STDK=1.0
 
-dT=1e-4
-DT=1.0
-DTex=100.0
+dT=5e-3
+DT=10
+DTex=10.0
 eqT=0.0
-simulT=110.0
+simulT=500
 
 savePos=1
 saveInitPos=0
@@ -63,7 +63,7 @@ saveForce=0
 saveCoupling=0
 
 intMethod='E'
-potMode='W'
+potMode='H'
 
 # Local
 if [ "${couplingMode}" == "C" ]; then
@@ -98,14 +98,19 @@ cd $run_dir
 if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
     sed -i '' "10s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
     if [ "${couplingMode}" == "C" ]; then
+        sed -i '' "16s/.*/${eqT}/" 'inpar'
         sed -i '' "17s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "T" ]; then
+        sed -i '' "18s/.*/${eqT}/" 'inpar'
         sed -i '' "19s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "G" ]; then
+        sed -i '' "17s/.*/${eqT}/" 'inpar'
         sed -i '' "18s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
+        sed -i '' "17s/.*/${eqT}/" 'inpar'
         sed -i '' "18s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
+        sed -i '' "17s/.*/${eqT}/" 'inpar'
         sed -i '' "18s/.*/${simulT}/" 'inpar'
     fi
 
@@ -154,6 +159,7 @@ else
     echo ${simulT} >> 'inpar'
 
     echo ${savePos} >> 'inpar'
+    echo ${saveInitPos} >> 'inpar'
     echo ${saveForce} >> 'inpar'
     echo ${saveCoupling} >> 'inpar'
 
