@@ -214,7 +214,7 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=T
     u = np.cos(theta)
     v = np.sin(theta)
     
-    fig, ax = plt.subplots(figsize=(5*xTy,5), dpi=72)
+    fig, ax = plt.subplots(figsize=(10*xTy,10), dpi=72)
     
     if neigh_col == True:
         if r_max == None:
@@ -1445,6 +1445,65 @@ def local_density_distribution_voronoi(mode, nPart, phi, noise, K, Rp, xTy, seed
 
     folder = os.path.abspath('../plots/density_distribution_voronoi/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+def get_binder(mode, nPart, phi, noise, K, Rp, xTy, seed_range):
+    p_2 = []
+    p_4 = []
+    for seed in seed_range:
+        stats_dir = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+        p_2.append(stats_dir["p_2"])
+        p_4.append(stats_dir["p_4"])
+    
+    p_2_av = np.mean(p_2)
+    p_4_av = np.mean(p_4)
+
+    binder = 1 - p_4_av/(3*(p_2_av**2))
+
+    return binder
+
+def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
+    """
+    Plot steady state binder cumulant against Kavg, for each fixed K_std value and noise value
+    Averaged over a number of realizations
+    """
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for Rp in Rp_range:
+            for noise in noise_range:
+                for K_std in K_std_range:
+                    binder = []
+                    error_count = 0
+                    for K_avg in K_avg_range:
+                        K = str(K_avg) + "_" + str(K_std)
+                        p_2_sum = 0
+                        p_4_sum = 0
+                        for seed in seed_range:
+                            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                            if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                                print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                error_count += 1
+                                # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                            else:
+                                p_2_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_2"]
+                                p_4_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_4"]
+                        p_2_av = p_2_sum/(len(seed_range)-error_count)
+                        p_4_av = p_4_sum/(len(seed_range)-error_count)
+
+                        binder.append(1 - p_4_av/(3*(p_2_av**2)))
+
+                    ax.plot([float(k) for k in K_avg_range], binder, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+    ax.set_xlabel(r"$K_{AVG}$")
+    ax.set_ylabel(r"Binder cumulant, $G$")
+    # ax.set_ylim([0,1])
+    # ax.set_xlim([-1,2])
+    ax.legend()
+
+    folder = os.path.abspath('../plots/binder_vs_Kavg/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
