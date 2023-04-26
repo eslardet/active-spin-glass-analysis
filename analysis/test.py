@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek as fun
+import analysis_functions_vicsek_new as fun
 import matplotlib.pyplot as plt
 import time
 import scipy.stats as sps
@@ -7,11 +7,12 @@ import os
 import freud
 
 mode = "G"
-nPart = 1000
+nPart = 10
 phi = 1.0
 noise = "0.20"
-K = "1.0_0.0"
-xTy = 5.0
+Rp = 1.0
+K = "0.0_1.0"
+xTy = 1.0
 seed = 1
 min_grid_size=2
 
@@ -91,9 +92,18 @@ min_grid_size=2
 
 # print(time.time()-t0)
 
-import bisect
-a = [0,1,2,3,4,5,6,7,8]
-b = [1,2,3,4,5,6,7,8,9]
 
-index = bisect.bisect_left(a, 5.5)
-print(a[:index])
+
+posFileExact = fun.get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
+x, y = fun.get_pos_ex_snapshot(file=posFileExact)[:2]
+
+x_all = [x]
+
+# inparFile, posFile = fun.get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+
+# x_all = []
+# for i in range(10):
+#     x, y, theta = fun.get_pos_snapshot(posFile, nPart, timestep=i)
+#     x_all.append(x)
+
+print(np.arange(-5,0,1))

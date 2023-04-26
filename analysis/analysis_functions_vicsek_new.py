@@ -1574,84 +1574,23 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-
-
-## TO DO
-# Add time averaging
-# Change difference to be with K_std=0 instead!
-def plot_dist_coupling_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, bin_size=100, bin_ratio=1, r_max=None, K_max=None):
-    # rij = rij_ex(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-
-    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
-    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
-    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
-    couplingFile = os.path.join(sim_dir, "coupling")
-
-    L = np.sqrt(nPart / (phi*xTy))
-    Ly = L
-    Lx = L*xTy
-
-    if r_max == None:
-        r_max = Lx
-
-    with open(couplingFile) as f:
-        line = 0
-        i = 0
-        j = i+1
-        k = nPart-1
-        start_row = 0
-        K_list = []
-        rij_list = []
-        rij_init_list = []
-        for Kij in f:
-            xij = x[i] - x[j]
-            xij = xij - Lx*round(xij/Lx)
-            yij = y[i] - y[j]
-            yij = yij - Ly*round(yij/Ly)
-            rij = np.sqrt(xij**2 + yij**2)
-            # ax.plot(float(Kij), rij[line], 'o', color='tab:blue' , alpha=0.2, ms=1)
-            # ax.plot(float(Kij), rij, 'o', color='tab:blue' , alpha=0.2, ms=1)
-            if rij < r_max:
-                K_list.append(float(Kij))
-                rij_list.append(rij)
-
-            line += 1
-
-            if line == start_row + k:
-                i += 1
-                j = i+1
-                k -= 1
-                start_row = line
-            else:
-                j += 1
-
-
-    fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 
-    # plt.tight_layout()
-    
-    if K_max != None:
-        ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), range=[[-K_max,K_max], [0,r_max]], cmap=cm.jet)
+def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_ex=True, timestep_range=[0]):
+    if pos_ex == True:
+        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
+        x, y = get_pos_ex_snapshot(file=posFileExact)[:2]
+        x_all = [x]
+        y_all = [y]
     else:
-        ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), cmap=cm.jet)
-        
-    ax.set_ylim(bottom=0)
-    ax.set_xlabel(r"$K_{ij}$")
-    ax.set_ylabel(r"$r_{ij}$")
-
-    # plt.show()
-    folder = os.path.abspath('../plots/dist_coupling/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
-
-def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None):
-    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
-    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+        inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+        x_all = []
+        y_all = []
+        for t in timestep_range:
+            x, y = get_pos_snapshot(posFile, nPart, timestep=t)[:2]
+            x_all.append(x)
+            y_all.append(y)
 
     sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     couplingFile = os.path.join(sim_dir, "coupling")
-
 
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
@@ -1659,6 +1598,8 @@ def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None):
 
     if r_max == None:
         r_max = Lx
+    
+    num_t = len(timestep_range)
 
     with open(couplingFile) as f:
         line = 0
@@ -1669,15 +1610,17 @@ def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None):
         K_list = []
         rij_list = []
         for Kij in f:
-            xij = x[i] - x[j]
-            xij = xij - Lx*round(xij/Lx)
-            yij = y[i] - y[j]
-            yij = yij - Ly*round(yij/Ly)
-            rij = np.sqrt(xij**2 + yij**2)
-
-            if rij < r_max:
-                K_list.append(float(Kij))
-                rij_list.append(rij)
+            for t in range(num_t):
+                x = x_all[t]
+                y = y_all[t]
+                xij = x[i] - x[j]
+                xij = xij - Lx*round(xij/Lx)
+                yij = y[i] - y[j]
+                yij = yij - Ly*round(yij/Ly)
+                rij = np.sqrt(xij**2 + yij**2)
+                if rij < r_max:
+                    K_list.append(float(Kij))
+                    rij_list.append(rij)
 
             line += 1
 
@@ -1690,14 +1633,37 @@ def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None):
                 j += 1
     return K_list, rij_list
 
-# Change difference to be with different K_avg shifted to origin instead!
-def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, K_std, Rp, xTy, seed, bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+def plot_dist_coupling_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+
+    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
+    
+    fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 
+    # plt.tight_layout()
+    
+    if K_max != None:
+        ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), range=[[-K_max,K_max], [0,r_max]], cmap=cm.jet)
+    else:
+        ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), cmap=cm.jet)
+        
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(r"$K_{ij}$")
+    ax.set_ylabel(r"$r_{ij}$")
+
+    folder = os.path.abspath('../plots/dist_coupling/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, K_std, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
 
     K = str(K_avg) + "_" + str(K_std)
-    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max)
+    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
     K = str(K_avg_compare) + "_" + str(K_std)
-    K_list_compare, rij_list_compare = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max)
+    K_list_compare, rij_list_compare = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
+    
     ## Shift to origin
+    K_list = [k - K_avg for k in K_list]
     K_list_compare = [k - K_avg_compare for k in K_list_compare]
 
     # fig, ax = plt.subplots(3, figsize=(3,9))
