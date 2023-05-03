@@ -23,18 +23,20 @@ Rp = 1.0
 xTy = 8.0
 # seed_range = np.arange(1,6,1)
 seed = 21
-timestep_range = np.arange(20,101,20)
-time_av = [-2,-1,0]
+timestep_range = np.arange(150,201,10)
+time_av = np.arange(-10,1,1)
 r_max = 3
 #r_bin_num = 100
 # random_sample = True
 # samples = 50000
-bins = 20
+bins = 30
 
 #fun.plot_band_profiles(mode, nPart, phi, noise, K, Rp, xTy, seed)
-# fun.local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=r_max, timestep_range=timestep_range, time_av=time_av)
-fun.local_density_distribution_diff_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=r_max, timestep_range=timestep_range, time_av=time_av, density_cap=8)
+fun.local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=r_max, timestep_range=timestep_range, time_av=time_av, bins=bins)
+# fun.local_density_distribution_diff_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=r_max, timestep_range=timestep_range, time_av=time_av, density_cap=8)
 # fun.local_density_distribution_voronoi(mode, nPart, phi, noise, K, Rp, xTy, seed, timestep_range=timestep_range, time_av=time_av, bins=bins)
+
+# fun.snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True)
 
 #fun.plot_dist_coupling(mode, nPart, phi, noise, K, xTy, seed)
 

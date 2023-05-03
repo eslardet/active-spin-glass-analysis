@@ -323,7 +323,7 @@ for (sig=1; sig<=32; sig++)
     if (savePos) { posFile.close(); }
     if (saveForce) { forceFile.close(); }
     
-    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", noise = " << noise << ", vp = " << vp << ", couplingMode = " << couplingMode << endl;
+    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", noise = " << noise << ", vp = " << vp <<  ", Rp = " << Rp << ", couplingMode = " << couplingMode << endl;
     switch(couplingMode)
     {
         case 'C' : // Constant coupling

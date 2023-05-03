@@ -378,6 +378,18 @@ def del_pos(mode, nPart, phi, noise, K, Rp, xTy, seed):
     sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
     os.remove(os.path.join(sim_dir, "pos"))
 
+def del_files(mode, nPart, phi, noise, K, Rp, xTy, seed, files):
+    """
+    Delete position file to save space
+    """
+    sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
+    for file in files:
+        path = os.path.join(sim_dir, file)
+        if os.path.exists(path):
+            os.remove(path)
+        else:
+            print("No file with name '" + file + "' to delete")
+
 def write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None, remove_pos=False, density_var=False, moments=False):
     """
     Write a file with various statistics from the simulation data (Vicsek order parameter mean, standard deviation, susceptibility)
@@ -1324,7 +1336,7 @@ def local_density_distribution(mode, nPart, phi, noise, K, Rp, xTy, seed, timest
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, timestep_range, time_av=[0], random_sample=False, samples=None, density_cap=10):
+def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, timestep_range, time_av=[0], random_sample=False, samples=None, density_cap=10, bins=100):
     """
     Plot local density distribution for various snapshots over time
     """
@@ -1370,33 +1382,29 @@ def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, 
             n_density_t = ld.compute(system=(box, points), query_points=query_points).density
             n_density.append(n_density_t)
 
-        unique, counts = np.unique(n_density, return_counts=True)
-        counts = counts/len(time_av)
+        # unique, counts = np.unique(n_density, return_counts=True)
+        # counts = counts/len(time_av)
 
-        index_cap = bisect.bisect_left(unique, density_cap)
-        unique = unique[:index_cap]
-        counts = counts[:index_cap]
+        # index_cap = bisect.bisect_left(unique, density_cap)
+        # unique = unique[:index_cap]
+        # counts = counts[:index_cap]
 
         view_time = eqT + timestep*DT
 
-        # window_width = len(unique) / bins
-        # cumsum_vec = np.cumsum(np.insert(counts, 0, 0)) 
-        # ma_vec = (cumsum_vec[window_width:] - cumsum_vec[:-window_width]) / window_width
+        # ax.plot(unique, counts, label="t=" + str(int(view_time)))
 
-        # window = np.ones(int(window_width))/float(window_width)
-        # count_av = np.convolve(counts, window, 'same')
-        ax.plot(unique, counts, label="t=" + str(int(view_time)))
+        # ax.hist(n_density, bins=bins)
 
-        # ax.hist(n_density, bins=100)
-
-        # n,x = np.histogram(n_density, bins=bins)
-        # bin_centers = 0.5*(x[1:]+x[:-1])
-        # ax.plot(bin_centers, n, label="t=" + str(int(view_time)))
+        n,x = np.histogram(n_density, bins=bins)
+        bin_centers = 0.5*(x[1:]+x[:-1])
+        ax.plot(bin_centers, n, label="t=" + str(int(view_time)))
+        # ax.hist(x, n, label="t=" + str(int(view_time)))
 
     ax.set_title(r"Number densities for $r_{max}=$" + str(r_max))
     ax.set_xlabel("Number density")
     ax.set_ylabel("Count")
     ax.legend()
+    ax.set_xlim(right=density_cap)
 
     folder = os.path.abspath('../plots/density_distribution/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
@@ -1574,6 +1582,9 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
+#######################
+## Coupling Analysis ##
+#######################
 def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_ex=True, timestep_range=[0]):
     if pos_ex == True:
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
@@ -1633,10 +1644,14 @@ def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_
                 j += 1
     return K_list, rij_list
 
-def plot_dist_coupling_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+## Add different seeds to same plot??
+def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
 
+    K = str(K_avg) + "_" + str(K_std)
     K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
-    
+    ## Shift to origin
+    K_list = [k - K_avg for k in K_list]
+
     fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 
     # plt.tight_layout()
     
@@ -1656,11 +1671,10 @@ def plot_dist_coupling_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=Tr
     plt.savefig(os.path.join(folder, filename))
 
 def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, K_std, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
-
-    K = str(K_avg) + "_" + str(K_std)
-    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
     K = str(K_avg_compare) + "_" + str(K_std)
     K_list_compare, rij_list_compare = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
+    K = str(K_avg) + "_" + str(K_std)
+    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
     
     ## Shift to origin
     K_list = [k - K_avg for k in K_list]
