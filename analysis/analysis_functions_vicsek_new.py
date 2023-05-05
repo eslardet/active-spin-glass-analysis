@@ -57,7 +57,10 @@ def get_params(inparFile):
     inpar_dict["seed"] = int(r[2][0])
     inpar_dict["noise"] = r[3][0]
     inpar_dict["vp"] = float(r[4][0])
-    inpar_dict["Rp"] = float(r[5][0])
+    try:
+        inpar_dict["Rp"] = float(r[5][0])
+    except:
+        inpar_dict["Rp"] = str(r[5][0])
     inpar_dict["xTy"] = float(r[6][0])
     inpar_dict["mode"] = r[8][0]
     
@@ -574,11 +577,17 @@ def plot_porder_K0(mode, nPart, phi, noise, K_range, Rp, xTy, seed_range):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_porder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
+def plot_porder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
     """
     Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
     Averaged over a number of realizations
     """
+    folder = os.path.abspath('../plots/p_order_vs_Kavg/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
     fig, ax = plt.subplots()
     for nPart in nPart_range:
         for Rp in Rp_range:
@@ -600,17 +609,26 @@ def plot_porder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
                         p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
                     ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                    if save_data == True:
+                        save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
+                        for K_avg in K_avg_range:
+                            save_file.write(str(K_avg) + "\t")
+                        save_file.write("\n")
+                        for p in p_ss:
+                            save_file.write(str(p) + "\t")
+                        save_file.write("\n")
+
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
     # ax.set_xlim([-1,2])
     ax.legend()
 
-    folder = os.path.abspath('../plots/p_order_vs_Kavg/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    if save_file == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
+    plt.savefig(os.path.join(folder, filename + '.png'))
 
 def plot_porder_Kavg_ax(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp, xTy, seed_range, ax):
     """
@@ -1585,12 +1603,17 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
 #######################
 ## Coupling Analysis ##
 #######################
-def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_ex=True, timestep_range=[0]):
+def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_ex=True, init_pos=False, timestep_range=[0]):
     if pos_ex == True:
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
         x, y = get_pos_ex_snapshot(file=posFileExact)[:2]
         x_all = [x]
         y_all = [y]
+    elif init_pos == True:
+        initFile = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='initpos')
+        x, y = get_pos_snapshot(initFile, nPart, timestep=0)[:2]
+        x_all = [x]
+        y_all = [y]     
     else:
         inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
         x_all = []
@@ -1645,10 +1668,10 @@ def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_
     return K_list, rij_list
 
 ## Add different seeds to same plot??
-def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed, pos_ex=True, init_pos=False, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
 
     K = str(K_avg) + "_" + str(K_std)
-    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
+    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range, init_pos=init_pos)
     ## Shift to origin
     K_list = [k - K_avg for k in K_list]
 
@@ -1665,7 +1688,10 @@ def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed
     ax.set_ylabel(r"$r_{ij}$")
 
     folder = os.path.abspath('../plots/dist_coupling/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist.png'
+    if init_pos == True:
+        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist_init.png'
+    else:
+        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
@@ -1679,6 +1705,40 @@ def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, 
     ## Shift to origin
     K_list = [k - K_avg for k in K_list]
     K_list_compare = [k - K_avg_compare for k in K_list_compare]
+
+    # fig, ax = plt.subplots(3, figsize=(3,9))
+    fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 
+
+    # plt.tight_layout()
+    if K_max != None:
+        h1, xedges1, yedges1, image_1 = plt.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), range= [[-K_max,K_max], [0,r_max]], cmap=cm.jet)
+    else: 
+        h1, xedges1, yedges1, image_1 = plt.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), cmap=cm.jet)
+    h0, xedges0, yedges0, image_0 = plt.hist2d(K_list_compare, rij_list_compare, bins=(xedges1, yedges1), cmap=cm.jet)
+    ax.clear()
+    ax.pcolormesh(xedges1, yedges1, (h1-h0).T)
+    
+    # for a in ax:
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(r"$K_{ij}$")
+    ax.set_ylabel(r"$r_{ij}$")
+    # ax.set_ylabel(r"$\langle r_{ij}\rangle_t$") ## when time average uncomment
+
+    # plt.show()
+    folder = os.path.abspath('../plots/dist_coupling/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_histdiff.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+def plot_dist_coupling_hist_diff_init(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+    K = str(K_avg) + "_" + str(K_std)
+    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
+    K_list_compare, rij_list_compare = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, timestep_range=timestep_range, pos_ex=False, init_pos=True)
+    
+    ## Shift to origin
+    K_list = [k - K_avg for k in K_list]
 
     # fig, ax = plt.subplots(3, figsize=(3,9))
     fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 

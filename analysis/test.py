@@ -16,94 +16,18 @@ xTy = 1.0
 seed = 1
 min_grid_size=2
 
-# posFileExact = fun.get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name="pos_exact")
 
+filename = "test_file"
 
-# L = np.sqrt(nPart / (phi*xTy))
-# Ly = L
-# Lx = L*xTy
+save_file = open(filename + ".txt", "w")
 
-# fig, ax = plt.subplots()
+some_data_x = [1.0, 2.0, 3.0, 4.0]
+some_data_y = [0.0, 0.0, 0.0, 1.0]
 
-# x, y, theta, viewtime = fun.get_pos_ex_snapshot(posFileExact)
+for x in some_data_x:
+    save_file.write(str(x) + "\t")
+save_file.close()
 
-
-# r_max = 2
-# r_max_sq = r_max**2
-
-# t0 = time.time()
-# points = np.zeros((nPart, 3))
-# points[:,0] = x
-# points[:,1] = y
-# box = freud.Box.from_box([Lx, Ly])
-# points = box.wrap(points)
-# ld = freud.density.LocalDensity(r_max=r_max, diameter=0)
-# n_nei = ld.compute(system=(box, points)).num_neighbors
-# print(n_nei[:10])
-# print("time=" + str(time.time()-t0))
-
-# t0 = time.time()
-# nei = np.zeros(nPart)
-# for i in range(nPart):
-#     for j in range(i+1, nPart):
-#         xij = x[i]-x[j]
-#         xij = fun.pbc_wrap(xij, Lx)
-#         if np.abs(xij) < r_max:
-#             yij = y[i]-y[j]
-#             yij = fun.pbc_wrap(yij, Ly)
-#             rij_sq = xij**2+yij**2
-#             if rij_sq <= r_max_sq:
-#                 nei[i] += 1
-#                 nei[j] += 1
-# print(nei[:10])
-# print("time=" + str(time.time()-t0))
-
-
-# fig, ax = plt.subplots()
-# ax.hist(n_density, bins=100)
-
-# n,x = np.hist(n_density, bins=100)
-# bin_centers = 0.5*(x[1:]+x[:-1])
-# ax.plot(bin_centers,n)
-
-
-# ax.set_xlabel("Number density")
-# ax.set_ylabel("Probability density")
-
-# folder = os.path.abspath('../plots/density_distribution/')
-# filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
-# if not os.path.exists(folder):
-#     os.makedirs(folder)
-# plt.savefig(os.path.join(folder, filename))
-
-# num = 50000
-# rng = np.random.default_rng(seed=1)
-
-# t0 = time.time()
-# for i in range(num):
-#     a = rng.uniform(0,5,1)
-
-# print(time.time()-t0)
-
-# t0 = time.time()
-# a = rng.uniform(0,5,num)
-# for i in range(num):
-#     b = a[i]
-
-# print(time.time()-t0)
-
-
-
-posFileExact = fun.get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
-x, y = fun.get_pos_ex_snapshot(file=posFileExact)[:2]
-
-x_all = [x]
-
-# inparFile, posFile = fun.get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
-
-# x_all = []
-# for i in range(10):
-#     x, y, theta = fun.get_pos_snapshot(posFile, nPart, timestep=i)
-#     x_all.append(x)
-
-print(np.arange(-5,0,1))
+read_file = open(filename + ".txt", "r")
+for line in read_file:
+    print(line)

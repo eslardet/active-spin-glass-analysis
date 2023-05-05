@@ -619,7 +619,7 @@ def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp
     ax.legend()
 
     folder = os.path.abspath('../plots/p_order_vs_Kavg/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_xTy' + str(xTy) + '.png'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))

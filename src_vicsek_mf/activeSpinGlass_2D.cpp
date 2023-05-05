@@ -102,7 +102,7 @@ for (sig=1; sig<=32; sig++)
     logFile << " --> Particle velocity = " << vp << endl;    
 
     inputFile >> Rp;
-    logFile << " --> Vicsek interaction radius = " << Rp << endl;  
+    logFile << " --> Vicsek interaction radius = " << "Infinite" << endl;  
 
     inputFile >> xTy;
     logFile << " --> Ratio of Lx/Ly = " << xTy << endl;
