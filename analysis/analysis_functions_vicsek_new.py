@@ -23,7 +23,7 @@ def get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed):
     elif mode == "F":
         mode_name = "Ferromagnetic"
 
-    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/Rp' + str(Rp) + '/xTy' + str(xTy) + '/s' + str(seed))
+    sim_dir = os.path.abspath('../../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/Rp' + str(Rp) + '/xTy' + str(xTy) + '/s' + str(seed))
 
     return sim_dir
 
@@ -219,7 +219,9 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=T
     v = np.sin(theta)
     
     fig, ax = plt.subplots(figsize=(10*xTy,10), dpi=72)
-    
+    if view_time == None:
+        view_time = timestep
+    ax.set_title("t=" + str(round(view_time)))
     if neigh_col == True:
         if r_max == None:
             r_max = Rp
@@ -230,6 +232,7 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=T
         ax.quiver(x, y, u, v, color=cols)
         cbar = plt.colorbar(mappable=mapper, ax=ax)
         cbar.set_label('# neighbours', rotation=270)
+        ax.set_title("t=" + str(round(view_time)) + r", $r_{max}$=" + str(r_max))
 
     elif show_color == True:
         norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
@@ -242,9 +245,7 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=T
     ax.set_xlim(0,Lx)
     ax.set_ylim(0,Ly)
     ax.set_aspect('equal')
-    if view_time == None:
-        view_time = timestep
-    ax.set_title("t=" + str(round(view_time)))
+
 
     if save_in_folder == True:
         folder = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
@@ -625,7 +626,7 @@ def plot_porder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
     ax.legend()
 
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
-    if save_file == True:
+    if save_data == True:
         save_file.close()
         os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
     plt.savefig(os.path.join(folder, filename + '.png'))
@@ -1274,7 +1275,7 @@ def neighbour_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=Tru
 
     return nei_av, nei_median, nei_std, nei_max
 
-def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1], print_stats=True):
+def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1], print_stats=True, n_max=None, c_max=None):
     
     av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex, timestep_range)
 
@@ -1288,7 +1289,12 @@ def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True
     ax.bar(unique, counts)
     ax.set_xlabel(r"$\langle N_i\rangle$")
     ax.set_ylabel("Count")
-    ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K=$" + str(K) + r"; $r_{max}=$" + str(r_max))
+    ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K=$" + str(K) + r"; $r_{max}=$" + str(r_max))
+
+    if n_max != None:
+        ax.set_xlim([0,n_max])
+    if c_max != None:
+        ax.set_ylim([0,c_max])
 
     folder = os.path.abspath('../plots/neighbour_hist/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
@@ -1667,13 +1673,18 @@ def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_
                 j += 1
     return K_list, rij_list
 
-## Add different seeds to same plot??
-def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed, pos_ex=True, init_pos=False, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, pos_ex=True, init_pos=False, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None, shift=False):
 
     K = str(K_avg) + "_" + str(K_std)
-    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range, init_pos=init_pos)
+    K_list = []
+    rij_list = []
+    for seed in seed_range:
+        K_seed, rij_seed = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range, init_pos=init_pos)
+        K_list.extend(K_seed)
+        rij_list.extend(rij_seed)
     ## Shift to origin
-    K_list = [k - K_avg for k in K_list]
+    if shift == True:
+        K_list = [k - K_avg for k in K_list]
 
     fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 
     # plt.tight_layout()
@@ -1689,9 +1700,9 @@ def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed
 
     folder = os.path.abspath('../plots/dist_coupling/')
     if init_pos == True:
-        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist_init.png'
+        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_hist_init.png'
     else:
-        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist.png'
+        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_hist.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
@@ -1732,13 +1743,24 @@ def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, 
     plt.savefig(os.path.join(folder, filename))
 
 
-def plot_dist_coupling_hist_diff_init(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+def plot_dist_coupling_hist_diff_init(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None, shift=False):
     K = str(K_avg) + "_" + str(K_std)
-    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
-    K_list_compare, rij_list_compare = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, timestep_range=timestep_range, pos_ex=False, init_pos=True)
+    K_list = []
+    rij_list = []
+    K_list_compare = []
+    rij_list_compare = []
+    for seed in seed_range:
+        K_seed, rij_seed = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
+        K_list.extend(K_seed)
+        rij_list.extend(rij_seed)
+
+        K_list_compare, rij_list_compare = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, timestep_range=timestep_range, pos_ex=False, init_pos=True)
+        K_list_compare.extend(K_seed)
+        rij_list_compare.extend(rij_seed)
     
-    ## Shift to origin
-    K_list = [k - K_avg for k in K_list]
+    if shift == True:
+        K_list = [k - K_avg for k in K_list]
+        K_list_compare = [k - K_avg for k in K_list_compare]
 
     # fig, ax = plt.subplots(3, figsize=(3,9))
     fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 

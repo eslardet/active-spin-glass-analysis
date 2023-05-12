@@ -568,11 +568,18 @@ def plot_porder_K0(mode, nPart, phi, noise, K_range, Rp, xTy, seed_range):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
+def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
     """
     Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
     Averaged over a number of realizations
     """
+
+    folder = os.path.abspath('../plots/p_order_vs_Kavg/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
     fig, ax = plt.subplots()
     for Rp in Rp_range:
         for noise in noise_range:
@@ -612,17 +619,24 @@ def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp
                     p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
                 ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $\phi=$" + str(phi) + r"; $R_p=$" + str(Rp))
+                if save_data == True:
+                    save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
+                    for K_avg in K_avg_range:
+                        save_file.write(str(K_avg) + "\t")
+                    save_file.write("\n")
+                    for p in p_ss:
+                        save_file.write(str(p) + "\t")
+                    save_file.write("\n")
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
     # ax.set_xlim([-1,2])
     ax.legend()
-
-    folder = os.path.abspath('../plots/p_order_vs_Kavg/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    if save_data == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
+    plt.savefig(os.path.join(folder, filename + '.png'))
 
 def plot_porder_Kavg_ax(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp, xTy, seed_range, ax):
     """
