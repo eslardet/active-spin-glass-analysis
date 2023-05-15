@@ -23,7 +23,7 @@ def get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed):
     elif mode == "F":
         mode_name = "Ferromagnetic"
 
-    sim_dir = os.path.abspath('../../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/Rp' + str(Rp) + '/xTy' + str(xTy) + '/s' + str(seed))
+    sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/Rp' + str(Rp) + '/xTy' + str(xTy) + '/s' + str(seed))
 
     return sim_dir
 
@@ -606,7 +606,13 @@ def plot_porder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
                                 error_count += 1
                                 # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
                             else:
-                                p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                                p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                                if np.isnan(p_mean):
+                                    print("Nan")
+                                    print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                    error_count += 1
+                                else:
+                                    p_ss_sum += p_mean
                         p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
                     ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
@@ -1553,8 +1559,11 @@ def get_binder(mode, nPart, phi, noise, K, Rp, xTy, seed_range):
     p_4 = []
     for seed in seed_range:
         stats_dir = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
-        p_2.append(stats_dir["p_2"])
-        p_4.append(stats_dir["p_4"])
+        if np.isnan(stats_dir["p_2"]) or np.isnan(stats_dir["p_4"]):
+            print("Nan, s=" + str(seed))
+        else:
+            p_2.append(stats_dir["p_2"])
+            p_4.append(stats_dir["p_4"])
     
     p_2_av = np.mean(p_2)
     p_4_av = np.mean(p_4)
@@ -1586,8 +1595,13 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
                                 error_count += 1
                                 # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
                             else:
-                                p_2_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_2"]
-                                p_4_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_4"]
+                                stats_dir = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                                if np.isnan(stats_dir["p_2"]) or np.isnan(stats_dir["p_4"]):
+                                    print("Nan, s=" + str(seed))
+                                    error_count += 1
+                                else:
+                                    p_2_sum += stats_dir["p_2"]
+                                    p_4_sum += stats_dir["p_4"]
                         p_2_av = p_2_sum/(len(seed_range)-error_count)
                         p_4_av = p_4_sum/(len(seed_range)-error_count)
 
