@@ -55,7 +55,10 @@ def get_params(inparFile):
     inpar_dict["seed"] = int(r[2][0])
     inpar_dict["noise"] = r[3][0]
     inpar_dict["vp"] = float(r[5][0])
-    inpar_dict["Rp"] = float(r[7][0])
+    try:
+        inpar_dict["Rp"] = float(r[5][0])
+    except:
+        inpar_dict["Rp"] = str(r[5][0])
     inpar_dict["xTy"] = float(r[8][0])
     inpar_dict["mode"] = r[10][0]
     inpar_dict["repulsion"] = r[-1][0]
@@ -620,7 +623,7 @@ def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp
 
                 ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $\phi=$" + str(phi) + r"; $R_p=$" + str(Rp))
                 if save_data == True:
-                    save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
+                    save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
                     for K_avg in K_avg_range:
                         save_file.write(str(K_avg) + "\t")
                     save_file.write("\n")

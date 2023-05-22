@@ -19,7 +19,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 
 nPart=1000
 phi=1.0
-noise=0.70
+noise=0.20
 
 seed=1
 
@@ -47,14 +47,14 @@ K0=0.0
 # KAB=0.0
 # KBB=10.0
 
-KAVG=1.0
-STDK=0.0
+KAVG=0.0
+STDK=8.0
 
 dT=0.005
-DT=0.2
+DT=100.0
 DTex=100.0
-eqT=1000.0
-simulT=200.0
+eqT=0.0
+simulT=100.0
 
 savePos=1
 saveInitPos=0

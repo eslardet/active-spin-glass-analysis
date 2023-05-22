@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import cm, colors
@@ -9,9 +10,9 @@ import bisect
 
 import csv, os
 
-num_Kstd = 4
+num_Kstd = 2
 
-file = os.path.abspath("plot/rep_Rp_phi0.1.txt")
+file = os.path.abspath("plot/N5k_mf_compare.txt")
 
 with open(file) as f:
         reader = csv.reader(f, delimiter="\n")
@@ -20,6 +21,7 @@ with open(file) as f:
 fig, ax = plt.subplots()
 for k in range(num_Kstd):
     params = r[3*k][0].split('\t')
+    print(params)
     K_std = params[3]
     Rp = params[1]
 
@@ -29,7 +31,9 @@ for k in range(num_Kstd):
     p_ss = r[3*k+2][0].split('\t')[:-1]
     p_ss_plot = [float(i) for i in p_ss]
 
-    ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_p=$" + str(Rp))
+    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_p=$" + str(Rp))
+    ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
+    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$K_{STD}=$" + str(K_std))
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
 params = r[3*k][0].split('\t')
@@ -37,14 +41,18 @@ nPart = params[0]
 Rp = params[1]
 noise = params[2]
 Kstd = params[3]
-# rho = 1.0
+rho = 1.0
 phi = 0.1
 
-ax.set_xlabel(r"$K_{AVG}$")
-ax.set_ylabel(r"Polar order parameter, $\Psi$")
+ax.set_xlabel(r"$K_{AVG}$", fontsize=16)
+ax.set_ylabel(r"Polar order parameter, $\Psi$", fontsize=16)
 ax.set_ylim([0,1])
-ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd))
-ax.legend(loc="lower right")
+# ax.set_title("With repulsion", fontsize=14)
+# plt.suptitle("Without repulsion", fontsize=14)
+# ax.set_title("With repulsion ($N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp) + ")", fontsize=14)
+# ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(rho) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp) + r"; $v_0=1.0$", fontsize=10)
+ax.set_title("Rep vs no rep MF; " + r"$N=$" + str(nPart) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd))
+ax.legend(loc="lower right", fontsize=14)
 plt.show()
 
 
