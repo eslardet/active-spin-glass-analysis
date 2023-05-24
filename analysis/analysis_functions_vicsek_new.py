@@ -296,8 +296,8 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
     norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
     plt.set_cmap('hsv')
 
-    # mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
-    # plt.colorbar(mappable=mapper, ax=ax)
+    mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
+    plt.colorbar(mappable=mapper, ax=ax)
 
     x = pbc_wrap(x_all[0],Lx)
     y = pbc_wrap(y_all[0],Ly)
@@ -325,6 +325,77 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
 
     folder = os.path.abspath('../animations_vicsek')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    ani.save(os.path.join(folder, filename))
+
+def animate_highlight(mode, nPart, phi, noise, K, Rp, xTy, seed, h, min_T=None, max_T=None):
+    """
+    Make animation from positions file
+    """
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+
+    x_all, y_all, theta_all = get_pos_arr(inparFile=inparFile, posFile=posFile, min_T=min_T, max_T=max_T)
+    
+    inpar_dict = get_params(inparFile)
+    
+    nPart = inpar_dict["nPart"]
+    phi = inpar_dict["phi"]
+    noise = inpar_dict["noise"]
+    mode = inpar_dict["mode"]
+    DT = inpar_dict["DT"]
+    seed = inpar_dict["seed"]
+    xTy = inpar_dict["xTy"]
+
+    if min_T == None:
+        min_T = 0
+
+    with open(posFile) as f:
+        reader = csv.reader(f, delimiter="\t")
+        startT = float(list(reader)[6][0])
+
+    plt.rcParams["animation.html"] = "jshtml"
+    plt.ioff()
+    plt.rcParams['animation.embed_limit'] = 2**128
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+    
+    fig, ax = plt.subplots(figsize=(5*xTy,5))
+
+    nh = list(set(list(range(nPart))) - set(h))
+
+    # mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
+    # plt.colorbar(mappable=mapper, ax=ax)
+
+    x = pbc_wrap(x_all[0],Lx)
+    y = pbc_wrap(y_all[0],Ly)
+    theta = theta_all[0]
+    col = ['k'] * nPart
+    for i in h:
+        col[i] = 'r'
+    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta), color=col)
+
+    def init():
+        ax.set_xlim(0, Lx)
+        ax.set_ylim(0, Ly)
+        return arrows,
+
+    def update(n):
+        x = pbc_wrap(x_all[n],Lx)
+        y = pbc_wrap(y_all[n],Ly)
+        theta = theta_all[n]
+        arrows.set_offsets(np.c_[x, y])
+        arrows.set_UVC(np.cos(theta), np.sin(theta))
+        ax.set_title("t = " + str(round(n*DT+startT+min_T, 1)), fontsize=10, loc='left')
+        
+        return arrows,
+
+    ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=10, blit=True)
+
+    folder = os.path.abspath('../animations_vicsek')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_highlights.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))
@@ -2060,6 +2131,15 @@ def plot_binder_noise(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ra
 #######################
 ## Coupling Analysis ##
 #######################
+def get_couplings(mode, nPart, phi, noise, K, Rp, xTy, seed):
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    couplingFile = os.path.join(sim_dir, "coupling")
+    with open(couplingFile) as f:
+        K_list = []
+        for Kij in f:
+            K_list.append(float(Kij))
+    return K_list
+
 def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_ex=True, init_pos=False, timestep_range=[0]):
     if pos_ex == True:
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
@@ -2146,8 +2226,8 @@ def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed
         ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), cmap=cm.jet)
         
     ax.set_ylim(bottom=0)
-    ax.set_xlabel(r"$K_{ij}$", fontsize=48)
-    ax.set_ylabel(r"$r_{ij}$", fontsize=48)
+    ax.set_xlabel(r"$K_{ij}$")
+    ax.set_ylabel(r"$r_{ij}$")
 
     folder = os.path.abspath('../plots/dist_coupling/')
     if init_pos == True:
@@ -2300,8 +2380,8 @@ def write_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, tape_time):
             if index not in in_contact_t:
                 if start_contact[index] != 0:
                     # contact_duration.append(t-start_contact[index])
-                    i = nPart - 2 - np.floor(np.sqrt(-8*index + 4*nPart*(nPart-1)-7)/2.0 - 0.5)
-                    j = index + i + 1 - nPart*(nPart-1)/2 + (nPart-i)*((nPart-i)-1)/2
+                    i = int(nPart - 2 - np.floor(np.sqrt(-8*index + 4*nPart*(nPart-1)-7)/2.0 - 0.5))
+                    j = int(index + i + 1 - nPart*(nPart-1)/2 + (nPart-i)*((nPart-i)-1)/2)
                     contactsFile.write(str(i) + '\t' + str(j) + '\t' + str(t-start_contact[index]) + '\n')
 
         # update for next time step
@@ -2312,8 +2392,8 @@ def write_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, tape_time):
         if index in in_contact_t0:
             if start_contact[index] == 0:
                 # contact_duration.append(tape_time)
-                i = nPart - 2 - np.floor(np.sqrt(-8*index + 4*nPart*(nPart-1)-7)/2.0 - 0.5)
-                j = index + i + 1 - nPart*(nPart-1)/2 + (nPart-i)*((nPart-i)-1)/2
+                i = int(nPart - 2 - np.floor(np.sqrt(-8*index + 4*nPart*(nPart-1)-7)/2.0 - 0.5))
+                j = int(index + i + 1 - nPart*(nPart-1)/2 + (nPart-i)*((nPart-i)-1)/2)
                 contactsFile.write(str(i) + '\t' + str(j) + '\t' + str(tape_time) + '\n')
     
     contactsFile.close()
@@ -2321,6 +2401,8 @@ def write_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, tape_time):
 
 def read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max):
     sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
+    if not os.path.exists(os.path.join(sim_dir, 'contacts_r' + str(r_max))):
+        raise Exception("Contacts file does not exist")
     contactsFile = os.path.join(sim_dir, "contacts_r" + str(r_max))
     i = []
     j = []
@@ -2339,16 +2421,60 @@ def read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max):
     return i, j, duration, r_max, tape_time
 
 ## Add seed range?
-def plot_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max):
+def plot_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, log=False):
     i, j, contact_duration, r_max, tape_time = read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max)
 
     fig, ax = plt.subplots()
+
     ax.hist(contact_duration, bins=np.arange(1,tape_time+1), density=True)
+    if log == True:
+        ax.set_yscale("log")
     ax.set_title(r"$r_{max}=$" + str(r_max) + r"; $T=$" + str(tape_time))
     ax.set_xlabel("Pairwise contact time")
     ax.set_ylabel("Density")
     folder = os.path.abspath('../plots/contact_duration/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_rmax' + str(r_max) + '.png'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_rmax' + str(r_max)
+    if log == True:
+        filename += "_log"
+    filename += '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def plot_K_vs_contact_time(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, log=False):
+    ix, jx, contact_duration, r_max, tape_time = read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max)
+
+    Kij = get_couplings(mode, nPart, phi, noise, K, Rp, xTy, seed)
+
+    K_t = []
+
+    for t in np.unique(contact_duration):
+        contact_t = [i for i,v in enumerate(contact_duration) if v==t]
+        ixs = [int(ix[k]) for k in contact_t]
+        jxs = [int(jx[k]) for k in contact_t]
+
+        K_contact = []
+        for i,j in zip(ixs,jxs):
+            index = int((nPart*(nPart-1)/2) - (nPart-i)*((nPart-i)-1)/2 + j - i - 1)
+            K_contact.append(Kij[index])
+
+
+        K_t.append(np.mean(K_contact))
+
+    fig, ax = plt.subplots()
+
+    ax.plot(np.unique(contact_duration), K_t, '-o')
+    ax.set_title(r"$r_{max}=$" + str(r_max))
+    ax.set_xlabel("Neighbour duration")
+    ax.set_ylabel(r"Mean $K_{ij}$")
+    if log == True:
+        ax.set_xscale("log")
+
+    folder = os.path.abspath('../plots/K_vs_contact_time/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_rmax' + str(r_max)
+    if log == True:
+        filename += "_log"
+    filename += '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))

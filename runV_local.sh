@@ -54,7 +54,7 @@ dT=0.005
 DT=1.0
 DTex=100.0
 eqT=500.0
-simulT=100.0
+simulT=300.0
 
 savePos=1
 saveInitPos=0
