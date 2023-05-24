@@ -1467,6 +1467,7 @@ def scatter_corr_vel_fluc(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True
 # Make function with different modes - y
 # Normalize! - y
 # Add multiple seeds - y
+# Add time average : TO DO
 # Create pipeline
 def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, scatter=False, xscale='lin', yscale='lin', d_type='v', r_max=10, r_bin_num=20):
     """
@@ -1477,6 +1478,7 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
     """
     rij_all = []
     corr_all = []
+    r_max_sq = r_max**2
 
     for seed in seed_range:
         if pos_ex == True:
@@ -1501,16 +1503,15 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
 
         dv = [v - av_vel for v in velocity]
 
-        av_unit = av_vel / np.linalg.norm(av_vel)
-        av_norm = np.array([-av_vel[1], av_vel[0]])
-
         if d_type == 'v':
             corr_dot = velocity
         elif d_type == 'dv':
             corr_dot = dv
         elif d_type == 'dv_par':
+            av_unit = av_vel / np.linalg.norm(av_vel)
             corr_dot = [np.dot(f, av_unit) * av_unit for f in dv]
         elif d_type == 'dv_perp':
+            av_norm = np.array([-av_vel[1], av_vel[0]])
             corr_dot = [np.dot(f, av_norm) * av_norm for f in dv]
         else:
             raise Exception("Type not valid. Must be 'v', 'dv', 'dv_par', or 'dv_perp'")
@@ -1525,12 +1526,14 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
             for j in range(i+1, nPart):
                 xij = x[i] - x[j]
                 xij = xij - Lx*round(xij/Lx)
-                yij = y[i] - y[j]
-                yij = yij - Ly*round(yij/Ly)
-                rij = np.sqrt(xij**2 + yij**2)
-                if rij < r_max:
-                    rij_all.append(rij)
-                    corr_all.append(np.dot(corr_dot[i],corr_dot[j])/c0)
+                if xij < r_max:
+                    yij = y[i] - y[j]
+                    yij = yij - Ly*round(yij/Ly)
+                    rij_sq = xij**2 + yij**2
+                    if rij_sq < r_max_sq:
+                        rij = np.sqrt(rij_sq)
+                        rij_all.append(rij)
+                        corr_all.append(np.dot(corr_dot[i],corr_dot[j])/c0)
                 
                 # ax.plot(rij, corr, '+', color='tab:blue', alpha=0.2)
     
@@ -1571,18 +1574,17 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
     ax.set_xlabel(r"$r$")
     ax.set_ylabel(r"$C(r)$ for " + d_type)
 
+    # plt.show()
 
-    plt.show()
-
-    # folder = os.path.abspath('../plots/correlation/')
-    # filename = str(type) + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
-    # if not os.path.exists(folder):
-    #     os.makedirs(folder)
-    # plt.savefig(os.path.join(folder, filename))
+    folder = os.path.abspath('../plots/correlation_velocity/')
+    filename = str(d_type) + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
 
 ## Add time average later
-def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, scatter=False, xscale='lin', yscale='lin', rho_r_max=1, samples=None, r_max=10, r_bin_num=20):
+def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, xscale='lin', yscale='lin', rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=20):
     """
     Plot correlation function for the velocity fluctations perpendicular to the mean heading angle with line from scatterplot
 
@@ -1591,6 +1593,7 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=Tr
     """
     rij_all = []
     corr_all = []
+    corr_r_max_sq = corr_r_max**2
 
     for seed in seed_range:
         if pos_ex == True:
@@ -1624,37 +1627,43 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=Tr
         points[:,1] = y
         points = box.wrap(points)
 
-        # get local density
+        # get local densities
         rho_all = ld.compute(system=(box, points), query_points=rand_points).density
-        d_fluc = [rho - phi for rho in rho_all]
+
+        rho_mean = np.mean(rho_all)
+        d_fluc = [rho - rho_mean for rho in rho_all]
+        # print(type(d_fluc))
 
         corr_dot = d_fluc
 
-        # Normalization factor
+        # normalization
         c0 = 0
         for i in range(samples):
-            c0 += np.dot(corr_dot[i], corr_dot[i])
-        c0 = c0/nPart
+            c0 += corr_dot[i] * corr_dot[i]
+        c0 = c0/samples
 
-        # for i in range(samples):
-        #     for j in range(i+1, samples):
-                ## get distance between points
-                # rij = np.sqrt(xij**2 + yij**2)
-                # if rij < r_max:
-                #     rij_all.append(rij)
-                #     corr_all.append(np.dot(corr_dot[i],corr_dot[j])/c0)
-                
-                # ax.plot(rij, corr, '+', color='tab:blue', alpha=0.2)
-    
+        for i in range(samples):
+            for j in range(i+1, samples):
+                xij = rand_points[i,0] - rand_points[j,0]
+                xij = xij - Lx*round(xij/Lx)
+                if xij < corr_r_max:
+                    yij = rand_points[i,1] - rand_points[j,1]
+                    yij = yij - Ly*round(yij/Ly)
+                    rij_sq = xij**2 + yij**2
+                    if rij_sq < corr_r_max_sq:
+                        rij = np.sqrt(rij_sq)
+                        rij_all.append(rij)
+                        corr_all.append(corr_dot[i]*corr_dot[j]/c0)
+
     corr_all = np.array(corr_all)
     rij_all = np.array(rij_all)
     corr_bin_av = []
-    bin_size = r_max / r_bin_num
+    bin_size = corr_r_max / r_bin_num
 
     if xscale == 'lin':
-        r_plot = np.linspace(0, r_max, num=r_bin_num, endpoint=False) + bin_size/2
+        r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
     elif xscale == 'log':
-        r_plot = np.logspace(-5, np.log10(r_max), num=r_bin_num, endpoint=True)
+        r_plot = np.logspace(-5, np.log10(corr_r_max), num=r_bin_num, endpoint=True)
     else:
         raise Exception("xscale type not valid")
 
@@ -1663,14 +1672,12 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=Tr
         try:
             upper = r_plot[i+1]
         except:
-            upper = r_max+1
+            upper = corr_r_max+1
         idx = np.where((rij_all>lower)&(rij_all<upper))
         corr = np.mean(corr_all[idx])
         corr_bin_av.append(corr)
 
     fig, ax = plt.subplots()
-    if scatter == True:
-        ax.plot(rij_all, corr_all, '+', alpha=0.2)
     ax.plot(r_plot, np.abs(corr_bin_av), '-')
 
     if xscale == 'log':
@@ -1684,13 +1691,13 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=Tr
     ax.set_ylabel(r"$C(r)$")
 
 
-    plt.show()
+    # plt.show()
 
-    # folder = os.path.abspath('../plots/correlation/')
-    # filename = str(type) + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
-    # if not os.path.exists(folder):
-    #     os.makedirs(folder)
-    # plt.savefig(os.path.join(folder, filename))
+    folder = os.path.abspath('../plots/correlation_density/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
 
 
