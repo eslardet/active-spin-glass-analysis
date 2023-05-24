@@ -348,7 +348,10 @@ def plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_
     with open(posFile) as f:
         line_count = 1
         timestep = int(min_T//DT)
+        startT = 0
         for line in f:
+            if line_count == 7:
+                startT = float(line)
             if 8 + timestep*(nPart + 1) <= line_count <= 7 + timestep*(nPart + 1) + nPart:
                 if line_count == 8 + timestep*(nPart+1):
                     cos_sum = 0
@@ -360,10 +363,11 @@ def plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_
                     p_order.append(np.sqrt(cos_sum**2+sin_sum**2)/nPart)
                     timestep += 1
             line_count += 1
-            if timestep*DT > max_T:
+            if timestep*DT > max_T-startT:
                 break
+                
     fig, ax = plt.subplots()
-    t_plot = np.arange(0, max_T+DT/4, DT)
+    t_plot = np.arange(startT, max_T+DT/4, DT)
     ax.plot(t_plot, p_order)
     ax.set_xlabel("time")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
@@ -1505,6 +1509,121 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
     #     os.makedirs(folder)
     # plt.savefig(os.path.join(folder, filename))
 
+
+## Add time average later
+def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, scatter=False, xscale='lin', yscale='lin', rho_r_max=1, samples=None, r_max=10, r_bin_num=20):
+    """
+    Plot correlation function for the velocity fluctations perpendicular to the mean heading angle with line from scatterplot
+
+    Type can be: v (usual velocity correlation), dv (fluctuation from mean heading angle), dv_par (flucation parallel to mean heading angle),
+    or dv_perp (fluctuation perpendicular to mean heading angle)
+    """
+    rij_all = []
+    corr_all = []
+
+    for seed in seed_range:
+        if pos_ex == True:
+            posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
+            x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+        else: 
+            inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+            inpar_dict = get_params(inparFile)
+            DT = inpar_dict["DT"]
+            simulT = inpar_dict["simulT"]
+            eqT = inpar_dict["eqT"]
+            if timestep == None:
+                timestep = int((simulT-eqT)/DT) 
+            x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+
+        L = np.sqrt(nPart / (phi*xTy))
+        Ly = L
+        Lx = L*xTy
+        box = freud.Box.from_box([Lx, Ly])
+        ld = freud.density.LocalDensity(r_max=rho_r_max, diameter=0)
+
+        rng = np.random.default_rng(seed=1)
+        if samples == None:
+            samples = nPart
+        rand_points = np.zeros((samples, 3))
+        rand_points[:,0] = rng.uniform(-Lx/2,Lx/2,samples)
+        rand_points[:,1] = rng.uniform(-Ly/2,Ly/2,samples)
+
+        points = np.zeros((nPart, 3))
+        points[:,0] = x
+        points[:,1] = y
+        points = box.wrap(points)
+
+        # get local density
+        rho_all = ld.compute(system=(box, points), query_points=rand_points).density
+        d_fluc = [rho - phi for rho in rho_all]
+
+        corr_dot = d_fluc
+
+        # Normalization factor
+        c0 = 0
+        for i in range(samples):
+            c0 += np.dot(corr_dot[i], corr_dot[i])
+        c0 = c0/nPart
+
+        # for i in range(samples):
+        #     for j in range(i+1, samples):
+                ## get distance between points
+                # rij = np.sqrt(xij**2 + yij**2)
+                # if rij < r_max:
+                #     rij_all.append(rij)
+                #     corr_all.append(np.dot(corr_dot[i],corr_dot[j])/c0)
+                
+                # ax.plot(rij, corr, '+', color='tab:blue', alpha=0.2)
+    
+    corr_all = np.array(corr_all)
+    rij_all = np.array(rij_all)
+    corr_bin_av = []
+    bin_size = r_max / r_bin_num
+
+    if xscale == 'lin':
+        r_plot = np.linspace(0, r_max, num=r_bin_num, endpoint=False) + bin_size/2
+    elif xscale == 'log':
+        r_plot = np.logspace(-5, np.log10(r_max), num=r_bin_num, endpoint=True)
+    else:
+        raise Exception("xscale type not valid")
+
+    for i in range(r_bin_num):
+        lower = r_plot[i]
+        try:
+            upper = r_plot[i+1]
+        except:
+            upper = r_max+1
+        idx = np.where((rij_all>lower)&(rij_all<upper))
+        corr = np.mean(corr_all[idx])
+        corr_bin_av.append(corr)
+
+    fig, ax = plt.subplots()
+    if scatter == True:
+        ax.plot(rij_all, corr_all, '+', alpha=0.2)
+    ax.plot(r_plot, np.abs(corr_bin_av), '-')
+
+    if xscale == 'log':
+        ax.set_xscale('log')
+    if yscale == 'log':
+        ax.set_yscale('log')
+    else:
+        ax.set_ylim(bottom=0)
+
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C(r)$")
+
+
+    plt.show()
+
+    # folder = os.path.abspath('../plots/correlation/')
+    # filename = str(type) + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
+    # if not os.path.exists(folder):
+    #     os.makedirs(folder)
+    # plt.savefig(os.path.join(folder, filename))
+
+
+
+
 ###############################
 ## Average neighbour numbers ##
 ###############################
@@ -1820,6 +1939,9 @@ def local_density_distribution_voronoi(mode, nPart, phi, noise, K, Rp, xTy, seed
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
+#####################
+## Binder Cumulant ##
+#####################
 
 def get_binder(mode, nPart, phi, noise, K, Rp, xTy, seed_range):
     p_2 = []
@@ -2112,6 +2234,121 @@ def plot_dist_coupling_hist_diff_init(mode, nPart, phi, noise, K_avg, K_std, Rp,
     # plt.show()
     folder = os.path.abspath('../plots/dist_coupling/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_histdiff.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+#############################
+## Neighbour contact times ##
+#############################
+
+def get_nlist(posFile, nPart, box, timestep, r_max):
+    x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=timestep)
+
+    points = np.zeros((nPart, 3))
+    points[:,0] = x
+    points[:,1] = y
+    points = box.wrap(points)
+
+    aq = freud.locality.AABBQuery(box, points)
+
+    query_points = points
+
+    query_result = aq.query(query_points, dict(r_max=r_max, exclude_ii=True))
+    nlist = query_result.toNeighborList()
+    return nlist
+
+def write_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, tape_time):
+
+    # Initialize stuff
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    box = freud.Box.from_box([Lx, Ly])
+
+    contactsFile = open(os.path.join(sim_dir, "contacts_r" + str(r_max)), "w")
+    contactsFile.write(str(r_max) + '\t' + str(tape_time) + '\n')
+
+    nlist = get_nlist(posFile=posFile, nPart=nPart, box=box, timestep=0, r_max=r_max)
+
+    in_contact_t0 = []
+    for (i,j) in nlist:
+        if j>i:
+            index = int((nPart*(nPart-1)/2) - (nPart-i)*((nPart-i)-1)/2 + j - i - 1)
+            in_contact_t0.append(index)
+
+    in_contact_t_old = in_contact_t0
+    start_contact = np.zeros(int(nPart*(nPart-1)/2))
+    # contact_duration = []
+
+    # Start going through timesteps
+    for t in range(1,tape_time+1):
+        in_contact_t = []
+        nlist = get_nlist(posFile=posFile, nPart=nPart, box=box, timestep=t, r_max=r_max)
+        for (i,j) in nlist:
+            if j>i:
+                index = int((nPart*(nPart-1)/2) - (nPart-i)*((nPart-i)-1)/2 + j - i - 1)
+                in_contact_t.append(index)
+                if index not in in_contact_t_old:
+                    start_contact[index] = t
+
+        # check if contact has ended
+        for index in in_contact_t_old:
+            if index not in in_contact_t:
+                if start_contact[index] != 0:
+                    # contact_duration.append(t-start_contact[index])
+                    i = nPart - 2 - np.floor(np.sqrt(-8*index + 4*nPart*(nPart-1)-7)/2.0 - 0.5)
+                    j = index + i + 1 - nPart*(nPart-1)/2 + (nPart-i)*((nPart-i)-1)/2
+                    contactsFile.write(str(i) + '\t' + str(j) + '\t' + str(t-start_contact[index]) + '\n')
+
+        # update for next time step
+        in_contact_t_old = in_contact_t
+
+    # Full simulation tape contacts
+    for index in in_contact_t:
+        if index in in_contact_t0:
+            if start_contact[index] == 0:
+                # contact_duration.append(tape_time)
+                i = nPart - 2 - np.floor(np.sqrt(-8*index + 4*nPart*(nPart-1)-7)/2.0 - 0.5)
+                j = index + i + 1 - nPart*(nPart-1)/2 + (nPart-i)*((nPart-i)-1)/2
+                contactsFile.write(str(i) + '\t' + str(j) + '\t' + str(tape_time) + '\n')
+    
+    contactsFile.close()
+
+
+def read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max):
+    sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
+    contactsFile = os.path.join(sim_dir, "contacts_r" + str(r_max))
+    i = []
+    j = []
+    duration = []
+    with open(contactsFile) as f:
+        line_count = 1
+        for line in f:
+            if line_count == 1:
+                r_max = float(line.split('\t')[0])
+                tape_time = int(line.split('\t')[1])
+            else:
+                i.append(float(line.split('\t')[0]))
+                j.append(float(line.split('\t')[1]))
+                duration.append(float(line.split('\t')[2]))
+            line_count += 1
+    return i, j, duration, r_max, tape_time
+
+## Add seed range?
+def plot_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max):
+    i, j, contact_duration, r_max, tape_time = read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max)
+
+    fig, ax = plt.subplots()
+    ax.hist(contact_duration, bins=np.arange(1,tape_time+1), density=True)
+    ax.set_title(r"$r_{max}=$" + str(r_max) + r"; $T=$" + str(tape_time))
+    ax.set_xlabel("Pairwise contact time")
+    ax.set_ylabel("Density")
+    folder = os.path.abspath('../plots/contact_duration/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_rmax' + str(r_max) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
