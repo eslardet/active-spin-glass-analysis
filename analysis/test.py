@@ -1,4 +1,4 @@
 import numpy as np
 
-a = []
-print(np.mean(a))
+for xscale, yscale in zip(["lin", "lin", "log"], ["lin", "log", "log"]):
+    print(xscale, yscale)

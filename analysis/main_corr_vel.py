@@ -17,14 +17,15 @@ Rp = 1.0
 xTy = 1.0
 seed_range = np.arange(1,2,1)
 
-xscale='lin'
-yscale='lin'
+linlin=True
+loglin=True
+loglog=False
 d_type='dv'
 r_max=10
 r_bin_num=20
 
 t0 = time.time()
-fun.plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, xscale=xscale, yscale=yscale, d_type=d_type, r_max=r_max, r_bin_num=r_bin_num)
+fun.plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type=d_type, r_max=r_max, r_bin_num=r_bin_num, linlin=linlin, loglin=loglin, loglog=loglog)
 
 print("Time taken: " + str(time.time() - t0))
 

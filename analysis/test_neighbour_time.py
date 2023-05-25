@@ -18,8 +18,8 @@ Rp = 1.0
 K = "0.0_8.0"
 xTy = 1.0
 seed = 1
-r_max = 1
-tape_time = 150
+r_max = 2
+tape_time = 100
 
 # fun.write_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, tape_time)
 

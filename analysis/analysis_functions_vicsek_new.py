@@ -1469,7 +1469,7 @@ def scatter_corr_vel_fluc(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True
 # Add multiple seeds - y
 # Add time average : TO DO
 # Create pipeline
-def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, scatter=False, xscale='lin', yscale='lin', d_type='v', r_max=10, r_bin_num=20):
+def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, linlin=True, loglin=True, loglog=True, d_type='v', r_max=10, r_bin_num=20):
     """
     Plot correlation function for the velocity fluctations perpendicular to the mean heading angle with line from scatterplot
 
@@ -1536,18 +1536,11 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
                         corr_all.append(np.dot(corr_dot[i],corr_dot[j])/c0)
                 
                 # ax.plot(rij, corr, '+', color='tab:blue', alpha=0.2)
-    
+
     corr_all = np.array(corr_all)
     rij_all = np.array(rij_all)
     corr_bin_av = []
     bin_size = r_max / r_bin_num
-
-    if xscale == 'lin':
-        r_plot = np.linspace(0, r_max, num=r_bin_num, endpoint=False) + bin_size/2
-    elif xscale == 'log':
-        r_plot = np.logspace(-5, np.log10(r_max), num=r_bin_num, endpoint=True)
-    else:
-        raise Exception("xscale type not valid")
 
     for i in range(r_bin_num):
         lower = r_plot[i]
@@ -1559,28 +1552,47 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
         corr = np.mean(corr_all[idx])
         corr_bin_av.append(corr)
 
-    fig, ax = plt.subplots()
-    if scatter == True:
-        ax.plot(rij_all, corr_all, '+', alpha=0.2)
-    ax.plot(r_plot, np.abs(corr_bin_av), '-')
+    xscale_all = []
+    yscale_all = []
+    if linlin == True:
+        xscale_all.append("lin")
+        yscale_all.append("lin")
+    if loglin == True:
+        xscale_all.append("lin")
+        yscale_all.append("log")
+    if loglog == True:
+        xscale_all.append("log")
+        yscale_all.append("log")
 
-    if xscale == 'log':
-        ax.set_xscale('log')
-    if yscale == 'log':
-        ax.set_yscale('log')
-    else:
-        ax.set_ylim(bottom=0)
+    for xscale, yscale in zip(xscale_all, yscale_all):
+        if xscale == 'lin':
+            r_plot = np.linspace(0, r_max, num=r_bin_num, endpoint=False) + bin_size/2
+        elif xscale == 'log':
+            r_plot = np.logspace(-5, np.log10(r_max), num=r_bin_num, endpoint=True)
+        else:
+            raise Exception("xscale type not valid")
 
-    ax.set_xlabel(r"$r$")
-    ax.set_ylabel(r"$C(r)$ for " + d_type)
+        fig, ax = plt.subplots()
+        ax.plot(r_plot, np.abs(corr_bin_av), '-')
 
-    # plt.show()
+        if xscale == 'log':
+            ax.set_xscale('log')
+        if yscale == 'log':
+            ax.set_yscale('log')
+        else:
+            ax.set_ylim(bottom=0)
 
-    folder = os.path.abspath('../plots/correlation_velocity/')
-    filename = str(d_type) + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
+        ax.set_xlabel(r"$r$")
+        ax.set_ylabel(r"$C(r)$ for " + d_type)
+
+        # plt.show()
+
+        folder = os.path.abspath('../plots/correlation_velocity/')
+        filename = str(d_type) + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + xscale + yscale + '.png'
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        plt.savefig(os.path.join(folder, filename))
+
 
 
 ## Add time average later
