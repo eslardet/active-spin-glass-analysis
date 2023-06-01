@@ -651,10 +651,10 @@ def plot_porder_Kavg_ax(mode, nPart, phi, noise_range, K_avg_range, K_std_range,
     for noise in noise_range:
         for K_std in K_std_range:
             p_ss = []
-            error_count = 0
             for K_avg in K_avg_range:
                 K = str(K_avg) + "_" + str(K_std)
                 p_ss_sum = 0
+                error_count = 0
                 for seed in seed_range:
                     sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
                     if not os.path.exists(os.path.join(sim_dir, 'stats')):
@@ -1060,10 +1060,10 @@ def plot_var_density_Kavg(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp,
     fig, ax = plt.subplots()
     for K_std in K_std_range:
         vars = []
-        error_count = 0
         for K_avg in K_avg_range:
             K = str(K_avg) + "_" + str(K_std)
             var_sum = 0
+            error_count = 0
             for seed in seed_range:
                 try:
                     var_sum += read_stats(mode, nPart, phi, noise, K, Rp, xTy, seed)["d_var"]

@@ -14,9 +14,9 @@ K_std_range = [1.0, 2.0, 8.0]
 Rp = 1.0
 xTy = 1.0
 seed = 1
-r_max = 5
-n_max = None
-c_max = None
+r_max = 1
+n_max = 35
+c_max = 1800
 
 stats_list = []
 
@@ -25,10 +25,10 @@ stats_list = []
 # fun.snapshot(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True)
 
 # for K_std in K_std_range:
-K_std = 8.0
+K_std = 1.0
 K = str(K_avg) + "_" + str(K_std)
-# fun.neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=r_max, n_max=n_max, c_max=c_max)
-fun.snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True, neigh_col=True, r_max=r_max)
+fun.neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=r_max, n_max=n_max, c_max=c_max)
+# fun.snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True, neigh_col=True, r_max=r_max)
 # print(fun.neighbour_stats(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True))
 
 # for K_std in K_std_range:

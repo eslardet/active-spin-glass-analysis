@@ -10,9 +10,9 @@ import bisect
 
 import csv, os
 
-num_Kstd = 2
+num_Kstd = 8
 
-file = os.path.abspath("plot/N5k_mf_compare.txt")
+file = os.path.abspath("plot/no_rep_full.txt")
 
 with open(file) as f:
         reader = csv.reader(f, delimiter="\n")
@@ -31,8 +31,12 @@ for k in range(num_Kstd):
     p_ss = r[3*k+2][0].split('\t')[:-1]
     p_ss_plot = [float(i) for i in p_ss]
 
-    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_p=$" + str(Rp))
-    ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
+    ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp))
+    # if str(Rp) == "I":
+    #     ax.plot(K_avg_plot, p_ss_plot, "--", label=r"$R_I=\infty$", color="black")
+    # else:
+    #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
+    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$K_{STD}=$" + str(K_std))
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
@@ -44,15 +48,19 @@ Kstd = params[3]
 rho = 1.0
 phi = 0.1
 
-ax.set_xlabel(r"$K_{AVG}$", fontsize=16)
-ax.set_ylabel(r"Polar order parameter, $\Psi$", fontsize=16)
+ax.set_xlabel(r"$K_{AVG}$")
+ax.set_ylabel(r"Polar order parameter, $\Psi$")
+# ax.set_xlabel(r"$K_{AVG}$", fontsize=16)
+# ax.set_ylabel(r"Polar order parameter, $\Psi$", fontsize=16)
 ax.set_ylim([0,1])
 # ax.set_title("With repulsion", fontsize=14)
-# plt.suptitle("Without repulsion", fontsize=14)
+# plt.suptitle("With repulsion", fontsize=14)
 # ax.set_title("With repulsion ($N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp) + ")", fontsize=14)
-# ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(rho) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp) + r"; $v_0=1.0$", fontsize=10)
-ax.set_title("Rep vs no rep MF; " + r"$N=$" + str(nPart) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd))
-ax.legend(loc="lower right", fontsize=14)
+# ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp), fontsize=10)
+ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(rho) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd), fontsize=10)
+# ax.set_title("Rep vs no rep MF; " + r"$N=$" + str(nPart) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd))
+# ax.legend(loc="lower right", fontsize=14)
+ax.legend(loc="lower right")
 plt.show()
 
 

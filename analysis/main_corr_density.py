@@ -17,15 +17,12 @@ Rp = 1.0
 xTy = 1.0
 seed_range = np.arange(1,2,1)
 
-linlin=False
-loglin=False
+linlin=True
+loglin=True
 loglog=True
-d_type='dv'
-r_max=10
-r_bin_num=20
 
 t0 = time.time()
-fun.plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type=d_type, r_max=r_max, r_bin_num=r_bin_num, linlin=linlin, loglin=loglin, loglog=loglog)
+fun.plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=linlin, loglin=loglin, loglog=loglog)
 
 print("Time taken: " + str(time.time() - t0))
 

@@ -586,10 +586,10 @@ def plot_porder_noise(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ra
             for K_avg in K_avg_range:
                 for K_std in K_std_range:
                     p_ss = []
-                    error_count = 0
                     for noise in noise_range:
                         K = str(K_avg) + "_" + str(K_std)
                         p_ss_sum = 0
+                        error_count = 0
                         for seed in seed_range:
                             sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
                             if not os.path.exists(os.path.join(sim_dir, 'stats')):
@@ -733,10 +733,10 @@ def plot_porder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
             for noise in noise_range:
                 for K_std in K_std_range:
                     p_ss = []
-                    error_count = 0
                     for K_avg in K_avg_range:
                         K = str(K_avg) + "_" + str(K_std)
                         p_ss_sum = 0
+                        error_count = 0
                         for seed in seed_range:
                             sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
                             if not os.path.exists(os.path.join(sim_dir, 'stats')):
@@ -785,10 +785,10 @@ def plot_porder_Kavg_ax(mode, nPart, phi, noise_range, K_avg_range, K_std_range,
     for noise in noise_range:
         for K_std in K_std_range:
             p_ss = []
-            error_count = 0
             for K_avg in K_avg_range:
                 K = str(K_avg) + "_" + str(K_std)
                 p_ss_sum = 0
+                error_count = 0
                 for seed in seed_range:
                     sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
                     if not os.path.exists(os.path.join(sim_dir, 'stats')):
@@ -1225,10 +1225,10 @@ def plot_var_density_Kavg(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp,
     fig, ax = plt.subplots()
     for K_std in K_std_range:
         vars = []
-        error_count = 0
         for K_avg in K_avg_range:
             K = str(K_avg) + "_" + str(K_std)
             var_sum = 0
+            error_count = 0
             for seed in seed_range:
                 try:
                     var_sum += read_stats(mode, nPart, phi, noise, K, Rp, xTy, seed)["d_var"]
@@ -1539,18 +1539,7 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
 
     corr_all = np.array(corr_all)
     rij_all = np.array(rij_all)
-    corr_bin_av = []
     bin_size = r_max / r_bin_num
-
-    for i in range(r_bin_num):
-        lower = r_plot[i]
-        try:
-            upper = r_plot[i+1]
-        except:
-            upper = r_max+1
-        idx = np.where((rij_all>lower)&(rij_all<upper))
-        corr = np.mean(corr_all[idx])
-        corr_bin_av.append(corr)
 
     xscale_all = []
     yscale_all = []
@@ -1568,12 +1557,26 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
         if xscale == 'lin':
             r_plot = np.linspace(0, r_max, num=r_bin_num, endpoint=False) + bin_size/2
         elif xscale == 'log':
-            r_plot = np.logspace(-5, np.log10(r_max), num=r_bin_num, endpoint=True)
+            r_plot = np.logspace(np.log10(np.min(rij_all)), np.log10(r_max), num=r_bin_num, endpoint=True)
         else:
             raise Exception("xscale type not valid")
+        
+        corr_bin_av = []
+        r_plot_new = []
+        for i in range(r_bin_num):
+            lower = r_plot[i]
+            try:
+                upper = r_plot[i+1]
+            except:
+                upper = r_max+1
+            idx = np.where((rij_all>lower)&(rij_all<upper))[0]
+            if len(idx) != 0:
+                corr = np.mean(corr_all[idx])
+                corr_bin_av.append(corr)
+                r_plot_new.append(r_plot[i])
 
         fig, ax = plt.subplots()
-        ax.plot(r_plot, np.abs(corr_bin_av), '-')
+        ax.plot(r_plot_new, np.abs(corr_bin_av), '-')
 
         if xscale == 'log':
             ax.set_xscale('log')
@@ -1588,7 +1591,7 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
         # plt.show()
 
         folder = os.path.abspath('../plots/correlation_velocity/')
-        filename = str(d_type) + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + xscale + yscale + '.png'
+        filename = str(d_type) + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
         if not os.path.exists(folder):
             os.makedirs(folder)
         plt.savefig(os.path.join(folder, filename))
@@ -1596,12 +1599,9 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
 
 
 ## Add time average later
-def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, xscale='lin', yscale='lin', rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=20):
+def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, linlin=True, loglin=True, loglog=True, rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=20):
     """
-    Plot correlation function for the velocity fluctations perpendicular to the mean heading angle with line from scatterplot
-
-    Type can be: v (usual velocity correlation), dv (fluctuation from mean heading angle), dv_par (flucation parallel to mean heading angle),
-    or dv_perp (fluctuation perpendicular to mean heading angle)
+    Plot correlation function for the density fluctuations
     """
     rij_all = []
     corr_all = []
@@ -1644,7 +1644,6 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=Tr
 
         rho_mean = np.mean(rho_all)
         d_fluc = [rho - rho_mean for rho in rho_all]
-        # print(type(d_fluc))
 
         corr_dot = d_fluc
 
@@ -1672,44 +1671,58 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=Tr
     corr_bin_av = []
     bin_size = corr_r_max / r_bin_num
 
-    if xscale == 'lin':
-        r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
-    elif xscale == 'log':
-        r_plot = np.logspace(-5, np.log10(corr_r_max), num=r_bin_num, endpoint=True)
-    else:
-        raise Exception("xscale type not valid")
+    xscale_all = []
+    yscale_all = []
+    if linlin == True:
+        xscale_all.append("lin")
+        yscale_all.append("lin")
+    if loglin == True:
+        xscale_all.append("lin")
+        yscale_all.append("log")
+    if loglog == True:
+        xscale_all.append("log")
+        yscale_all.append("log")
 
-    for i in range(r_bin_num):
-        lower = r_plot[i]
-        try:
-            upper = r_plot[i+1]
-        except:
-            upper = corr_r_max+1
-        idx = np.where((rij_all>lower)&(rij_all<upper))
-        corr = np.mean(corr_all[idx])
-        corr_bin_av.append(corr)
+    for xscale, yscale in zip(xscale_all, yscale_all):
+        if xscale == 'lin':
+            r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
+        elif xscale == 'log':
+            r_plot = np.logspace(np.log10(np.min(rij_all)), np.log10(corr_r_max), num=r_bin_num, endpoint=True)
+        else:
+            raise Exception("xscale type not valid")
+        
+        corr_bin_av = []
+        r_plot_new = []
+        for i in range(r_bin_num):
+            lower = r_plot[i]
+            try:
+                upper = r_plot[i+1]
+            except:
+                upper = corr_r_max+1
+            idx = np.where((rij_all>lower)&(rij_all<upper))[0]
+            if len(idx) != 0:
+                corr = np.mean(corr_all[idx])
+                corr_bin_av.append(corr)
+                r_plot_new.append(r_plot[i])
 
-    fig, ax = plt.subplots()
-    ax.plot(r_plot, np.abs(corr_bin_av), '-')
+        fig, ax = plt.subplots()
+        ax.plot(r_plot_new, np.abs(corr_bin_av), '-')
 
-    if xscale == 'log':
-        ax.set_xscale('log')
-    if yscale == 'log':
-        ax.set_yscale('log')
-    else:
-        ax.set_ylim(bottom=0)
+        if xscale == 'log':
+            ax.set_xscale('log')
+        if yscale == 'log':
+            ax.set_yscale('log')
+        else:
+            ax.set_ylim(bottom=0)
 
-    ax.set_xlabel(r"$r$")
-    ax.set_ylabel(r"$C(r)$")
+        ax.set_xlabel(r"$r$")
+        ax.set_ylabel(r"$C(r)$")
 
-
-    # plt.show()
-
-    folder = os.path.abspath('../plots/correlation_density/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
+        folder = os.path.abspath('../plots/correlation_density/')
+        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        plt.savefig(os.path.join(folder, filename))
 
 
 
@@ -1764,14 +1777,14 @@ def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True
     if print_stats == True:
         print(np.mean(av_nei_i), np.median(av_nei_i), np.std(av_nei_i), np.max(av_nei_i))
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(7,5))
 
     # ax.hist(av_nei_i, bins=np.arange(0, np.max(av_nei_i)+1))
     unique, counts = np.unique(av_nei_i, return_counts=True)
     ax.bar(unique, counts)
-    ax.set_xlabel(r"$\langle N_i\rangle$")
-    ax.set_ylabel("Count")
-    ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K=$" + str(K) + r"; $r_{max}=$" + str(r_max))
+    ax.set_xlabel(r"$\langle N_i\rangle$", fontsize=16)
+    ax.set_ylabel("Count", fontsize=16)
+    # ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K=$" + str(K) + r"; $r_{max}=$" + str(r_max))
 
     if n_max != None:
         ax.set_xlim([0,n_max])
@@ -2062,11 +2075,11 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
             for noise in noise_range:
                 for K_std in K_std_range:
                     binder = []
-                    error_count = 0
                     for K_avg in K_avg_range:
                         K = str(K_avg) + "_" + str(K_std)
                         p_2_sum = 0
                         p_4_sum = 0
+                        error_count = 0
                         for seed in seed_range:
                             sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
                             if not os.path.exists(os.path.join(sim_dir, 'stats')):
@@ -2110,11 +2123,11 @@ def plot_binder_noise(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ra
             for K_avg in K_avg_range:
                 for K_std in K_std_range:
                     binder = []
-                    error_count = 0
                     for noise in noise_range:
                         K = str(K_avg) + "_" + str(K_std)
                         p_2_sum = 0
                         p_4_sum = 0
+                        error_count = 0
                         for seed in seed_range:
                             sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
                             if not os.path.exists(os.path.join(sim_dir, 'stats')):
