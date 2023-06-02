@@ -51,10 +51,10 @@ KAVG=0.0
 STDK=8.0
 
 dT=0.005
-DT=1.0
+DT=100.0
 DTex=100.0
-eqT=500.0
-simulT=300.0
+eqT=1000.0
+simulT=500.0
 
 savePos=1
 saveInitPos=0

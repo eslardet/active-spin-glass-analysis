@@ -26,7 +26,7 @@ gx=5.0
 vp=1.0
 
 Rr=1.0
-Rp="I"
+Rp=10.0
 xTy=1.0
 
 initMode='R'
@@ -57,7 +57,7 @@ DTex=10.0
 eqT=0.0
 simulT=10
 
-savePos=1
+savePos=0
 saveInitPos=0
 saveForce=0
 saveCoupling=0
@@ -167,6 +167,6 @@ else
     echo ${potMode} >> 'inpar'
 fi
 
-time ${bin_dir}/vicsek_2D_rep_MS_MF inpar
+time ${bin_dir}/vicsek_2D_rep_MS inpar
 
 echo "2D Vicsek run done."

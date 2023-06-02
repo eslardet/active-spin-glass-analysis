@@ -12,7 +12,7 @@ import csv, os
 
 num_Kstd = 8
 
-file = os.path.abspath("plot/no_rep_full.txt")
+file = os.path.abspath("plot/G_N1000_phi0.1_n0.20_Kstd8.0_Rp10.0_xTy1.0.txt")
 
 with open(file) as f:
         reader = csv.reader(f, delimiter="\n")
@@ -21,8 +21,9 @@ with open(file) as f:
 fig, ax = plt.subplots()
 for k in range(num_Kstd):
     params = r[3*k][0].split('\t')
-    print(params)
+    # print(params)
     K_std = params[3]
+    nPart = params[0]
     Rp = params[1]
 
     K_avg = r[3*k+1][0].split('\t')[:-1]
@@ -31,21 +32,23 @@ for k in range(num_Kstd):
     p_ss = r[3*k+2][0].split('\t')[:-1]
     p_ss_plot = [float(i) for i in p_ss]
 
-    ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp))
+    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp))
     # if str(Rp) == "I":
     #     ax.plot(K_avg_plot, p_ss_plot, "--", label=r"$R_I=\infty$", color="black")
     # else:
     #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
-    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$K_{STD}=$" + str(K_std))
+    ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$K_{STD}=$" + str(K_std))
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
 params = r[3*k][0].split('\t')
 nPart = params[0]
 Rp = params[1]
 noise = params[2]
+# noise = "0.20"
 Kstd = params[3]
-rho = 1.0
+# Kstd = "8.0"
+rho = 0.13
 phi = 0.1
 
 ax.set_xlabel(r"$K_{AVG}$")
@@ -56,11 +59,11 @@ ax.set_ylim([0,1])
 # ax.set_title("With repulsion", fontsize=14)
 # plt.suptitle("With repulsion", fontsize=14)
 # ax.set_title("With repulsion ($N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp) + ")", fontsize=14)
-# ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp), fontsize=10)
-ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(rho) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd), fontsize=10)
+ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp), fontsize=10)
+# ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd), fontsize=10)
 # ax.set_title("Rep vs no rep MF; " + r"$N=$" + str(nPart) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd))
 # ax.legend(loc="lower right", fontsize=14)
-ax.legend(loc="lower right")
+ax.legend(loc="upper left")
 plt.show()
 
 

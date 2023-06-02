@@ -7,7 +7,7 @@ import sys
 import time
 
 mode = 'G'
-nPart = 10000
+nPart = 1000
 phi = 1.0
 noise = "0.20"
 K_avg = 0.0
@@ -16,13 +16,22 @@ K = str(K_avg) + "_" + str(K_std)
 Rp = 1.0
 xTy = 1.0
 seed_range = np.arange(1,2,1)
+timestep_range = np.arange(0,1,1)
 
 linlin=True
-loglin=True
-loglog=True
+loglin=False
+loglog=False
 
 t0 = time.time()
-fun.plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=linlin, loglin=loglin, loglog=loglog)
+# fun.plot_corr_density_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=linlin, loglin=loglin, loglog=loglog)
+fun.plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=timestep_range, linlin=linlin, loglin=loglin, loglog=loglog)
+
+# inparFile, posFile = fun.get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=1)
+# x, y, theta = fun.get_pos_snapshot(posFile, nPart, timestep=5)
+# print(x[0])
+# posexFile = fun.get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed=1, file_name="pos_exact")
+# x,y,theta,view_time = fun.get_pos_ex_snapshot(posexFile)
+# print(x[0])
 
 print("Time taken: " + str(time.time() - t0))
 

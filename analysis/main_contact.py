@@ -15,6 +15,8 @@ seed = 1
 r_max = 1
 tape_time = 1
 
-fun.write_contacts(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, tape_time=tape_time)
+# fun.write_contacts(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, tape_time=tape_time)
 
-fun.plot_contacts(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max)
+fun.plot_contacts(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, log=True)
+
+# fun.plot_K_vs_contact_time(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, log_x=True, log_y=True)

@@ -10,7 +10,7 @@ import sys
 
 
 mode = "G"
-nPart = 1000
+nPart = 10000
 phi = 1.0
 noise = "0.20"
 K = "0.0_8.0"
@@ -20,9 +20,9 @@ seed = 1
 
 
 # fun.write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed)
-# fun.animate(mode, nPart, phi, noise, K, Rp, xTy, seed)
+fun.animate(mode, nPart, phi, noise, K, Rp, xTy, seed, max_T=3300)
 # fun.plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed)
-fun.snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, show_color=True)
+# fun.snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, show_color=True)
 
 # for K in [1.1]:
 #     fun.write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, remove_pos=True, moments=True)
