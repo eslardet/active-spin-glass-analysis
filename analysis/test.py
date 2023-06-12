@@ -1,12 +1,25 @@
 import numpy as np
+from scipy.stats import norm
+import matplotlib.pyplot as plt
 
 
-rij_all = np.array([1,2,3,4,5])
-corr_all = np.array([1,2,3,4,5])
+std = np.arange(1, 9, 1)
+avg = np.arange(0, -0.8, -0.1)
 
-lower = 0.5
-upper = 0.75
+val = []
+for i in range(8):
+    val.append(1-norm.cdf(0, loc=avg[i], scale=std[i]))
 
+plt.plot(std, val, "o-")
+plt.show()
 
-rij_all = np.delete(rij_all, 2)
-print(rij_all)
+# for l in np.arange(-5, 6, 1):
+#     val = []
+#     for s in std:
+#         val.append(1-norm.cdf(0, loc=l, scale=s))
+
+#     plt.plot(std, val, "-o", label=l)
+# # plt.yscale("log")
+# # plt.xscale("log")
+# plt.legend()
+# plt.show()
