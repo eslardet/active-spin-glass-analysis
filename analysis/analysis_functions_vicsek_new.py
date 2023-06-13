@@ -1461,13 +1461,166 @@ def scatter_corr_vel_fluc(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True
     plt.savefig(os.path.join(folder, filename))
 
 
+def write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, timestep_range=[0], d_type='v', corr_r_max=10, r_bin_num=120):
+    """
+    Write to file correlation function for the density fluctuations
+    """
+    rij_all = []
+    corr_all = []
+    corr_r_max_sq = corr_r_max**2
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    folder = os.path.abspath('../plot_data/correlation_velocity/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_' + r_scale + '.txt'
+    corrFile = open(os.path.join(folder, filename), "w")
+
+    corrFile.write(str(corr_r_max) + "\n")
+    corrFile.write(str(r_bin_num) + "\n")
+    corrFile.write(str(timestep_range[0]) + "\t" + str(timestep_range[-1]) + "\n")
+
+    for seed in seed_range:
+        for timestep in timestep_range:
+            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+            if not os.path.exists(os.path.join(sim_dir, 'pos')):
+                print(mode, nPart, phi, noise, K, Rp, xTy, seed)
+            else:
+                inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+            
+
+                velocity = [np.array([np.cos(p), np.sin(p)]) for p in theta]
+                av_vel = np.mean(velocity, axis=0)
+
+                dv = [v - av_vel for v in velocity]
+
+                if d_type == 'v':
+                    corr_dot = velocity
+                elif d_type == 'dv':
+                    corr_dot = dv
+                elif d_type == 'dv_par':
+                    av_unit = av_vel / np.linalg.norm(av_vel)
+                    corr_dot = [np.dot(f, av_unit) * av_unit for f in dv]
+                elif d_type == 'dv_perp':
+                    av_norm = np.array([-av_vel[1], av_vel[0]])
+                    corr_dot = [np.dot(f, av_norm) * av_norm for f in dv]
+                else:
+                    raise Exception("Type not valid. Must be 'v', 'dv', 'dv_par', or 'dv_perp'")
+
+                # normalization
+                c0 = 0
+                for i in range(nPart):
+                    c0 += corr_dot[i] * corr_dot[i]
+                c0 = c0/nPart
+
+                for i in range(nPart):
+                    for j in range(i+1, nPart):
+                        xij = x[i] - x[j]
+                        xij = xij - Lx*round(xij/Lx)
+                        if xij < corr_r_max:
+                            yij = y[i] - y[j]
+                            yij = yij - Ly*round(yij/Ly)
+                            rij_sq = xij**2 + yij**2
+                            if rij_sq < corr_r_max_sq:
+                                rij = np.sqrt(rij_sq)
+                                rij_all.append(rij)
+                                corr_all.append(np.dot(corr_dot[i],corr_dot[j])/c0)
+
+    corr_all = np.array(corr_all)
+    rij_all = np.array(rij_all)
+    bin_size = corr_r_max / r_bin_num
+
+    if r_scale == 'lin':
+        r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
+    elif r_scale == 'log':
+        r_plot = np.logspace(np.log10(np.min(rij_all)), np.log10(corr_r_max), num=r_bin_num, endpoint=True)
+    else:
+        raise Exception("Not a valid scale for r; should be 'lin' or 'log")
+
+    for i in range(r_bin_num):
+        lower = r_plot[i]
+        try:
+            upper = r_plot[i+1]
+        except:
+            upper = corr_r_max+1
+        idx = np.where((rij_all>lower)&(rij_all<upper))[0]
+        if len(idx) != 0:
+            corr = np.mean(corr_all[idx])
+            corrFile.write(str(r_plot[i]) + "\t" + str(corr) + "\n")
+
+    corrFile.close()
+
+def read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, d_type, bin_ratio=1):
+    r_plot = []
+    corr_bin_av = []
+
+    folder = os.path.abspath('../plot_data/correlation_velocity/')
+    filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_' + r_scale + ".txt"
+    corrFile = os.path.join(folder, filename)
+    with open(corrFile) as f:
+        line_count = 1
+        for line in f:
+            if line_count == 2:
+                r_bin_num = float(line)
+            if line_count > 3:
+                r_plot.append(float(line.split('\t')[0]))
+                corr_bin_av.append(float(line.split('\t')[1]))
+            line_count += 1
+
+    ## To reduce number of bins
+    if bin_ratio>1:
+        bin_ratio = int(bin_ratio)
+        r_plot_new = []
+        corr_new = []
+        for i in np.arange(0, r_bin_num, bin_ratio):
+            i = int(i)
+            if i+bin_ratio+1>len(r_plot):
+                r_plot_new.append(np.mean(r_plot[i:]))
+                corr_new.append(np.mean(corr_bin_av[i:]))
+            else:
+                r_plot_new.append(np.mean(r_plot[i:i+bin_ratio]))
+                corr_new.append(np.mean(corr_bin_av[i:i+bin_ratio]))
+
+        r_plot = r_plot_new
+        corr_bin_av = corr_new
+
+    return r_plot, corr_bin_av
+
+def plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, x_scale, y_scale, bin_ratio=1):
+    r_plot, corr_bin_av = read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, x_scale, d_type, bin_ratio)
+
+    fig, ax = plt.subplots()
+    ax.plot(r_plot, np.abs(corr_bin_av), '-')
+
+    if x_scale == 'log':
+        ax.set_xscale('log')
+    if y_scale == 'log':
+        ax.set_yscale('log')
+    else:
+        ax.set_ylim(bottom=0)
+
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C(r)$")
+
+    # plt.show()
+
+    folder = os.path.abspath('../plots/correlation_velocity/')
+    filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_' + y_scale + x_scale + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
 ## TO DO: 
 # Bin r according to scale used - y
 # Check C-> 1 as r-> when r bin small enough (only for vel corr not fluctuations)
 # Make function with different modes - y
 # Normalize! - y
 # Add multiple seeds - y
-# Add time average : TO DO
+# Add time average - y
 # Create pipeline
 def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, linlin=True, loglin=True, loglog=True, d_type='v', r_max=10, r_bin_num=20):
     """
@@ -1915,8 +2068,6 @@ def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep
 
     r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
 
-    
-
     for i in range(r_bin_num):
         lower = r_plot[i]
         try:
@@ -1926,8 +2077,6 @@ def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep
         idx = np.where((rij_all>lower)&(rij_all<upper))[0]
         if len(idx) != 0:
             corr = np.mean(corr_all[idx])
-
-            ## write to file instead here
             corrFile.write(str(r_plot[i]) + "\t" + str(corr) + "\n")
 
     corrFile.close()
@@ -1952,7 +2101,6 @@ def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, bin_ratio
     ## To reduce number of bins
     if bin_ratio>1:
         bin_ratio = int(bin_ratio)
-        new_r_bin_num = int(r_bin_num / bin_ratio)
         r_plot_new = []
         corr_new = []
         for i in np.arange(0, r_bin_num, bin_ratio):
@@ -1983,16 +2131,16 @@ def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_
     ax.set_xlabel(r"$r$")
     ax.set_ylabel(r"$C(r)$")
 
-    plt.show()
+    # plt.show()
 
-    # folder = os.path.abspath('../plots/correlation_density/')
-    # filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
-    # if log_y == True:
-    #     filename += "_loglin"
-    # filename += '.png'
-    # if not os.path.exists(folder):
-    #     os.makedirs(folder)
-    # plt.savefig(os.path.join(folder, filename))
+    folder = os.path.abspath('../plots/correlation_density/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    if log_y == True:
+        filename += "_loglin"
+    filename += '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
 
 ###############################
