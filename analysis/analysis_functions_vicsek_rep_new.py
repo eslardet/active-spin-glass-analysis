@@ -178,11 +178,10 @@ def get_pos_ex_snapshot(file):
     return x, y, theta, view_time
 
 
-def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=False, show_color=True, save_in_folder=False):
+def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=False, show_color=True, neigh_col=False, save_in_folder=False, r_max=None):
     """
     Get static snapshot at specified time from the positions file
     """
-
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     if pos_ex == True:
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
@@ -197,7 +196,8 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=F
     xTy = inpar_dict["xTy"]
     simulT = inpar_dict["simulT"]
 
-    beta = 2**(1/6)
+    # beta = 2**(1/6)
+    beta = 1
 
     L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
     Ly = L
@@ -218,18 +218,33 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=F
     u = np.cos(theta)
     v = np.sin(theta)
 
-    norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
-    mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
+    # norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
+    # mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
     
-    fig, ax = plt.subplots(figsize=(10*xTy,10), dpi=72)
+    fig, ax = plt.subplots(figsize=(20*xTy,20), dpi=72)
 
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /L * beta
-    
-    if show_color == True:
+
+    if neigh_col == True:
+        if r_max == None:
+            r_max = Rp
+        num_nei = neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max)
+        norm = colors.Normalize(vmin=0.0, vmax=np.max(num_nei), clip=True)
+        mapper = cm.ScalarMappable(norm=norm, cmap=cm.plasma)
+        for i in range(nPart):
+            color = mapper.to_rgba(num_nei[i])
+            ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
+        cbar = plt.colorbar(mappable=mapper, ax=ax)
+        cbar.set_label('# neighbours', rotation=270)
+
+    elif show_color == True:
+        norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
+        mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
         for i in range(nPart):
             color = mapper.to_rgba(theta[i]%(2*np.pi))
             ax.plot(x[i], y[i], 'o', ms=diameter, color=color, zorder=1)
-        plt.colorbar(mappable=mapper, ax=ax)
+        # plt.colorbar(mappable=mapper, ax=ax)
+
     else:
         ax.plot(x, y, 'o', ms=diameter)
         ax.quiver(x, y, u, v)
@@ -640,6 +655,72 @@ def plot_porder_Kavg(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp
         save_file.close()
         os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
     plt.savefig(os.path.join(folder, filename + '.png'))
+
+def plot_porder_Kavg_t(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, t, save_data=False):
+    """
+    Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
+    Averaged over a number of realizations
+    """
+    folder = os.path.abspath('../plots/p_order_vs_Kavg/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for Rp in Rp_range:
+            for noise in noise_range:
+                for K_std in K_std_range:
+                    p_ss = []
+                    for K_avg in K_avg_range:
+                        K = str(K_avg) + "_" + str(K_std)
+                        p_ss_sum = 0
+                        error_count = 0
+                        for seed in seed_range:
+                            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                            posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
+                            x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+                            if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                                print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                error_count += 1
+                                # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                            elif int(view_time) != t:
+                                print("Time incorrect")
+                                print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                error_count += 1
+                            else:
+                                p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                                if np.isnan(p_mean):
+                                    print("Nan")
+                                    print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                    error_count += 1
+                                else:
+                                    p_ss_sum += p_mean
+                        p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+
+                    ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                    if save_data == True:
+                        save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
+                        for K_avg in K_avg_range:
+                            save_file.write(str(K_avg) + "\t")
+                        save_file.write("\n")
+                        for p in p_ss:
+                            save_file.write(str(p) + "\t")
+                        save_file.write("\n")
+
+    ax.set_xlabel(r"$K_{AVG}$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
+    # ax.set_xlim([-1,2])
+    ax.legend()
+
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    if save_data == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
+    plt.savefig(os.path.join(folder, filename + '.png'))
+
 
 def plot_porder_Kavg_ax(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp, xTy, seed_range, ax):
     """
@@ -1208,7 +1289,7 @@ def neighbour_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=Tru
 
     return nei_av, nei_std, nei_max
 
-def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1], print_stats=True):
+def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1], print_stats=True, n_max=None, c_max=None):
     
     av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex, timestep_range)
 
@@ -1223,6 +1304,11 @@ def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True
     ax.set_xlabel(r"$\langle N_i\rangle$")
     ax.set_ylabel("Count")
     ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K=$" + str(K) + r"; $r_{max}=$" + str(r_max))
+
+    if n_max != None:
+        ax.set_xlim([0,n_max])
+    if c_max != None:
+        ax.set_ylim([0,c_max])
 
     folder = os.path.abspath('../plots/neighbour_hist/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) +  '_xTy' + str(xTy) + '_s' + str(seed) + '_rmax' + str(r_max) + '.png'

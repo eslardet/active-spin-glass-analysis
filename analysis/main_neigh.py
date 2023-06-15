@@ -31,19 +31,3 @@ fun.neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=r_max, n_max
 # fun.snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True, neigh_col=True, r_max=r_max)
 # print(fun.neighbour_stats(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True))
 
-# for K_std in K_std_range:
-#     K = str(K_avg) + "_" + str(K_std)
-#     stats_list.append(fun.neighbour_stats(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True))
-
-# print("Mean")
-# for stat in stats_list:
-#     print(stat[0])
-
-# print("\nSD")
-# for stat in stats_list:
-#     print(stat[1])
-
-# print("\nMax")
-# for stat in stats_list:
-#     print(stat[2])
-

@@ -28,8 +28,9 @@ double K0; // mode 'C': K0: Coupling constant
 double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
                     //           KAB: Coupling constant for A-B interactions 
                     //           KBB: Coupling constant for B-B interactions
-double KAVG,STDK; // mode 'G', 'F', 'A': KAVG: Average coupling constant
-                  //                     STDK: Standard deviation of coupling constant
+double KAVG,STDK; // mode 'G', 'A': KAVG: Average coupling constant
+                  //                STDK: Standard deviation of coupling constant
+double alpha; // Fraction of particles with +K0 coupling for mode F
 
 ///////////////
 // saveFrame //

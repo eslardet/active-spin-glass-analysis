@@ -42,13 +42,13 @@ couplingMode=$9
 #    'A' for normally distributed antiferromagnetic
 
 K0=${10}
-
+alpha=${11}
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
 
-KAVG=${10}
-STDK=${11}
+# KAVG=${10}
+# STDK=${11}
 
 dT=${12}
 DT=${13}
@@ -70,7 +70,7 @@ elif [ "${couplingMode}" == "T" ]; then
 elif [ "${couplingMode}" == "G" ]; then
     run_dir=$HOME/Vicsek_2D/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Vicsek_2D/simulation_data/Ferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${K0}_${alpha}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
     run_dir=$HOME/Vicsek_2D/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
@@ -149,8 +149,8 @@ else
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        echo ${KAVG} >> 'inpar'
-        echo ${STDK} >> 'inpar'
+        echo ${K0} >> 'inpar'
+        echo ${alpha} >> 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'

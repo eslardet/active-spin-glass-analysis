@@ -138,10 +138,10 @@ for (sig=1; sig<=32; sig++)
             logFile << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
             break;
 
-        case 'F' : // Normally distributed ferromagnetic couplings
-            inputFile >> KAVG; 
-            inputFile >> STDK;            
-            logFile << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
+        case 'F' : // Fraction of ferro and anti-ferro magnetic couplings
+            inputFile >> K0; 
+            inputFile >> alpha;            
+            logFile << " ----> Coupling constant K0 = " << K0 << " and alpha (fraction with +K0) = " << alpha << endl; 
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings
@@ -338,9 +338,9 @@ for (sig=1; sig<=32; sig++)
             break;
 
         case 'F' : // Normally distributed ferromagnetic couplings
-            inputFile >> KAVG; 
-            inputFile >> STDK;            
-            cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
+            inputFile >> K0; 
+            inputFile >> alpha;            
+            cout << " ----> Coupling Constant K0 = " << K0 << " and fraction of ferromagnetic particles = " << alpha << endl; 
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings

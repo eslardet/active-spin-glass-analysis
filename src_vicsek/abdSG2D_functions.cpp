@@ -204,13 +204,26 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             }
             break;
 
-        case 'F' : // Normally distributed ferromagnetic couplings
+        case 'F' : // Fraction of particles ferro and anti-ferro magnetic
+            // for(int i=0 ; i<nPart ; i++){
+            //     K[i][i] = 0.0;
+            //     for(int j=i+1 ; j<nPart ; j++){
+            //         do{
+            //             KK = KAVG + STDK*normDist(rnd_gen);    
+            //         }while (KK<0.0);
+            //         K[i][j] = KK;
+            //         K[j][i] = KK;
+            //     }
+            // }
             for(int i=0 ; i<nPart ; i++){
                 K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
-                    do{
-                        KK = KAVG + STDK*normDist(rnd_gen);    
-                    }while (KK<0.0);
+                    if(uniDist(rnd_gen) < alpha) {
+                        KK = K0;
+                        }
+                    else{
+                        KK = -K0;
+                    }
                     K[i][j] = KK;
                     K[j][i] = KK;
                 }

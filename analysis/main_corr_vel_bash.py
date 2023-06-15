@@ -16,16 +16,16 @@ xTy = float(sys.argv[8])
 seed = int(sys.argv[9])
 seed_range = np.arange(1,seed+1,1)
 
-linlin = bool(sys.argv[10])
-loglin = bool(sys.argv[11])
-loglog = bool(sys.argv[12])
+r_scale = str(sys.argv[10])
 
-d_type = str(sys.argv[13])
-r_max = float(sys.argv[14])
-r_bin_num = int(sys.argv[15])
+d_type = str(sys.argv[11])
+max_time = float(sys.argv[12])
+timestep_range = np.arange(0, max_time+1, 1)
 
 
 t0 = time.time()
-fun.plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type=d_type, r_max=r_max, r_bin_num=r_bin_num, linlin=linlin, loglin=loglin, loglog=loglog)
+
+fun.write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, timestep_range, d_type)
+fun.plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, x_scale=r_scale, y_scale="log")
 
 print("Time taken: " + str(time.time() - t0))

@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=1000
+nPart=10
 phi=1.0
 noise=0.20
 
@@ -33,7 +33,7 @@ initMode='R'
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='G'
+couplingMode='F'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -41,25 +41,26 @@ couplingMode='G'
 #    'F' for normally distributed ferromagnetic, 
 #    'A' for normally distributed antiferromagnetic
 
-K0=0.0
+K0=1.0
+alpha=0.2
 
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
 
-KAVG=0.0
-STDK=8.0
+# KAVG=0.0
+# STDK=8.0
 
 dT=0.005
-DT=100.0
+DT=10.0
 DTex=100.0
-eqT=1000.0
-simulT=500.0
+eqT=0.0
+simulT=10.0
 
 savePos=1
 saveInitPos=0
 saveForce=0
-saveCoupling=0
+saveCoupling=1
 
 intMethod='E'
 
@@ -71,7 +72,7 @@ elif [ "${couplingMode}" == "T" ]; then
 elif [ "${couplingMode}" == "G" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Ferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${K0}_${alpha}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
@@ -156,8 +157,8 @@ else
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        echo ${KAVG} >> 'inpar'
-        echo ${STDK} >> 'inpar'
+        echo ${K0} >> 'inpar'
+        echo ${alpha} >> 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'
