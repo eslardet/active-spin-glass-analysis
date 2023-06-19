@@ -443,7 +443,7 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
 
     // Timing
     Neq = (int) ceil(eqT/dT);
-    Nsimul = (int) ceil((simulT-startT)/dT);
+    Nsimul = (int) ceil((simulT-startT-eqT)/dT);
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);
     logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;

@@ -10,8 +10,9 @@ import bisect
 
 import csv, os
 
+save_plot = True
 num_Kstd = 8
-filename = "G_N1000_phi1.0_n0.20_Kstd7.0_RpI_xTy1.0"
+filename = "no_rep_full"
 
 file = os.path.abspath("plot/" + filename + ".txt")
 
@@ -23,12 +24,12 @@ fig, ax = plt.subplots()
 for k in range(num_Kstd):
     params = r[3*k][0].split('\t')
     # print(params)
-    K_std = params[4]
+    K_std = params[3]
     nPart = params[0]
     Rp = params[1]
 
     K_avg = r[3*k+1][0].split('\t')[:-1]
-    K_avg_plot = [float(i) for i in K_avg]
+    K_avg_plot = [float(i)/float(K_std)*float(nPart)**(1/2) for i in K_avg]
     
     p_ss = r[3*k+2][0].split('\t')[:-1]
     p_ss_plot = [float(i) for i in p_ss]
@@ -45,14 +46,16 @@ for k in range(num_Kstd):
 params = r[3*k][0].split('\t')
 nPart = params[0]
 Rp = params[1]
-noise = params[3]
+noise = params[2]
 # noise = "0.20"
 Kstd = params[3]
 # Kstd = "8.0"
 rho = 1.0
 phi = 0.1
 
-ax.set_xlabel(r"$K_{AVG}$")
+# ax.set_xlim([-20,10])
+
+ax.set_xlabel(r"$N^{1/2} \times K_{AVG}/K_{STD}$")
 ax.set_ylabel(r"Polar order parameter, $\Psi$")
 # ax.set_xlabel(r"$K_{AVG}$", fontsize=16)
 # ax.set_ylabel(r"Polar order parameter, $\Psi$", fontsize=16)
@@ -66,11 +69,11 @@ ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(rho) + r"; $\eta=$" + str
 # ax.legend(loc="lower right", fontsize=14)
 ax.legend(loc="upper left")
 
-
-folder = os.path.abspath('../plots/local')
-if not os.path.exists(folder):
-    os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename + ".png"))
+if save_plot:
+    folder = os.path.abspath('../plots/local')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename + ".png"))
 
 plt.show()
 

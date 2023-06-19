@@ -21,7 +21,7 @@ def get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed):
     elif mode == "A":
         mode_name = "Antiferromagnetic"
     elif mode == "F":
-        mode_name = "Ferromagnetic"
+        mode_name = "Fraction"
 
     sim_dir = os.path.abspath('../simulation_data/' + mode_name + '/N' + str(nPart) + '/phi' + str(phi) + '_n' + str(noise) + '/K' + str(K) + '/Rp' + str(Rp) + '/xTy' + str(xTy) + '/s' + str(seed))
 
@@ -868,6 +868,66 @@ def plot_porder_Kavg_ax(mode, nPart, phi, noise_range, K_avg_range, K_std_range,
     ax.legend()
 
     return ax
+
+def plot_porder_alpha(mode, nPart_range, phi, noise_range, K0_range, alpha_range, Rp_range, xTy, seed_range, save_data=False):
+    """
+    Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
+    Averaged over a number of realizations
+    """
+    folder = os.path.abspath('../plots/p_order_vs_alpha/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for Rp in Rp_range:
+            for noise in noise_range:
+                for K0 in K0_range:
+                    p_ss = []
+                    for alpha in alpha_range:
+                        K = str(K0) + "_" + str(alpha)
+                        p_ss_sum = 0
+                        error_count = 0
+                        for seed in seed_range:
+                            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                            if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                                print(mode, nPart, phi, noise, K0, alpha, Rp, xTy, seed)
+                                error_count += 1
+                                # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                            else:
+                                p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                                if np.isnan(p_mean):
+                                    print("Nan")
+                                    print(mode, nPart, phi, noise, K0, alpha, Rp, xTy, seed)
+                                    error_count += 1
+                                else:
+                                    p_ss_sum += p_mean
+                        p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+
+                    # ax.plot([float(a) for a in alpha_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{0}=$" + str(K0) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                    ax.plot([float(a) for a in alpha_range], p_ss, '-o', label=r"$K_{0}=$" + str(K0))
+                    if save_data == True:
+                        save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K0) + "\n")
+                        for alpha in alpha_range:
+                            save_file.write(str(alpha) + "\t")
+                        save_file.write("\n")
+                        for p in p_ss:
+                            save_file.write(str(p) + "\t")
+                        save_file.write("\n")
+
+    ax.set_xlabel(r"$\alpha$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
+    # ax.set_xlim([-1,2])
+    ax.legend()
+
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    if save_data == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
+    plt.savefig(os.path.join(folder, filename + '.png'))
 
 def plot_porder_Kstd(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range):
     """
