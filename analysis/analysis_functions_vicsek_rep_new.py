@@ -1321,12 +1321,26 @@ def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True
 #######################
 ## Coupling Analysis ##
 #######################
-def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_ex=True, timestep_range=[0]):
+def get_couplings(mode, nPart, phi, noise, K, Rp, xTy, seed):
+    sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+    couplingFile = os.path.join(sim_dir, "coupling")
+    with open(couplingFile) as f:
+        K_list = []
+        for Kij in f:
+            K_list.append(float(Kij))
+    return K_list
+
+def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_ex=True, init_pos=False, timestep_range=[0]):
     if pos_ex == True:
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
         x, y = get_pos_ex_snapshot(file=posFileExact)[:2]
         x_all = [x]
         y_all = [y]
+    elif init_pos == True:
+        initFile = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='initpos')
+        x, y = get_pos_snapshot(initFile, nPart, timestep=0)[:2]
+        x_all = [x]
+        y_all = [y]     
     else:
         inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
         x_all = []
@@ -1380,10 +1394,19 @@ def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_
                 j += 1
     return K_list, rij_list
 
-def plot_dist_coupling_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, pos_ex=True, init_pos=False, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None, shift=False):
 
-    K_list, rij_list = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
-    
+    K = str(K_avg) + "_" + str(K_std)
+    K_list = []
+    rij_list = []
+    for seed in seed_range:
+        K_seed, rij_seed = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range, init_pos=init_pos)
+        K_list.extend(K_seed)
+        rij_list.extend(rij_seed)
+    ## Shift to origin
+    if shift == True:
+        K_list = [k - K_avg for k in K_list]
+
     fig, ax = plt.subplots(figsize=(10,10/bin_ratio)) 
     # plt.tight_layout()
     
@@ -1396,8 +1419,11 @@ def plot_dist_coupling_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=Tr
     ax.set_xlabel(r"$K_{ij}$")
     ax.set_ylabel(r"$r_{ij}$")
 
-    folder = os.path.abspath('../plots/dist_coupling_rep/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_hist.png'
+    folder = os.path.abspath('../plots/dist_coupling/')
+    if init_pos == True:
+        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_hist_init.png'
+    else:
+        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_hist.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
