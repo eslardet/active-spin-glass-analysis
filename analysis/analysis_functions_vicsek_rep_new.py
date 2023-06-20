@@ -409,6 +409,18 @@ def del_pos(mode, nPart, phi, noise, K, Rp, xTy, seed):
     sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
     os.remove(os.path.join(sim_dir, "pos"))
 
+def del_files(mode, nPart, phi, noise, K, Rp, xTy, seed, files):
+    """
+    Delete position file to save space
+    """
+    sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
+    for file in files:
+        path = os.path.join(sim_dir, file)
+        if os.path.exists(path):
+            os.remove(path)
+        else:
+            print("No file with name '" + file + "' to delete")
+
 def write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None, remove_pos=False, density_var=False):
     """
     Write a file with various statistics from the simulation data (Vicsek order parameter mean, standard deviation, susceptibility)

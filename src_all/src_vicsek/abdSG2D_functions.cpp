@@ -373,10 +373,10 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
         p[i] = 2.0*PI*uniDist(rnd_gen); 
     }
 
-    // Save initial conditions
-    if (saveInitPos) {
-        saveInitFrame(x,y,p,initposFile);
-    }
+    // // Save initial conditions
+    // if (saveInitPos) {
+    //     saveInitFrame(x,y,p,initposFile);
+    // }
 
     // Initialize lengthscales related to the cell list
     lx = rl; 
@@ -393,9 +393,9 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     // Build map of cells
     buildMap();
 
-    // Proceed to one-step energy minimization via FIRE
-    U = -1.0;
-    fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
+    // // Proceed to one-step energy minimization via FIRE
+    // U = -1.0;
+    // fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
 
     // Save initial conditions
     if (saveInitPos) {
