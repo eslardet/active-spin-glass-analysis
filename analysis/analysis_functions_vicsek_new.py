@@ -1637,7 +1637,7 @@ def write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, tim
                 # normalization
                 c0 = 0
                 for i in range(nPart):
-                    c0 += corr_dot[i] * corr_dot[i]
+                    c0 += np.dot(corr_dot[i], corr_dot[i])
                 c0 = c0/nPart
 
                 for i in range(nPart):
