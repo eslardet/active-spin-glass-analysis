@@ -144,7 +144,7 @@ for (sig=1; sig<=32; sig++)
             logFile << " ----> Coupling constant K0 = " << K0 << " and alpha (fraction with +K0) = " << alpha << endl; 
             break;
 
-        case 'A' : // Normally distributed antiferromagnetic couplings
+        case 'A' : // Normally distributed asymmetric couplings
             inputFile >> KAVG; 
             inputFile >> STDK;            
             logFile << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 

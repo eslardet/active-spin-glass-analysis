@@ -72,7 +72,7 @@ elif [ "${couplingMode}" == "G" ]; then
 elif [ "${couplingMode}" == "F" ]; then
     run_dir=$HOME/Vicsek_2D/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${K0}_${alpha}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
-    run_dir=$HOME/Vicsek_2D/simulation_data/Antiferromagnetic/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D/simulation_data/Asymmetric/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
 
 

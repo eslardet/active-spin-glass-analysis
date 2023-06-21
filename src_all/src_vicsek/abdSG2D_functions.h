@@ -166,11 +166,21 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
 // Saves to file the coupling constants
 inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& File) 
 {
-    
-    for(int i=0 ; i<nPart ; i++)
-    {
-        for(int j=i+1 ; j<nPart ; j++){
-            File << k[i][j] << std::endl; 
+    if(couplingMode == 'A') {
+        for(int i=0 ; i<nPart ; i++)
+        {
+            for(int j=0 ; j<nPart ; j++){
+                File << k[i][j] << std::endl; 
+            }
+        }
+    }
+
+    else{
+        for(int i=0 ; i<nPart ; i++)
+        {
+            for(int j=i+1 ; j<nPart ; j++){
+                File << k[i][j] << std::endl; 
+            }
         }
     }
 }

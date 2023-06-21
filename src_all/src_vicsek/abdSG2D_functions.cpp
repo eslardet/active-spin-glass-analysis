@@ -89,11 +89,11 @@ void checkParameters()
             break;
 
         case 'F' : // Normally distributed ferromagnetic couplings
-            logFile << "Initializing couplings in mode 'F', normally distributed ferromagnetic couplings" << endl;
+            logFile << "Initializing couplings in mode 'F', fraction mode" << endl;
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings
-            logFile << "Initializing couplings in mode 'A', normally distributed antiferromagnetic couplings" << endl;
+            logFile << "Initializing couplings in mode 'A', antisymmetric couplings" << endl;
             break;
 
         // case 'B' : // Bimodal Gaussian distributed couplings
@@ -134,7 +134,7 @@ void checkParameters()
 // Initialize positions, and velocities
 void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
 {
-    double KK;
+    double KK, KK2;
 
     // Seed the random engines
     rnd_gen.seed (seed);
@@ -231,14 +231,23 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings
+            // for(int i=0 ; i<nPart ; i++){
+            //     K[i][i] = 0.0;
+            //     for(int j=i+1 ; j<nPart ; j++){
+            //         do{
+            //             KK = KAVG + STDK*normDist(rnd_gen);    
+            //         }while (KK>0.0);
+            //         K[i][j] = KK;
+            //         K[j][i] = KK;
+            //     }
+            // }
             for(int i=0 ; i<nPart ; i++){
                 K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
-                    do{
-                        KK = KAVG + STDK*normDist(rnd_gen);    
-                    }while (KK>0.0);
+                    KK = KAVG + STDK*normDist(rnd_gen);
+                    KK2 = KAVG + STDK*normDist(rnd_gen);
                     K[i][j] = KK;
-                    K[j][i] = KK;
+                    K[j][i] = KK2;
                 }
             }
             break;

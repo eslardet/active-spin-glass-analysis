@@ -19,7 +19,7 @@ def get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed):
     elif mode == "G":
         mode_name = "Gaussian"
     elif mode == "A":
-        mode_name = "Antiferromagnetic"
+        mode_name = "Asymmetric"
     elif mode == "F":
         mode_name = "Fraction"
 
@@ -1584,7 +1584,7 @@ def scatter_corr_vel_fluc(mode, nPart, phi, noise, K, Rp, xTy, seed, pos_ex=True
     plt.savefig(os.path.join(folder, filename))
 
 
-def write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, timestep_range=[0], d_type='v', corr_r_max=10, r_bin_num=120):
+def write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, timestep_range=[0], d_type='v', corr_r_min=0, corr_r_max=10, r_bin_num=120):
     """
     Write to file correlation function for the density fluctuations
     """
@@ -1644,7 +1644,7 @@ def write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, tim
                     for j in range(i+1, nPart):
                         xij = x[i] - x[j]
                         xij = xij - Lx*round(xij/Lx)
-                        if xij < corr_r_max:
+                        if corr_r_min < xij < corr_r_max:
                             yij = y[i] - y[j]
                             yij = yij - Ly*round(yij/Ly)
                             rij_sq = xij**2 + yij**2
@@ -1655,12 +1655,15 @@ def write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, tim
 
     corr_all = np.array(corr_all)
     rij_all = np.array(rij_all)
-    bin_size = corr_r_max / r_bin_num
 
     if r_scale == 'lin':
-        r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
+        bin_size = (corr_r_max-corr_r_min) / r_bin_num
+        r_plot = np.linspace(corr_r_min, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
     elif r_scale == 'log':
-        r_plot = np.logspace(np.log10(np.min(rij_all)), np.log10(corr_r_max), num=r_bin_num, endpoint=True)
+        if corr_r_min != 0:
+            r_plot = np.logspace(np.log10(corr_r_min), np.log10(corr_r_max), num=r_bin_num, endpoint=True)
+        else:
+            r_plot = np.logspace(np.log10(np.min(rij_all)), np.log10(corr_r_max), num=r_bin_num, endpoint=True)
     else:
         raise Exception("Not a valid scale for r; should be 'lin' or 'log")
 
