@@ -51,9 +51,9 @@ for k in range(num_Kstd-1):
 
     KAVG_crit.append((cutoff-intercept)/grad)
 
-ax.plot(Rp_plot, KAVG_crit, '-o', label="No rep")
+ax.plot(Rp_plot, KAVG_crit, '-o', label=r"No rep, $\rho=0.13$")
 
-num_Kstd = 10
+num_Kstd = 11
 cutoff = 0.4
 KAVG_crit = []
 Rp_plot = []
@@ -93,15 +93,15 @@ for k in range(1,num_Kstd-1):
     intercept = p_ss_plot[i] - grad*K_avg_plot[i]
 
     KAVG_crit.append((cutoff-intercept)/grad)
-ax.plot(Rp_plot, KAVG_crit, '-o', label="Rep")
+ax.plot(Rp_plot, KAVG_crit, '-o', label=r"Rep, $\phi=0.1$")
 
 
-num_Kstd = 7
+num_Kstd = 9
 cutoff = 0.4
 KAVG_crit = []
 Rp_plot = []
 # save_plot = False
-filename = "G_N1000_phi1.0_n0.20_Kstd7.0_RpI_xTy1.0"
+filename = "G_N1000_phi1.0_n0.20_Kstd8.0_Rp30.0_xTy1.0"
 
 file = os.path.abspath("plot/" + filename + ".txt")
 
@@ -110,7 +110,7 @@ with open(file) as f:
         r = list(reader)
 
 # fig, ax = plt.subplots()
-for k in range(1,num_Kstd-1):
+for k in range(num_Kstd):
     params = r[3*k][0].split('\t')
     # print(params)
     # K_std = params[4]
