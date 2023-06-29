@@ -317,7 +317,7 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
         arrows.set_offsets(np.c_[x, y])
         cols = np.mod(theta, 2*np.pi)
         arrows.set_UVC(np.cos(theta), np.sin(theta), norm(cols))
-        ax.set_title("t = " + str(round(n*DT+startT+min_T, 1)), fontsize=10, loc='left')
+        ax.set_title("t = " + str(round(n*DT+startT, 1)), fontsize=10, loc='left')
         
         return arrows,
 
