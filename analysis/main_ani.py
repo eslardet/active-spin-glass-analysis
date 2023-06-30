@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek_new as fun
+import analysis_functions_vicsek_rep_new as fun
 import os
 import matplotlib.pyplot as plt
 import sys
@@ -9,15 +9,15 @@ import sys
 # f.snapshot(mode="C", nPart=1000, phi=0.4, K=1.0, seed=2, view_time=10)
 
 
-mode = "A"
+mode = "G"
 nPart = 10000
-phi = 1.0
+phi = 0.1
 noise = "0.20"
 K_std = 8.0
-K_avg_range = np.round(np.arange(0.6,0.9,0.2),1)
-# K_avg_range = [-0.6]
+# K_avg_range = np.round(np.arange(-0.6,1.1,0.2),1)
+K_avg_range = [0.0]
 # K = "0.0_8.0"
-Rp = 1.0
+Rp = 10.0
 xTy = 1.0
 seed = 1
 

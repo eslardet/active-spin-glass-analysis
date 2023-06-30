@@ -307,8 +307,6 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
     L = np.sqrt(nPart*np.pi*beta**2 / (4*phi*xTy))
     Ly = L
     Lx = L*xTy
-    print(repulsion == "H")
-    print(beta, repulsion, Lx,Ly)
     diameter = (ax.get_window_extent().height * 72/fig.dpi) /L * beta
 
     # norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
@@ -317,33 +315,37 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
     # mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
     # plt.colorbar(mappable=mapper, ax=ax)
 
+    norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
+    plt.set_cmap('hsv')
+
+    mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
+    # plt.colorbar(mappable=mapper, ax=ax)
+
     x = pbc_wrap(x_all[0],Lx)
     y = pbc_wrap(y_all[0],Ly)
     theta = theta_all[0]
-    # cols = np.mod(theta, 2*np.pi)
-    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta), zorder=2)
-    points, = plt.plot([], [], 'o', ms=diameter, zorder=1)
+    cols = np.mod(theta, 2*np.pi)
+    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta), norm(cols))
 
     def init():
         ax.set_xlim(0, Lx)
         ax.set_ylim(0, Ly)
-        return arrows, points
+        return arrows,
 
     def update(n):
         x = pbc_wrap(x_all[n],Lx)
         y = pbc_wrap(y_all[n],Ly)
         theta = theta_all[n]
-        # cols = np.mod(theta, 2*np.pi)
-        points.set_data(x, y)
         arrows.set_offsets(np.c_[x, y])
-        arrows.set_UVC(np.cos(theta), np.sin(theta))
-        ax.set_title("t = " + str(round(n*DT+startT+min_T, 1)), fontsize=10, loc='left')
+        cols = np.mod(theta, 2*np.pi)
+        arrows.set_UVC(np.cos(theta), np.sin(theta), norm(cols))
+        ax.set_title("t = " + str(round(n*DT+startT, 1)), fontsize=10, loc='left')
         
-        return arrows, points
+        return arrows,
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=10, blit=True)
 
-    folder = os.path.abspath('../animations')
+    folder = os.path.abspath('../animations_vicsek')
     filename = repulsion + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) +  '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)

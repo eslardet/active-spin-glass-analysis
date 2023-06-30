@@ -966,7 +966,7 @@ def plot_porder_alpha(mode, nPart_range, phi, noise_range, K0_range, alpha_range
                         p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
                     # ax.plot([float(a) for a in alpha_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{0}=$" + str(K0) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
-                    ax.plot([float(a) for a in alpha_range], p_ss, '-o', label=r"$K_{0}=$" + str(K0))
+                    ax.plot([float(a) for a in alpha_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{0}=$" + str(K0))
                     if save_data == True:
                         save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K0) + "\n")
                         for alpha in alpha_range:
@@ -1776,10 +1776,10 @@ def read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, d_ty
     return r_plot, corr_bin_av
 
 def plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, x_scale, y_scale, bin_ratio=1):
-    r_plot, corr_bin_av = read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, x_scale, d_type, bin_ratio)
-
     fig, ax = plt.subplots()
-    ax.plot(r_plot, np.abs(corr_bin_av), '-')
+    
+    r_plot, corr_bin_av = read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, x_scale, d_type, bin_ratio)
+    ax.plot(r_plot, np.abs(corr_bin_av), '-', label="K=" + str(K))
 
     if x_scale == 'log':
         ax.set_xscale('log')
@@ -1795,6 +1795,37 @@ def plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, 
 
     folder = os.path.abspath('../plots/correlation_velocity/')
     filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_' + y_scale + x_scale + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def plot_corr_vel_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, x_scale, y_scale, bin_ratio=1):
+    fig, ax = plt.subplots()
+    
+    for K_avg in K_avg_range:
+        for K_std in K_std_range:
+            K = str(K_avg) + "_" + str(K_std)
+            r_plot, corr_bin_av = read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, x_scale, d_type, bin_ratio)
+            ax.plot(r_plot, np.abs(corr_bin_av), '-', label="K=" + str(K))
+
+    if x_scale == 'log':
+        ax.set_xscale('log')
+    if y_scale == 'log':
+        ax.set_yscale('log')
+        ax.set_xlim(left=1)
+        ax.set_ylim(bottom=10**(-3))
+    else:
+        ax.set_ylim(bottom=0)
+    ax.set_ylim(top=1)
+    
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C(r)$")
+    ax.legend()
+    ax.set_title(str(d_type) + r"; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+    # plt.show()
+
+    folder = os.path.abspath('../plots/correlation_velocity/')
+    filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_' + y_scale + x_scale + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
@@ -2173,7 +2204,7 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_
             os.makedirs(folder)
         plt.savefig(os.path.join(folder, filename))
 
-def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=[0], rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=120):
+def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=[0], rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=120, r_scale='lin', corr_r_min=0):
     """
     Write to file correlation function for the density fluctuations
     """
@@ -2197,7 +2228,7 @@ def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep
     folder = os.path.abspath('../plot_data/correlation_density/')
     if not os.path.exists(folder):
         os.makedirs(folder)
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + ".txt"
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_' + r_scale + ".txt"
     corrFile = open(os.path.join(folder, filename), "w")
 
     corrFile.write(str(rho_r_max) + "\n")
@@ -2251,6 +2282,17 @@ def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep
     rij_all = np.array(rij_all)
     bin_size = corr_r_max / r_bin_num
 
+    if r_scale == 'lin':
+        bin_size = (corr_r_max-corr_r_min) / r_bin_num
+        r_plot = np.linspace(corr_r_min, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
+    elif r_scale == 'log':
+        if corr_r_min != 0:
+            r_plot = np.logspace(np.log10(corr_r_min), np.log10(corr_r_max), num=r_bin_num, endpoint=True)
+        else:
+            r_plot = np.logspace(np.log10(np.min(rij_all)), np.log10(corr_r_max), num=r_bin_num, endpoint=True)
+    else:
+        raise Exception("Not a valid scale for r; should be 'lin' or 'log")
+
     r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
 
     for i in range(r_bin_num):
@@ -2266,12 +2308,12 @@ def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep
 
     corrFile.close()
 
-def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, bin_ratio=1):
+def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio=1):
     r_plot = []
     corr_bin_av = []
 
     folder = os.path.abspath('../plot_data/correlation_density/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + ".txt"
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_' + r_scale + ".txt"
     corrFile = os.path.join(folder, filename)
     with open(corrFile) as f:
         line_count = 1
@@ -2302,8 +2344,8 @@ def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, bin_ratio
 
     return r_plot, corr_bin_av
 
-def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, bin_ratio=1):
-    r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, bin_ratio)
+def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, log_y=True, bin_ratio=1):
+    r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio)
 
     fig, ax = plt.subplots()
     ax.plot(r_plot, np.abs(corr_bin_av), '-')
@@ -2321,7 +2363,39 @@ def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_
     folder = os.path.abspath('../plots/correlation_density/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
     if log_y == True:
-        filename += "_loglin"
+        filename += "_log"
+    filename += r_scale
+    filename += '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, r_scale, log_y=True, bin_ratio=1):
+    
+    fig, ax = plt.subplots()
+
+    for K_avg in K_avg_range:
+        for K_std in K_std_range:
+            K = str(K_avg) + "_" + str(K_std)
+            r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio)
+            ax.plot(r_plot, np.abs(corr_bin_av), '-', label=r"$K=$" + str(K))
+
+    if log_y == True:
+        ax.set_yscale('log')
+    else:
+        ax.set_ylim(bottom=0)
+
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C(r)$")
+    ax.set_title(r"Density correlation; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+    ax.legend()
+    # plt.show()
+
+    folder = os.path.abspath('../plots/correlation_density/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    if log_y == True:
+        filename += "_log"
+    filename += r_scale
     filename += '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
