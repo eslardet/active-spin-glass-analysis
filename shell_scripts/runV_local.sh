@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=10
+nPart=100
 phi=1.0
 noise=0.20
 
@@ -33,7 +33,7 @@ initMode='R'
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='A'
+couplingMode='F'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -41,7 +41,8 @@ couplingMode='A'
 #    'F' for fraction, 
 #    'A' for asymmetric
 
-K0=1.0
+K0=2.0
+K1=-1.0
 alpha=0.2
 
 # KAA=10.0
@@ -72,7 +73,7 @@ elif [ "${couplingMode}" == "T" ]; then
 elif [ "${couplingMode}" == "G" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${K0}_${alpha}/Rp${Rp}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${K0}_${K1}/a${alpha}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Asymmetric/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
@@ -113,18 +114,28 @@ cd $run_dir
 if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if restarting from previous simulation
     sed -i '' "8s/.*/${initMode}/" 'inpar' # extra '' required on MacOS for sed (remove on Linux)
     if [ "${couplingMode}" == "C" ]; then
+        sed -i '' "12s/.*/${DT}/" 'inpar'
+        sed -i '' "13s/.*/${DTex}/" 'inpar'
         sed -i '' "14s/.*/${eqT}/" 'inpar'
         sed -i '' "15s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "T" ]; then
+        sed -i '' "14s/.*/${DT}/" 'inpar'
+        sed -i '' "15s/.*/${DTex}/" 'inpar'
         sed -i '' "16s/.*/${eqT}/" 'inpar'
         sed -i '' "17s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "G" ]; then
+        sed -i '' "13s/.*/${DT}/" 'inpar'
+        sed -i '' "14s/.*/${DTex}/" 'inpar'
         sed -i '' "15s/.*/${eqT}/" 'inpar'
         sed -i '' "16s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        sed -i '' "15s/.*/${eqT}/" 'inpar'
-        sed -i '' "16s/.*/${simulT}/" 'inpar'
+        sed -i '' "14s/.*/${DT}/" 'inpar'
+        sed -i '' "15s/.*/${DTex}/" 'inpar'
+        sed -i '' "16s/.*/${eqT}/" 'inpar'
+        sed -i '' "17s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
+        sed -i '' "13s/.*/${DT}/" 'inpar'
+        sed -i '' "14s/.*/${DTex}/" 'inpar'
         sed -i '' "15s/.*/${eqT}/" 'inpar'
         sed -i '' "16s/.*/${simulT}/" 'inpar'
     fi
@@ -158,6 +169,7 @@ else
         echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
         echo ${K0} >> 'inpar'
+        echo ${K1} >> 'inpar'
         echo ${alpha} >> 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
         echo ${KAVG} >> 'inpar'

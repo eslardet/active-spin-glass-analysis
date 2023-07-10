@@ -93,7 +93,7 @@ void checkParameters()
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings
-            logFile << "Initializing couplings in mode 'A', antisymmetric couplings" << endl;
+            logFile << "Initializing couplings in mode 'A', non-reciprocal couplings" << endl;
             break;
 
         // case 'B' : // Bimodal Gaussian distributed couplings
@@ -219,10 +219,10 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                 K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
                     if(uniDist(rnd_gen) < alpha) {
-                        KK = K0;
+                        KK = K0; // K0 is alpha proportion (positive one K+)
                         }
                     else{
-                        KK = -K0;
+                        KK = K1; // K1 is negative one K-
                     }
                     K[i][j] = KK;
                     K[j][i] = KK;

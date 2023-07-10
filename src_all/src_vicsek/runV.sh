@@ -42,7 +42,8 @@ couplingMode=$9
 #    'A' for normally distributed antiferromagnetic
 
 K0=${10}
-alpha=${11}
+K1=${11}
+alpha=${12}
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
@@ -50,18 +51,18 @@ alpha=${11}
 # KAVG=${10}
 # STDK=${11}
 
-dT=${12}
-DT=${13}
-DTex=${14}
-eqT=${15}
-simulT=${16}
+dT=${13}
+DT=${14}
+DTex=${15}
+eqT=${16}
+simulT=${17}
 
-savePos=${17}
-saveInitPos=${18}
+savePos=${18}
+saveInitPos=${19}
 saveForce=0
-saveCoupling=${19} # Need to save couplings to be able to restart sim later for e.g. mode 'G'
+saveCoupling=${20} # Need to save couplings to be able to restart sim later for e.g. mode 'G'
 
-intMethod=${20}
+intMethod=${21}
 
 if [ "${couplingMode}" == "C" ]; then
     run_dir=$HOME/Vicsek_2D/simulation_data/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/Rp${Rp}/xTy${xTy}/s${seed}
@@ -70,7 +71,7 @@ elif [ "${couplingMode}" == "T" ]; then
 elif [ "${couplingMode}" == "G" ]; then
     run_dir=$HOME/Vicsek_2D/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Vicsek_2D/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${K0}_${alpha}/Rp${Rp}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${K0}_${K1}/a${alpha}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
     run_dir=$HOME/Vicsek_2D/simulation_data/Asymmetric/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
@@ -110,10 +111,10 @@ if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if
         sed -i "15s/.*/${eqT}/" 'inpar'
         sed -i "16s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        sed -i "13s/.*/${DT}/" 'inpar'
-        sed -i "14s/.*/${DTex}/" 'inpar'
-        sed -i "15s/.*/${eqT}/" 'inpar'
-        sed -i "16s/.*/${simulT}/" 'inpar'
+        sed -i "14s/.*/${DT}/" 'inpar'
+        sed -i "15s/.*/${DTex}/" 'inpar'
+        sed -i "16s/.*/${eqT}/" 'inpar'
+        sed -i "17s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
         sed -i "13s/.*/${DT}/" 'inpar'
         sed -i "14s/.*/${DTex}/" 'inpar'
@@ -150,6 +151,7 @@ else
         echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
         echo ${K0} >> 'inpar'
+        echo ${K1} >> 'inpar'
         echo ${alpha} >> 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
         echo ${KAVG} >> 'inpar'

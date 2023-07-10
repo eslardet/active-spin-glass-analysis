@@ -1813,7 +1813,7 @@ def plot_corr_vel_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_r
     if y_scale == 'log':
         ax.set_yscale('log')
         ax.set_xlim(left=1)
-        ax.set_ylim(bottom=10**(-3))
+        # ax.set_ylim(bottom=10**(-3))
     else:
         ax.set_ylim(bottom=0)
     ax.set_ylim(top=1)
@@ -1829,6 +1829,71 @@ def plot_corr_vel_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_r
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+
+def plot_corr_vel_file_superimpose_N(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, x_scale, y_scale, bin_ratio=1):
+    fig, ax = plt.subplots()
+    
+    for nPart in nPart_range:
+        for K_avg in K_avg_range:
+            for K_std in K_std_range:
+                K = str(K_avg) + "_" + str(K_std)
+                r_plot, corr_bin_av = read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, x_scale, d_type, bin_ratio)
+                ax.plot(r_plot, np.abs(corr_bin_av), '-', label= "N=" + str(nPart) + ", K=" + str(K))
+
+    if x_scale == 'log':
+        ax.set_xscale('log')
+    if y_scale == 'log':
+        ax.set_yscale('log')
+        ax.set_xlim(left=1)
+        # ax.set_ylim(bottom=10**(-3))
+    else:
+        ax.set_ylim(bottom=0)
+    ax.set_ylim(top=1)
+    
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C(r)$")
+    ax.legend()
+    ax.set_title(str(d_type) + r"; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+    # plt.show()
+
+    folder = os.path.abspath('../plots/correlation_velocity/')
+    filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_' + y_scale + x_scale + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+def get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, max_r):
+    r_plot, corr_bin_av = read_corr_vel(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed_range=seed_range, r_scale="log", d_type=d_type, bin_ratio=1)
+    r_plot = np.array(r_plot)
+    corr_bin_av = np.array(corr_bin_av)
+    idx = np.where(r_plot<max_r)[0]
+
+    exponent = np.polyfit(x=np.log10(r_plot[idx]), y=np.log10(corr_bin_av[idx]), deg=1)[0]
+
+    return exponent
+
+def plot_exponents_Kavg_corr_vel(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, max_r):
+    fig, ax = plt.subplots()
+
+    for K_std in K_std_range:
+        exponents = []
+        for K_avg in K_avg_range:
+            K = str(K_avg) + "_" + str(K_std)
+            exponents.append(get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, max_r))
+        ax.plot(K_avg_range, exponents, '-o', label=r"$K_{STD}=$" + str(K_std))
+
+    ax.set_title(str(d_type) + r"; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+    ax.set_xlabel(r"$K_{AVG}$")
+    ax.set_ylabel(r"$\xi$")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/correlation_velocity_exp/')
+    filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
 
 ## TO DO: 
 # Bin r according to scale used - y
@@ -2293,8 +2358,6 @@ def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep
     else:
         raise Exception("Not a valid scale for r; should be 'lin' or 'log")
 
-    r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
-
     for i in range(r_bin_num):
         lower = r_plot[i]
         try:
@@ -2379,15 +2442,16 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
             K = str(K_avg) + "_" + str(K_std)
             r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio)
             ax.plot(r_plot, np.abs(corr_bin_av), '-', label=r"$K=$" + str(K))
-
     if log_y == True:
         ax.set_yscale('log')
     else:
         ax.set_ylim(bottom=0)
+    if r_scale == "log":
+        ax.set_xscale('log')
 
     ax.set_xlabel(r"$r$")
     ax.set_ylabel(r"$C(r)$")
-    ax.set_title(r"Density correlation; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+    ax.set_title(r"Density fluctions correlation; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
     ax.legend()
     # plt.show()
 

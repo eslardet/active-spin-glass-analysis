@@ -1,5 +1,5 @@
 import numpy as np
-import scipy
+import numpy as np
 import analysis_functions_vicsek_new as fun
 import os
 import matplotlib.pyplot as plt
@@ -13,58 +13,29 @@ noise = "0.20"
 K_avg = 0.0
 K_std = 8.0
 K = str(K_avg) + "_" + str(K_std)
+# K_avg_range = np.round(np.arange(-1.0,1.6,0.5),1)
+K_avg_range = [0.0]
+K_std_range = [0.0, 1.0, 2.0, 4.0, 8.0]
 Rp = 1.0
 xTy = 1.0
 seed_range = np.arange(1,21,1)
-timestep_range = np.arange(0,6,1)
+r_scale = "log"
+log_y = True
+timestep_range = [0,1,2,3,4,5]
 
-linlin=True
-loglin=False
-loglog=False
+corr_r_min=0.1
+corr_r_max=10
+r_bin_num=50
 
 t0 = time.time()
-# fun.plot_corr_density_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=linlin, loglin=loglin, loglog=loglog)
-# fun.plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=timestep_range, linlin=linlin, loglin=loglin, loglog=loglog)
+# fun.plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type=d_type, r_max=r_max, r_bin_num=r_bin_num, linlin=linlin, loglin=loglin, loglog=loglog)
 
-# fun.write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range)
-# r_plot, corr = fun.read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
-# fun.plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, bin_ratio=1)
+# fun.write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, timestep_range, d_type, corr_r_min, corr_r_max, r_bin_num)
+# # fun.read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, d_type)
+# fun.plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, x_scale=r_scale, y_scale=y_scale, bin_ratio=1)
 
-r_lower = 0
-r_upper = 3
+fun.plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, r_scale, log_y, bin_ratio=1)
 
-exponents = []
-exponents_2 = []
-K_avg_range = [-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0]
-
-for K_avg in K_avg_range:
-    K = str(K_avg) + "_" + str(K_std)
-    r_plot, corr = fun.read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
-    lower = np.where(np.array(r_plot) > r_lower)[0][0]
-    upper = np.where(np.array(r_plot) < r_upper)[0][-1]
-    exponents.append(np.polyfit(r_plot[lower:upper+1], np.log(corr[lower:upper+1]), 1)[0])
-    exponents_2.append(scipy.optimize.curve_fit(lambda t,a,b: a*np.exp(b*t), r_plot[:upper], corr[:upper])[0][1])
-
-K_avg_range = [2.5, 3.5]
-seed_range = np.arange(1,11,1)
-
-for K_avg in K_avg_range:
-    K = str(K_avg) + "_" + str(K_std)
-    r_plot, corr = fun.read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
-    lower = np.where(np.array(r_plot) > r_lower)[0][0]
-    upper = np.where(np.array(r_plot) < r_upper)[0][-1]
-    exponents.append(np.polyfit(r_plot[lower:upper+1], np.log(corr[lower:upper+1]), 1)[0])
-    exponents_2.append(scipy.optimize.curve_fit(lambda t,a,b: a*np.exp(b*t), r_plot[:upper], corr[:upper])[0][1])
-
-K_avg_range = [-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.5]
-
-plt.plot(K_avg_range, exponents, "o-", label="numpy polyfit")
-plt.plot(K_avg_range, exponents_2, "o-", label="scipy curve_fit")
-plt.legend()
-plt.xlabel("K_avg")
-plt.ylabel("Exponent")
-plt.show()
-
-
+# fun.plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, log_y=True, bin_ratio=1)
 
 print("Time taken: " + str(time.time() - t0))

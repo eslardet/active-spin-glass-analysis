@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek_rep_new as fun
+import analysis_functions_vicsek_new as fun
 import os
 import matplotlib.pyplot as plt
 import sys
@@ -11,13 +11,13 @@ import sys
 
 mode = "G"
 nPart = 10000
-phi = 0.1
+phi = 1.0
 noise = "0.20"
 K_std = 8.0
 # K_avg_range = np.round(np.arange(-0.6,1.1,0.2),1)
-K_avg_range = [0.0]
+K_avg_range = [-0.5,-0.4,0.5]
 # K = "0.0_8.0"
-Rp = 10.0
+Rp = 1.0
 xTy = 1.0
 seed = 1
 
@@ -29,4 +29,4 @@ seed = 1
 
 for K_avg in K_avg_range:
     K = str(K_avg) + "_" + str(K_std)
-    fun.animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=3000, max_T=3300)
+    fun.animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=3000, max_T=3500)
