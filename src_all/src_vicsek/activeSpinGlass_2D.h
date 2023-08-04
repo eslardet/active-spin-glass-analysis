@@ -24,7 +24,7 @@ double ymin,ymax;
 double xTy,Lx,Ly;
 
 // Coupling constant parameters
-double K0; // mode 'C': K0: Coupling constant
+double K0,K1; // mode 'C': K0: Coupling constant
 double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
                     //           KAB: Coupling constant for A-B interactions 
                     //           KBB: Coupling constant for B-B interactions

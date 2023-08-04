@@ -139,9 +139,10 @@ for (sig=1; sig<=32; sig++)
             break;
 
         case 'F' : // Fraction of ferro and anti-ferro magnetic couplings
+            inputFile >> K1;
             inputFile >> KAVG; 
-            inputFile >> STDK;         
-            logFile << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl;
+            inputFile >> STDK;            
+            cout << " ----> K- = " << K1 << ", average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
             break;
 
         case 'A' : // Normally distributed non-reciprocal couplings
@@ -338,9 +339,10 @@ for (sig=1; sig<=32; sig++)
             break;
 
         case 'F' : // Fraction mode
+            inputFile >> K1;
             inputFile >> KAVG; 
             inputFile >> STDK;            
-            cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
+            cout << " ----> K- = " << K1 << ", average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings

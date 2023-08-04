@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=100
+nPart=1000
 phi=1.0
 noise=0.20
 
@@ -41,22 +41,23 @@ couplingMode='F'
 #    'F' for fraction, 
 #    'A' for asymmetric
 
-K0=2.0
-K1=-1.0
-alpha=0.2
+# K0=2.0
+# K1=-1.0
+# alpha=0.2
 
 # KAA=10.0
 # KAB=0.0
 # KBB=10.0
 
+K1=-5.0
 KAVG=0.0
 STDK=8.0
 
 dT=0.005
-DT=10.0
-DTex=10.0
-eqT=10.0
-simulT=0.1
+DT=100.0
+DTex=500.0
+eqT=0.0
+simulT=1500
 
 savePos=1
 saveInitPos=0
@@ -73,7 +74,7 @@ elif [ "${couplingMode}" == "T" ]; then
 elif [ "${couplingMode}" == "G" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${K0}_${K1}_${alpha}/Rp${Rp}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}_Kn${K1}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Asymmetric/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
@@ -168,9 +169,9 @@ else
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        echo ${K0} >> 'inpar'
         echo ${K1} >> 'inpar'
-        echo ${alpha} >> 'inpar'
+        echo ${KAVG} >> 'inpar'
+        echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'

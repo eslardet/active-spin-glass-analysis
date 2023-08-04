@@ -134,7 +134,7 @@ void checkParameters()
 // Initialize positions, and velocities
 void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
 {
-    double KK, KK2, K1;
+    double KK, KK2;
 
     // Seed the random engines
     rnd_gen.seed (seed);
@@ -215,9 +215,9 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             //         K[j][i] = KK;
             //     }
             // }
-            alpha = SQR(KAVG+1)/(SQR(STDK)+SQR(KAVG+1));
-            K0 = (SQR(STDK)+KAVG*(KAVG+1))/(KAVG+1);
-            K1 = -1.0;
+            alpha = SQR(KAVG-K1)/(SQR(STDK)+SQR(KAVG-K1));
+            K0 = (SQR(STDK)+KAVG*(KAVG-K1))/(KAVG-K1);
+            cout << endl << "alpha = " << alpha << "; K+ = " << K0 << "; K- = " << K1 << endl;
             for(int i=0 ; i<nPart ; i++){
                 K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
