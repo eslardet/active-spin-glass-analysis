@@ -68,7 +68,7 @@ def get_params(inparFile):
         inpar_dict["DT"] = float(r[11][0])
         inpar_dict["eqT"] = float(r[13][0])
         inpar_dict["simulT"] = float(r[14][0])
-    elif inpar_dict["mode"] == 'T':
+    elif inpar_dict["mode"] == 'T' or inpar_dict["mode"] == 'F':
         inpar_dict["DT"] = float(r[13][0])
         inpar_dict["eqT"] = float(r[15][0])
         inpar_dict["simulT"] = float(r[16][0])
@@ -928,9 +928,9 @@ def plot_norder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
         os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
     plt.savefig(os.path.join(folder, filename + '.png'))
 
-def plot_porder_alpha(mode, nPart_range, phi, noise_range, K0_range, alpha_range, Rp_range, xTy, seed_range, save_data=False):
+def plot_porder_alpha_old(mode, nPart_range, phi, noise_range, K0_range, alpha_range, Rp_range, xTy, seed_range, save_data=False):
     """
-    Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
+    Plot steady state polar order parameter against alpha, for each fixed K0 & K1 value and noise value
     Averaged over a number of realizations
     """
     folder = os.path.abspath('../plots/p_order_vs_alpha/')
@@ -986,6 +986,117 @@ def plot_porder_alpha(mode, nPart_range, phi, noise_range, K0_range, alpha_range
     if save_data == True:
         save_file.close()
         os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
+    plt.savefig(os.path.join(folder, filename + '.png'))
+
+def plot_porder_alpha(mode, nPart_range, phi, noise_range, K0_range, K1_range, alpha_range, Rp_range, xTy, seed_range, save_data=False):
+    """
+    Plot steady state polar order parameter against alpha, for each fixed K0 & K1 value and noise value
+    Averaged over a number of realizations
+    """
+    folder = os.path.abspath('../plots/p_order_vs_alpha/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for Rp in Rp_range:
+            for noise in noise_range:
+                for K1 in K1_range:
+                    for K0 in K0_range:
+                        p_ss = []
+                        for alpha in alpha_range:
+                            K = str(K0) + "_" + str(K1) + "_" + str(alpha)
+                            p_ss_sum = 0
+                            error_count = 0
+                            for seed in seed_range:
+                                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                                if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                                    print(mode, nPart, phi, noise, K0, K1, alpha, Rp, xTy, seed)
+                                    error_count += 1
+                                    # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                                else:
+                                    p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                                    if np.isnan(p_mean):
+                                        print("Nan")
+                                        print(mode, nPart, phi, noise, K0, K1, alpha, Rp, xTy, seed)
+                                        error_count += 1
+                                    else:
+                                        p_ss_sum += p_mean
+                            p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+
+                        # ax.plot([float(a) for a in alpha_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{0}=$" + str(K0) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                        ax.plot([float(a) for a in alpha_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{+}=$" + str(K0) + r"; $K_{-}=$" + str(K1))
+                        if save_data == True:
+                            save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K0) + "\t" + str(K1) + "\n")
+                            for alpha in alpha_range:
+                                save_file.write(str(alpha) + "\t")
+                            save_file.write("\n")
+                            for p in p_ss:
+                                save_file.write(str(p) + "\t")
+                            save_file.write("\n")
+
+    ax.set_xlabel(r"$\alpha$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
+    # ax.set_xlim([-1,2])
+    ax.legend()
+
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    if save_data == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
+    plt.savefig(os.path.join(folder, filename + '.png'))
+
+def plot_porder_K0(mode, nPart_range, phi, noise_range, K0_range, K1_range, alpha_range, Rp_range, xTy, seed_range, save_data=False):
+    """
+    Plot steady state polar order parameter against K+, for each fixed alpha & K1 value and noise value
+    Averaged over a number of realizations
+    """
+    folder = os.path.abspath('../plots/p_order_vs_K+/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for Rp in Rp_range:
+            for noise in noise_range:
+                for K1 in K1_range:
+                    for alpha in alpha_range:
+                        p_ss = []
+                        for K0 in K0_range:
+                            K = str(K0) + "_" + str(K1) + "_" + str(alpha)
+                            p_ss_sum = 0
+                            error_count = 0
+                            for seed in seed_range:
+                                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                                if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                                    print(mode, nPart, phi, noise, K0, K1, alpha, Rp, xTy, seed)
+                                    error_count += 1
+                                    # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                                else:
+                                    p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                                    if np.isnan(p_mean):
+                                        print("Nan")
+                                        print(mode, nPart, phi, noise, K0, K1, alpha, Rp, xTy, seed)
+                                        error_count += 1
+                                    else:
+                                        p_ss_sum += p_mean
+                            p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+
+                        # ax.plot([float(a) for a in alpha_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{0}=$" + str(K0) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                        ax.plot([float(a) for a in K0_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{-}=$" + str(K1) + r"; $\alpha=$" + str(alpha))
+
+    ax.set_xlabel(r"$K_{+}$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
+    # ax.set_xlim([-1,2])
+    ax.legend()
+
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_alpha' + str(alpha)
     plt.savefig(os.path.join(folder, filename + '.png'))
 
 def plot_porder_Kstd(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range):
@@ -1868,20 +1979,23 @@ def get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_typ
     r_plot = np.array(r_plot)
     corr_bin_av = np.array(corr_bin_av)
     idx = np.where(r_plot<max_r)[0]
+    # idx2 = np.where(corr_bin_av>0)[0]
+    # idx = list(set(idx1) & set(idx2))
+    # print(corr_bin_av[idx])
 
-    exponent = np.polyfit(x=np.log10(r_plot[idx]), y=np.log10(corr_bin_av[idx]), deg=1)[0]
+    exponent = np.polyfit(x=np.log10(r_plot[idx]), y=np.log10(np.abs(corr_bin_av[idx])), deg=1)[0]
 
     return exponent
 
-def plot_exponents_Kavg_corr_vel(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, max_r):
+def plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, max_r):
     fig, ax = plt.subplots()
-
-    for K_std in K_std_range:
-        exponents = []
-        for K_avg in K_avg_range:
-            K = str(K_avg) + "_" + str(K_std)
-            exponents.append(get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, max_r))
-        ax.plot(K_avg_range, exponents, '-o', label=r"$K_{STD}=$" + str(K_std))
+    for nPart in nPart_range:
+        for K_std in K_std_range:
+            exponents = []
+            for K_avg in K_avg_range:
+                K = str(K_avg) + "_" + str(K_std)
+                exponents.append(get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, max_r))
+            ax.plot(K_avg_range, exponents, '-o', label="N=" + str(nPart) + r"; $K_{STD}=$" + str(K_std))
 
     ax.set_title(str(d_type) + r"; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
     ax.set_xlabel(r"$K_{AVG}$")
@@ -2441,7 +2555,7 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
         for K_std in K_std_range:
             K = str(K_avg) + "_" + str(K_std)
             r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio)
-            ax.plot(r_plot, np.abs(corr_bin_av), '-', label=r"$K=$" + str(K))
+            ax.plot(r_plot, np.abs(corr_bin_av), '-', label=r"$K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std))
     if log_y == True:
         ax.set_yscale('log')
     else:
@@ -2449,8 +2563,8 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
     if r_scale == "log":
         ax.set_xscale('log')
 
-    ax.set_xlabel(r"$r$")
-    ax.set_ylabel(r"$C(r)$")
+    ax.set_xlabel(r"$r$", fontsize=12)
+    ax.set_ylabel(r"$C(r)$", fontsize=12)
     ax.set_title(r"Density fluctions correlation; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
     ax.legend()
     # plt.show()
@@ -2465,6 +2579,40 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
+
+def get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r):
+    r_plot, corr_bin_av = read_corr_density(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed_range=seed_range, r_scale="log", bin_ratio=1)
+    r_plot = np.array(r_plot)
+    corr_bin_av = np.array(corr_bin_av)
+    idx1 = np.where(r_plot<max_r)[0]
+    idx2 = np.where(r_plot>min_r)[0]
+    idx = list(set(idx1) & set(idx2))
+    # print(corr_bin_av[idx])
+
+    exponent = np.polyfit(x=np.log10(r_plot[idx]), y=np.log10(np.abs(corr_bin_av[idx])), deg=1)[0]
+
+    return exponent
+
+def plot_exponents_Kavg_corr_density(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, min_r, max_r):
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for K_std in K_std_range:
+            exponents = []
+            for K_avg in K_avg_range:
+                K = str(K_avg) + "_" + str(K_std)
+                exponents.append(get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
+            ax.plot(K_avg_range, exponents, '-o', label="N=" + str(nPart) + r"; $K_{STD}=$" + str(K_std))
+
+    ax.set_title(r"Density correlation exponents; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+    ax.set_xlabel(r"$K_{AVG}$")
+    ax.set_ylabel(r"$\xi$")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/correlation_density_exp/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
 
 ###############################
 ## Average neighbour numbers ##
@@ -3257,6 +3405,66 @@ def plot_K_vs_contact_time(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, log
     if log_y == True:
         filename += "log"
     filename += '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+
+
+
+def plot_porder_logL(mode, nPart_range, phi, noise, K_avg, K_std, Rp, xTy, seed_range, save_data=False):
+    """
+    Plot steady state polar order parameter against log(L)
+    Averaged over a number of realizations
+    """
+    folder = os.path.abspath('../plots/p_order_vs_N')
+    filename = mode + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
+    fig, ax = plt.subplots()
+    p_ss = []
+    for nPart in nPart_range:
+        K = str(K_avg) + "_" + str(K_std)
+        p_ss_sum = 0
+        error_count = 0
+        for seed in seed_range:
+            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+            if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                error_count += 1
+                # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+            else:
+                p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                if np.isnan(p_mean):
+                    print("Nan")
+                    print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                    error_count += 1
+                else:
+                    p_ss_sum += p_mean
+        p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+
+
+    ax.plot([np.sqrt(n/phi) for n in nPart_range], p_ss, '-o')
+    ax.set_xscale("log")
+    if save_data == True:
+        save_file.write(str(noise) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
+        for nPart in nPart_range:
+            save_file.write(str(nPart) + "\t")
+        save_file.write("\n")
+        for p in p_ss:
+            save_file.write(str(p) + "\t")
+        save_file.write("\n")
+
+    # noise_range = [float(i) for i in noise_range]
+    # ax.plot(noise_range, p_ss, '-o')
+    ax.set_xlabel(r"$L$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    # ax.set_ylim([0,1])
+    # ax.set_title()
+    
+    folder = os.path.abspath('../plots/p_order_vs_N/')
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
