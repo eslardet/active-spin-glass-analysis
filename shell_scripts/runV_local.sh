@@ -49,7 +49,7 @@ couplingMode='F'
 # KAB=0.0
 # KBB=10.0
 
-K1=-5.0
+K1=-1.0
 KAVG=0.0
 STDK=8.0
 
@@ -57,7 +57,7 @@ dT=0.005
 DT=100.0
 DTex=500.0
 eqT=0.0
-simulT=1500
+simulT=3000
 
 savePos=1
 saveInitPos=0

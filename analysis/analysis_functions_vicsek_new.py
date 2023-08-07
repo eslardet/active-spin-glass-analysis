@@ -239,7 +239,7 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=T
         mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
         cols = mapper.to_rgba(np.mod(theta, 2*np.pi))
         ax.quiver(x, y, u, v, color=cols)
-        plt.colorbar(mappable=mapper, ax=ax)
+        # plt.colorbar(mappable=mapper, ax=ax)
     else:
         ax.quiver(x, y, u, v)
     ax.set_xlim(0,Lx)
@@ -716,7 +716,7 @@ def plot_porder_K0(mode, nPart, phi, noise, K_range, Rp, xTy, seed_range):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_porder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
+def plot_porder_Kavg(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
     """
     Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
     Averaged over a number of realizations
@@ -729,39 +729,40 @@ def plot_porder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
 
     fig, ax = plt.subplots()
     for nPart in nPart_range:
-        for Rp in Rp_range:
-            for noise in noise_range:
-                for K_std in K_std_range:
-                    p_ss = []
-                    for K_avg in K_avg_range:
-                        K = str(K_avg) + "_" + str(K_std)
-                        p_ss_sum = 0
-                        error_count = 0
-                        for seed in seed_range:
-                            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
-                            if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                                print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                                error_count += 1
-                                # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-                            else:
-                                p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
-                                if np.isnan(p_mean):
-                                    print("Nan")
+        for phi in phi_range:
+            for Rp in Rp_range:
+                for noise in noise_range:
+                    for K_std in K_std_range:
+                        p_ss = []
+                        for K_avg in K_avg_range:
+                            K = str(K_avg) + "_" + str(K_std)
+                            p_ss_sum = 0
+                            error_count = 0
+                            for seed in seed_range:
+                                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                                if not os.path.exists(os.path.join(sim_dir, 'stats')):
                                     print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
                                     error_count += 1
+                                    # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
                                 else:
-                                    p_ss_sum += p_mean
-                        p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+                                    p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
+                                    if np.isnan(p_mean):
+                                        print("Nan")
+                                        print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                        error_count += 1
+                                    else:
+                                        p_ss_sum += p_mean
+                            p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-                    ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
-                    if save_data == True:
-                        save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
-                        for K_avg in K_avg_range:
-                            save_file.write(str(K_avg) + "\t")
-                        save_file.write("\n")
-                        for p in p_ss:
-                            save_file.write(str(p) + "\t")
-                        save_file.write("\n")
+                        ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                        if save_data == True:
+                            save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
+                            for K_avg in K_avg_range:
+                                save_file.write(str(K_avg) + "\t")
+                            save_file.write("\n")
+                            for p in p_ss:
+                                save_file.write(str(p) + "\t")
+                            save_file.write("\n")
 
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
@@ -3411,7 +3412,7 @@ def plot_K_vs_contact_time(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, log
 
 
 
-def plot_porder_logL(mode, nPart_range, phi, noise, K_avg, K_std, Rp, xTy, seed_range, save_data=False):
+def plot_porder_logL(mode, nPart_range, phi, noise, K_avg, K_std, Rp, xTy, seed_range, y_log=False, save_data=False):
     """
     Plot steady state polar order parameter against log(L)
     Averaged over a number of realizations
@@ -3448,6 +3449,8 @@ def plot_porder_logL(mode, nPart_range, phi, noise, K_avg, K_std, Rp, xTy, seed_
 
     ax.plot([np.sqrt(n/phi) for n in nPart_range], p_ss, '-o')
     ax.set_xscale("log")
+    if y_log ==True:
+        ax.set_yscale("log")
     if save_data == True:
         save_file.write(str(noise) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
         for nPart in nPart_range:

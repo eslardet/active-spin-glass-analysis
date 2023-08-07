@@ -6,14 +6,13 @@ import sys
 import csv
 
 
-mode = "G"
-nPart = 20000
+mode = "F"
+nPart = 1000
 phi = 1.0
 noise = "0.20"
-K = "0.5_8.0"
+K = "0.0_8.0_Kn-8.0"
 Rp = 1.0
 xTy = 1.0
-seed = 2
+seed = 1
 
-fun.snapshot(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, pos_ex=False, timestep=5)
-
+fun.snapshot(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, pos_ex=True)

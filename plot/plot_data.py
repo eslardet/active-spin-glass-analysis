@@ -10,8 +10,8 @@ import bisect
 
 import csv, os
 
-num_Kstd = 10
-filename = "G_N1000_phi1.0_n0.20_Kstd8.0_RpI_xTy1.0"
+num_Kstd = 8
+filename = "F_N10000_phi1.0_n0.20_Kstd8.0_Kn-8.0_Rp1.0_xTy1.0"
 
 file = os.path.abspath("plot/" + filename + ".txt")
 
@@ -34,12 +34,12 @@ for k in range(num_Kstd):
     p_ss_plot = [float(i) for i in p_ss]
 
     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp))
-    if str(Rp) == "I":
-        ax.plot(K_avg_plot, p_ss_plot, "--", label=r"$R_I=\infty$", color="black")
-    else:
-        ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
+    # if str(Rp) == "I":
+    #     ax.plot(K_avg_plot, p_ss_plot, "--", label=r"$R_I=\infty$", color="black")
+    # else:
+    #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
-    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$K_{STD}=$" + str(K_std))
+    ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$K_{STD}=$" + str(K_std[:3]))
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
 params = r[3*k][0].split('\t')
