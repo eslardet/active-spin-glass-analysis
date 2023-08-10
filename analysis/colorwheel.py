@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
 import matplotlib as mpl
+import os
 
 fig = plt.figure()
 
@@ -25,4 +26,8 @@ cb.outline.set_visible(False)
 display_axes.set_axis_off()
 display_axes.set_rlim([-1,1])
 plt.show() # Replace with plt.savefig if you want to save a file
+
+folder = os.path.abspath('../plots/for_figures')
+filename = "colorwheel"
+plt.savefig(os.path.join(folder, filename))
 

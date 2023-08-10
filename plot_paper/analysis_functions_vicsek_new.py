@@ -80,15 +80,9 @@ def get_params(inparFile):
 
 def pbc_wrap(x, L):
     """
-    Wrap points into periodic box with length L (from 0 to L) for display
+    Wrap points into periodic box with length L
     """
     return x - L*np.round(x/L) + L/2
-
-def pbc_wrap_calc(x, L):
-    """
-    Wrap points into periodic box with length L (from -L/2 to L/2) for calculations
-    """
-    return x - L*np.round(x/L)
 
 
 def get_pos_arr(inparFile, posFile, min_T=None, max_T=None):
@@ -3502,7 +3496,7 @@ def mean_dist_com(file, L):
 
     dist = 0
     for i in range(nPart):
-        dist += np.sqrt(pbc_wrap_calc(x[i] - com_x, L)**2 + pbc_wrap_calc(y[i]-com_y, L)**2)
+        dist += np.sqrt(pbc_wrap(x[i] - com_x, L)**2 + pbc_wrap(y[i]-com_y, L)**2)
     mean_dist = dist/nPart
     return mean_dist
 
@@ -3538,6 +3532,9 @@ def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, 
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
+### Plot other measures of cohesion?
+# Mean number of neighbours in R_I
+# ?
 
 ## But av_n wthin RI will increase with RI
 def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
@@ -3573,65 +3570,9 @@ def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range,
     plt.savefig(os.path.join(folder, filename))
     
 
-def mean_dist_nn(file, L):
+def mean_dist_nn(file):
     """
     Calculate mean distance to nearest neighbour
     """
     x, y, theta, view_time = get_pos_ex_snapshot(file)
-    nPart = len(x)
-    total_dist = 0
-
-    for i in range(nPart):
-        min_dist = np.infty # initialise min_dist benchmark
-        for j in range(nPart):
-            if i != j:
-                xij = pbc_wrap_calc(x[i]-x[j],L)
-                if np.abs(xij) < min_dist:
-                    yij = pbc_wrap_calc(y[i]-y[j],L)
-                    if np.abs(yij) < min_dist:
-                        rij = np.sqrt(xij**2+yij**2)
-                        if rij < min_dist:
-                            min_dist = rij
-        total_dist += min_dist
-
-    mean_dist_nn = total_dist/nPart
-
-    return mean_dist_nn
-
-
-### Plot other measures of cohesion?
-# Mean number of neighbours in R_I
-# ?
-
-def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
-    """
-    Plot mean distance to nearest neighbor as given in in eq. 7 in Huepe & Aldana, 2008
-    https://hal.elte.hu/~vicsek/downloads/papers/aldana3.pdf
-    """
     
-    L = np.sqrt(nPart / (phi*xTy))
-
-    fig, ax = plt.subplots()
-
-    nn_arr = []
-    for K_avg in K_avg_range:
-        for K_std in K_std_range:
-            K = str(K_avg) + "_" + str(K_std)
-            for Rp in Rp_range:
-                mean_nn = []
-                for seed in seed_range:
-                    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
-                    mean_nn.append(mean_dist_nn(posFileExact, L))
-                nn_arr.append(np.mean(mean_nn))
-            
-            ax.plot(Rp_range, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
-
-    ax.set_xlabel(r"$R_I$")
-    ax.set_ylabel(r"Mean distance to nearest neighbor")
-    # ax.set_title()
-
-    folder = os.path.abspath('../plots/nn_vs_RI')
-    filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_xTy' + str(xTy) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))

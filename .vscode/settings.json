@@ -62,5 +62,8 @@
         "variant": "cpp",
         "algorithm": "cpp"
     },
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "python.analysis.extraPaths": [
+        "./analysis"
+    ]
 }

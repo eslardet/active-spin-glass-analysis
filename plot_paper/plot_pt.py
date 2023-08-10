@@ -10,6 +10,14 @@ import bisect
 
 import csv, os
 
+num_Kstd = 9
+filename = "phase_transition"
+file = os.path.abspath("plot_pt/" + filename + ".txt")
+with open(file) as f:
+        reader = csv.reader(f, delimiter="\n")
+        r = list(reader)
+
+
 small = 12
 big = 18
 
@@ -28,18 +36,11 @@ plt.rcParams['text.usetex'] = True
 
 # matplotlib.rc('font', **font)
 
-num_Kstd = 9
-filename = "no_rep_full_K0-8"
-
 colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
-
-file = os.path.abspath("plot/" + filename + ".txt")
-
-with open(file) as f:
-        reader = csv.reader(f, delimiter="\n")
-        r = list(reader)
+# colors = plt.cm.binary(np.linspace(0.2, 1, num_Kstd))
 
 fig, ax = plt.subplots()
+
 for k in range(num_Kstd):
     params = r[3*k][0].split('\t')
     # print(params)
