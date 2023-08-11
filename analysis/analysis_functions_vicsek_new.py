@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import cm, colors
 from decimal import Decimal
-import freud
+# import freud
 import scipy.stats as sps
 import bisect
 
@@ -415,10 +415,11 @@ def plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
     simulT = inpar_dict["simulT"]
+    eqT = inpar_dict["eqT"]
     if min_T == None:
         min_T = 0
     if max_T == None:
-        max_T = simulT
+        max_T = simulT + eqT
     
     p_order = []
 
@@ -446,6 +447,7 @@ def plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_
     fig, ax = plt.subplots()
     t_plot = np.arange(startT, max_T+DT/4, DT)
     ax.plot(t_plot, p_order)
+    ax.set_ylim([0,1])
     ax.set_xlabel("time")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
 
@@ -1629,6 +1631,7 @@ def plot_correlation(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy,
     """
     Plot equal time 2-point correlation function, averaged over time and seeds
     """
+    import freud
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
     Lx = L*xTy
@@ -2158,6 +2161,7 @@ def plot_corr_density_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, li
     """
     Plot correlation function for the density fluctuations
     """
+    import freud
     rij_all = []
     corr_all = []
     corr_r_max_sq = corr_r_max**2
@@ -2277,6 +2281,7 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_
     """
     Plot correlation function for the density fluctuations
     """
+    import freud
     rij_all = []
     corr_all = []
     corr_r_max_sq = corr_r_max**2
@@ -2394,6 +2399,7 @@ def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep
     """
     Write to file correlation function for the density fluctuations
     """
+    import freud
     rij_all = []
     corr_all = []
     corr_r_max_sq = corr_r_max**2
@@ -2626,7 +2632,7 @@ def plot_exponents_Kavg_corr_density(mode, nPart_range, phi, noise, K_avg_range,
 ###############################
 
 def neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
-    
+    import freud
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
     Lx = L*xTy
@@ -2753,7 +2759,7 @@ def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, 
     """
     Plot local density distribution for various snapshots over time
     """
-
+    import freud
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
@@ -2829,7 +2835,7 @@ def local_density_distribution_diff_freud(mode, nPart, phi, noise, K, Rp, xTy, s
     """
     Plot local density distribution for various snapshots over time by taking their differences
     """
-
+    import freud
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
@@ -2889,7 +2895,7 @@ def local_density_distribution_voronoi(mode, nPart, phi, noise, K, Rp, xTy, seed
     """
     Plot local density distribution for various snapshots over time using Voronoi method
     """
-
+    import freud
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
@@ -3249,6 +3255,7 @@ def plot_dist_coupling_hist_diff_init(mode, nPart, phi, noise, K_avg, K_std, Rp,
 #############################
 
 def get_nlist(posFile, nPart, box, timestep, r_max):
+    import freud
     x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=timestep)
 
     points = np.zeros((nPart, 3))
@@ -3265,7 +3272,7 @@ def get_nlist(posFile, nPart, box, timestep, r_max):
     return nlist
 
 def write_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, tape_time):
-
+    import freud
     # Initialize stuff
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)

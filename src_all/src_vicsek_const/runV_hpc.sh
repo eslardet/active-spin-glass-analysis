@@ -48,8 +48,9 @@ alpha=${12}
 # KAB=0.0
 # KBB=10.0
 
-# KAVG=${10}
-# STDK=${11}
+KAVG=${10}
+STDK=${11}
+K1=${12}
 
 dT=${13}
 DT=${14}
@@ -71,7 +72,7 @@ elif [ "${couplingMode}" == "T" ]; then
 elif [ "${couplingMode}" == "G" ]; then
     run_dir=$HOME/Vicsek_2D/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Vicsek_2D/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${K0}_${K1}/a${alpha}/Rp${Rp}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Vicsek_2D/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}_Kn${K1}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
     run_dir=$HOME/Vicsek_2D/simulation_data/Asymmetric/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
@@ -150,9 +151,9 @@ else
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        echo ${K0} >> 'inpar'
         echo ${K1} >> 'inpar'
-        echo ${alpha} >> 'inpar'
+        echo ${KAVG} >> 'inpar'
+        echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'
