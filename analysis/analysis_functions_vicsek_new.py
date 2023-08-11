@@ -2006,7 +2006,7 @@ def plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_s
 
     ax.set_title(str(d_type) + r"; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
     ax.set_xlabel(r"$K_{AVG}$")
-    ax.set_ylabel(r"$\xi$")
+    ax.set_ylabel(r"$\gamma$")
     ax.legend()
 
     folder = os.path.abspath('../plots/correlation_velocity_exp/')
@@ -2612,7 +2612,7 @@ def plot_exponents_Kavg_corr_density(mode, nPart_range, phi, noise, K_avg_range,
 
     ax.set_title(r"Density correlation exponents; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
     ax.set_xlabel(r"$K_{AVG}$")
-    ax.set_ylabel(r"$\xi$")
+    ax.set_ylabel(r"$\gamma$")
     ax.legend()
 
     folder = os.path.abspath('../plots/correlation_density_exp/')
