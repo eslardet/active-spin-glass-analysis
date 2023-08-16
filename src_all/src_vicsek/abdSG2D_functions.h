@@ -27,13 +27,13 @@ extern double Lx,xmin,xmax;
 extern double Ly,ymin,ymax;
 extern double xTy;
 
-extern double K0,K1; // mode 'C': K0: Coupling constant
+extern double K0; // mode 'C': K0: Coupling constant
 extern double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
                            //           KAB: Coupling constant for A-B interactions 
                            //           KBB: Coupling constant for B-B interactions
 extern double KAVG,STDK; // mode 'G', 'A': KAVG: Average coupling constant
                          //                STDK: Standard deviation of coupling constant
-extern double alpha; // Fraction of particles with +K0 coupling for mode F
+// extern double alpha; // Fraction of particles with +K0 coupling for mode F
 
 /////////////////////////////
 // Define global variables //

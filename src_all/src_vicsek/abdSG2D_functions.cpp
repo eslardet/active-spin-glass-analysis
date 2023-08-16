@@ -135,6 +135,7 @@ void checkParameters()
 void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
 {
     double KK, KK2;
+    double alpha, Kp, Kn;
 
     // Seed the random engines
     rnd_gen.seed (seed);
@@ -205,27 +206,27 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             break;
 
         case 'F' : // Fraction of particles ferro and anti-ferro magnetic
-            // for(int i=0 ; i<nPart ; i++){
-            //     K[i][i] = 0.0;
-            //     for(int j=i+1 ; j<nPart ; j++){
-            //         do{
-            //             KK = KAVG + STDK*normDist(rnd_gen);    
-            //         }while (KK<0.0);
-            //         K[i][j] = KK;
-            //         K[j][i] = KK;
-            //     }
-            // }
-            alpha = SQR(KAVG-K1)/(SQR(STDK)+SQR(KAVG-K1));
-            K0 = (SQR(STDK)+KAVG*(KAVG-K1))/(KAVG-K1);
-            cout << endl << "alpha = " << alpha << "; K+ = " << K0 << "; K- = " << K1 << endl;
+            // alpha = SQR(KAVG-K1)/(SQR(STDK)+SQR(KAVG-K1));
+            // K0 = (SQR(STDK)+KAVG*(KAVG-K1))/(KAVG-K1);
+            if(STDK==0) {
+                Kp = KAVG;
+                Kn = 0;
+                alpha = 1;
+            }
+            else {
+                alpha = 0.5 - 0.5 * erf(-KAVG/(sqrt(2)*STDK));
+                Kp = KAVG + STDK*sqrt((1-alpha)/alpha);
+                Kn = KAVG - STDK*sqrt(alpha/(1-alpha));
+            }
+            cout << " ----> alpha = " << alpha << "; K+ = " << Kp << "; K- = " << Kn << endl;
             for(int i=0 ; i<nPart ; i++){
                 K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
                     if(uniDist(rnd_gen) < alpha) {
-                        KK = K0; // K0 is alpha proportion (positive one K+)
+                        KK = Kp; // Kp is alpha proportion (positive one K+)
                         }
                     else{
-                        KK = K1; // K1 is negative one K-
+                        KK = Kn; // Kn is negative one K-
                     }
                     K[i][j] = KK;
                     K[j][i] = KK;

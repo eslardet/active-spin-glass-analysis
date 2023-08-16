@@ -33,7 +33,7 @@ initMode='R'
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='G'
+couplingMode='F'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -49,15 +49,14 @@ couplingMode='G'
 # KAB=0.0
 # KBB=10.0
 
-K1=-1.0
-KAVG=1.0
-STDK=0.0
+KAVG=0.0
+STDK=8.0
 
 dT=0.005
 DT=100.0
 DTex=1000.0
-eqT=1000.0
-simulT=1000.0
+eqT=0.0
+simulT=1.0
 
 savePos=1
 saveInitPos=0
@@ -74,7 +73,7 @@ elif [ "${couplingMode}" == "T" ]; then
 elif [ "${couplingMode}" == "G" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}_Kn${K1}/Rp${Rp}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Asymmetric/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 fi
@@ -130,10 +129,10 @@ if [ ${initMode} == "S" ]; then # Only overwrite initMode and simulT in inpar if
         sed -i '' "15s/.*/${eqT}/" 'inpar'
         sed -i '' "16s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        sed -i '' "14s/.*/${DT}/" 'inpar'
-        sed -i '' "15s/.*/${DTex}/" 'inpar'
-        sed -i '' "16s/.*/${eqT}/" 'inpar'
-        sed -i '' "17s/.*/${simulT}/" 'inpar'
+        sed -i '' "13s/.*/${DT}/" 'inpar'
+        sed -i '' "14s/.*/${DTex}/" 'inpar'
+        sed -i '' "15s/.*/${eqT}/" 'inpar'
+        sed -i '' "16s/.*/${simulT}/" 'inpar'
     elif [ "${couplingMode}" == "A" ]; then
         sed -i '' "13s/.*/${DT}/" 'inpar'
         sed -i '' "14s/.*/${DTex}/" 'inpar'
@@ -169,7 +168,6 @@ else
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "F" ]; then
-        echo ${K1} >> 'inpar'
         echo ${KAVG} >> 'inpar'
         echo ${STDK} >> 'inpar'
     elif [ "${couplingMode}" == "A" ]; then

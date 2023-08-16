@@ -68,7 +68,7 @@ def get_params(inparFile):
         inpar_dict["DT"] = float(r[11][0])
         inpar_dict["eqT"] = float(r[13][0])
         inpar_dict["simulT"] = float(r[14][0])
-    elif inpar_dict["mode"] == 'T' or inpar_dict["mode"] == 'F':
+    elif inpar_dict["mode"] == 'T':
         inpar_dict["DT"] = float(r[13][0])
         inpar_dict["eqT"] = float(r[15][0])
         inpar_dict["simulT"] = float(r[16][0])
