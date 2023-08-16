@@ -8,17 +8,17 @@ import time
 
 mode = 'G'
 nPart = 20000
-nPart_range = [10000]
+nPart_range = [10000,20000]
 phi = 1.0
 noise = "0.20"
-K_avg = -0.5
+K_avg = 0.0
 K_std = 8.0
 K = str(K_avg) + "_" + str(K_std)
 K_arr = [1.0, 1.5, 2.0]
 K_avg_range = np.concatenate((np.round(np.arange(-1.0,0.0,0.1),1), np.round(np.arange(0.0, 0.6, 0.1), 1),K_arr))
-K_avg_range = [-0.5,-0.4,-0.3,-0.2,-0.1,0.0,0.1,0.2,0.3,0.4,0.5,1.0]
-# K_avg_range = [-0.5]
-K_std_range = [0.0]
+# K_avg_range = [-0.5,-0.4,-0.3,-0.2,-0.1,0.0,0.1,0.2,0.3,0.4,0.5,1.0]
+# K_avg_range = [-0.5,0.0]
+K_std_range = [8.0]
 Rp = 1.0
 xTy = 1.0
 seed_range = np.arange(1,21,1)
@@ -43,9 +43,9 @@ t0 = time.time()
 
 # fun.plot_corr_vel_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, x_scale=r_scale, y_scale=y_scale, bin_ratio=2)
 
-fun.plot_corr_vel_file_superimpose_N(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, x_scale=r_scale, y_scale=y_scale, bin_ratio=2)
+# fun.plot_corr_vel_file_superimpose_N(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, x_scale=r_scale, y_scale=y_scale, bin_ratio=2)
 
-# print(fun.get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, max_r=10))
-# fun.plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, max_r=10)
+# print(fun.get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r=2, max_r=10))
+fun.plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, min_r=2, max_r=10)
 
 print("Time taken: " + str(time.time() - t0))

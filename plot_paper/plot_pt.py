@@ -12,14 +12,14 @@ import csv, os
 
 num_Kstd = 9
 filename = "phase_transition"
-file = os.path.abspath("plot_pt/" + filename + ".txt")
+file = os.path.abspath("plot_paper/" + filename + ".txt")
 with open(file) as f:
-        reader = csv.reader(f, delimiter="\n")
-        r = list(reader)
+    reader = csv.reader(f, delimiter="\n")
+    r = list(reader)
 
 
-small = 12
-big = 18
+small = 18
+big = 28
 
 plt.rc('font', size=big)          # controls default text sizes
 plt.rc('axes', labelsize=big)    # fontsize of the x and y labels
@@ -39,7 +39,7 @@ plt.rcParams['text.usetex'] = True
 colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
 # colors = plt.cm.binary(np.linspace(0.2, 1, num_Kstd))
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10,7))
 
 for k in range(num_Kstd):
     params = r[3*k][0].split('\t')
@@ -88,10 +88,10 @@ ax.set_xlim([-1.0,1.0])
 ax.legend(loc="lower right")
 
 
-folder = os.path.abspath('../plots/local')
+folder = os.path.abspath('../plots/for_figures/pt')
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename + ".png"))
+plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
 plt.show()
 

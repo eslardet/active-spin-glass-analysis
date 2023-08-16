@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import cm, colors
 from decimal import Decimal
-import freud
+# import freud
 import scipy.stats as sps
 import bisect
 
@@ -80,9 +80,15 @@ def get_params(inparFile):
 
 def pbc_wrap(x, L):
     """
-    Wrap points into periodic box with length L
+    Wrap points into periodic box with length L (from 0 to L) for display
     """
     return x - L*np.round(x/L) + L/2
+
+def pbc_wrap_calc(x, L):
+    """
+    Wrap points into periodic box with length L (from -L/2 to L/2) for calculations
+    """
+    return x - L*np.round(x/L)
 
 
 def get_pos_arr(inparFile, posFile, min_T=None, max_T=None):
@@ -409,10 +415,11 @@ def plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
     simulT = inpar_dict["simulT"]
+    eqT = inpar_dict["eqT"]
     if min_T == None:
         min_T = 0
     if max_T == None:
-        max_T = simulT
+        max_T = simulT + eqT
     
     p_order = []
 
@@ -440,6 +447,7 @@ def plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_
     fig, ax = plt.subplots()
     t_plot = np.arange(startT, max_T+DT/4, DT)
     ax.plot(t_plot, p_order)
+    ax.set_ylim([0,1])
     ax.set_xlabel("time")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
 
@@ -1623,6 +1631,7 @@ def plot_correlation(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy,
     """
     Plot equal time 2-point correlation function, averaged over time and seeds
     """
+    import freud
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
     Lx = L*xTy
@@ -1975,32 +1984,32 @@ def plot_corr_vel_file_superimpose_N(mode, nPart_range, phi, noise, K_avg_range,
     plt.savefig(os.path.join(folder, filename))
 
 
-def get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, max_r):
+def get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r=2, max_r=10):
     r_plot, corr_bin_av = read_corr_vel(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed_range=seed_range, r_scale="log", d_type=d_type, bin_ratio=1)
     r_plot = np.array(r_plot)
     corr_bin_av = np.array(corr_bin_av)
-    idx = np.where(r_plot<max_r)[0]
-    # idx2 = np.where(corr_bin_av>0)[0]
-    # idx = list(set(idx1) & set(idx2))
+    idx1 = np.where(r_plot<max_r)[0]
+    idx2 = np.where(r_plot>min_r)[0]
+    idx = list(set(idx1) & set(idx2))
     # print(corr_bin_av[idx])
 
     exponent = np.polyfit(x=np.log10(r_plot[idx]), y=np.log10(np.abs(corr_bin_av[idx])), deg=1)[0]
 
     return exponent
 
-def plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, max_r):
+def plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, min_r=2, max_r=10):
     fig, ax = plt.subplots()
     for nPart in nPart_range:
         for K_std in K_std_range:
             exponents = []
             for K_avg in K_avg_range:
                 K = str(K_avg) + "_" + str(K_std)
-                exponents.append(get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, max_r))
+                exponents.append(get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r, max_r))
             ax.plot(K_avg_range, exponents, '-o', label="N=" + str(nPart) + r"; $K_{STD}=$" + str(K_std))
 
     ax.set_title(str(d_type) + r"; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
     ax.set_xlabel(r"$K_{AVG}$")
-    ax.set_ylabel(r"$\xi$")
+    ax.set_ylabel(r"$\lambda$")
     ax.legend()
 
     folder = os.path.abspath('../plots/correlation_velocity_exp/')
@@ -2152,6 +2161,7 @@ def plot_corr_density_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, li
     """
     Plot correlation function for the density fluctuations
     """
+    import freud
     rij_all = []
     corr_all = []
     corr_r_max_sq = corr_r_max**2
@@ -2271,6 +2281,7 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_
     """
     Plot correlation function for the density fluctuations
     """
+    import freud
     rij_all = []
     corr_all = []
     corr_r_max_sq = corr_r_max**2
@@ -2388,6 +2399,7 @@ def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep
     """
     Write to file correlation function for the density fluctuations
     """
+    import freud
     rij_all = []
     corr_all = []
     corr_r_max_sq = corr_r_max**2
@@ -2606,7 +2618,7 @@ def plot_exponents_Kavg_corr_density(mode, nPart_range, phi, noise, K_avg_range,
 
     ax.set_title(r"Density correlation exponents; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
     ax.set_xlabel(r"$K_{AVG}$")
-    ax.set_ylabel(r"$\xi$")
+    ax.set_ylabel(r"$\lambda$")
     ax.legend()
 
     folder = os.path.abspath('../plots/correlation_density_exp/')
@@ -2620,7 +2632,7 @@ def plot_exponents_Kavg_corr_density(mode, nPart_range, phi, noise, K_avg_range,
 ###############################
 
 def neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
-    
+    import freud
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
     Lx = L*xTy
@@ -2632,7 +2644,7 @@ def neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=Tr
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
         x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
 
-
+    n_nei = np.array([])
     for t in timestep_range:
         if pos_ex == False:
             x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
@@ -2642,10 +2654,8 @@ def neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=Tr
         box = freud.Box.from_box([Lx, Ly])
         points = box.wrap(points)
         ld = freud.density.LocalDensity(r_max=r_max, diameter=0)
-        n_nei = ld.compute(system=(box, points)).num_neighbors
-    av_nei_i = n_nei / (len(timestep_range))
-
-    return av_nei_i
+        n_nei = np.append(n_nei, ld.compute(system=(box, points)).num_neighbors)
+    return n_nei
 
 def neighbour_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
     
@@ -2747,7 +2757,7 @@ def local_density_distribution_freud(mode, nPart, phi, noise, K, Rp, xTy, seed, 
     """
     Plot local density distribution for various snapshots over time
     """
-
+    import freud
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
@@ -2823,7 +2833,7 @@ def local_density_distribution_diff_freud(mode, nPart, phi, noise, K, Rp, xTy, s
     """
     Plot local density distribution for various snapshots over time by taking their differences
     """
-
+    import freud
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
@@ -2883,7 +2893,7 @@ def local_density_distribution_voronoi(mode, nPart, phi, noise, K, Rp, xTy, seed
     """
     Plot local density distribution for various snapshots over time using Voronoi method
     """
-
+    import freud
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     inpar_dict = get_params(inparFile)
     DT = inpar_dict["DT"]
@@ -3124,15 +3134,32 @@ def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_
                 j += 1
     return K_list, rij_list
 
-def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, pos_ex=True, init_pos=False, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None, shift=False):
+
+def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, 
+                            pos_ex=True, init_pos=False, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None, shift=False, save_data=False):
 
     K = str(K_avg) + "_" + str(K_std)
+    folder = os.path.abspath('../plots/dist_coupling/')
+    if init_pos == True:
+        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_hist_init'
+    else:
+        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_hist'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
     K_list = []
     rij_list = []
     for seed in seed_range:
         K_seed, rij_seed = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range, init_pos=init_pos)
         K_list.extend(K_seed)
         rij_list.extend(rij_seed)
+
+    if save_data == True:
+        save_file = open(os.path.join(folder, filename + '.txt'), "w")
+        for i in range(len(K_list)):
+            save_file.write(str(K_list[i]) + "\t" + str(rij_list[i]) + "\n")
+    save_file.close()
+
     ## Shift to origin
     if shift == True:
         K_list = [k - K_avg for k in K_list]
@@ -3149,14 +3176,7 @@ def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed
     ax.set_xlabel(r"$K_{ij}$")
     ax.set_ylabel(r"$r_{ij}$")
 
-    folder = os.path.abspath('../plots/dist_coupling/')
-    if init_pos == True:
-        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_hist_init.png'
-    else:
-        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_hist.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
+    plt.savefig(os.path.join(folder, filename + ".png"))
 
 def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, K_std, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
     K = str(K_avg_compare) + "_" + str(K_std)
@@ -3243,6 +3263,7 @@ def plot_dist_coupling_hist_diff_init(mode, nPart, phi, noise, K_avg, K_std, Rp,
 #############################
 
 def get_nlist(posFile, nPart, box, timestep, r_max):
+    import freud
     x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=timestep)
 
     points = np.zeros((nPart, 3))
@@ -3259,7 +3280,7 @@ def get_nlist(posFile, nPart, box, timestep, r_max):
     return nlist
 
 def write_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, tape_time):
-
+    import freud
     # Initialize stuff
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
@@ -3412,51 +3433,55 @@ def plot_K_vs_contact_time(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, log
 
 
 
-def plot_porder_logL(mode, nPart_range, phi, noise, K_avg, K_std, Rp, xTy, seed_range, y_log=False, save_data=False):
+def plot_porder_logL(mode, nPart_range, phi, noise, K, Rp, xTy, seed_range, y_log=False, save_data=False):
     """
     Plot steady state polar order parameter against log(L)
     Averaged over a number of realizations
     """
     folder = os.path.abspath('../plots/p_order_vs_N')
-    filename = mode + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
+    filename = mode + '_noise' + str(noise) + '_phi' + str(phi) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
     if not os.path.exists(folder):
         os.makedirs(folder)
     if save_data == True:
-        save_file = open(os.path.join(folder, "data.txt"), "w")
+        save_file = open(os.path.join(folder, filename + ".txt"), "w")
 
     fig, ax = plt.subplots()
-    p_ss = []
+    p_ss_mean = []
+    p_ss_sd = []
     for nPart in nPart_range:
-        K = str(K_avg) + "_" + str(K_std)
-        p_ss_sum = 0
+        print(nPart)
+        # K = str(K_avg) + "_" + str(K_std)
+        p_ss_all = []
         error_count = 0
         for seed in seed_range:
             sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
             if not os.path.exists(os.path.join(sim_dir, 'stats')):
-                print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                print(mode, nPart, phi, noise, K, Rp, xTy, seed)
                 error_count += 1
                 # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
             else:
                 p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
                 if np.isnan(p_mean):
                     print("Nan")
-                    print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                    print(mode, nPart, phi, noise, K, Rp, xTy, seed)
                     error_count += 1
                 else:
-                    p_ss_sum += p_mean
-        p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+                    p_ss_all.append(p_mean)
+                    print(p_mean)
+        p_ss_mean.append(np.mean(p_ss_all))
+        p_ss_sd.append(np.std(p_ss_all))
 
-
-    ax.plot([np.sqrt(n/phi) for n in nPart_range], p_ss, '-o')
+    # ax.plot([np.sqrt(n/phi) for n in nPart_range], p_ss_mean, '-o')
+    ax.errorbar([np.sqrt(n/phi) for n in nPart_range], p_ss_mean, yerr=p_ss_sd, fmt='-o')
     ax.set_xscale("log")
     if y_log ==True:
         ax.set_yscale("log")
     if save_data == True:
-        save_file.write(str(noise) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
+        save_file.write(str(noise) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K) + "\n")
         for nPart in nPart_range:
             save_file.write(str(nPart) + "\t")
         save_file.write("\n")
-        for p in p_ss:
+        for p in p_ss_mean:
             save_file.write(str(p) + "\t")
         save_file.write("\n")
 
@@ -3470,7 +3495,7 @@ def plot_porder_logL(mode, nPart_range, phi, noise, K_avg, K_std, Rp, xTy, seed_
     folder = os.path.abspath('../plots/p_order_vs_N/')
     if not os.path.exists(folder):
         os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
+    plt.savefig(os.path.join(folder, filename + '.png'), bbox_inches="tight")
 
 
 ### Centre of Mass calculations ###
@@ -3496,7 +3521,7 @@ def mean_dist_com(file, L):
 
     dist = 0
     for i in range(nPart):
-        dist += np.sqrt(pbc_wrap(x[i] - com_x, L)**2 + pbc_wrap(y[i]-com_y, L)**2)
+        dist += np.sqrt(pbc_wrap_calc(x[i] - com_x, L)**2 + pbc_wrap_calc(y[i]-com_y, L)**2)
     mean_dist = dist/nPart
     return mean_dist
 
@@ -3532,9 +3557,6 @@ def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, 
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-### Plot other measures of cohesion?
-# Mean number of neighbours in R_I
-# ?
 
 ## But av_n wthin RI will increase with RI
 def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
@@ -3570,9 +3592,65 @@ def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range,
     plt.savefig(os.path.join(folder, filename))
     
 
-def mean_dist_nn(file):
+def mean_dist_nn(file, L):
     """
     Calculate mean distance to nearest neighbour
     """
     x, y, theta, view_time = get_pos_ex_snapshot(file)
+    nPart = len(x)
+    total_dist = 0
+
+    for i in range(nPart):
+        min_dist = np.infty # initialise min_dist benchmark
+        for j in range(nPart):
+            if i != j:
+                xij = pbc_wrap_calc(x[i]-x[j],L)
+                if np.abs(xij) < min_dist:
+                    yij = pbc_wrap_calc(y[i]-y[j],L)
+                    if np.abs(yij) < min_dist:
+                        rij = np.sqrt(xij**2+yij**2)
+                        if rij < min_dist:
+                            min_dist = rij
+        total_dist += min_dist
+
+    mean_dist_nn = total_dist/nPart
+
+    return mean_dist_nn
+
+
+### Plot other measures of cohesion?
+# Mean number of neighbours in R_I
+# ?
+
+def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
+    """
+    Plot mean distance to nearest neighbor as given in in eq. 7 in Huepe & Aldana, 2008
+    https://hal.elte.hu/~vicsek/downloads/papers/aldana3.pdf
+    """
     
+    L = np.sqrt(nPart / (phi*xTy))
+
+    fig, ax = plt.subplots()
+
+    nn_arr = []
+    for K_avg in K_avg_range:
+        for K_std in K_std_range:
+            K = str(K_avg) + "_" + str(K_std)
+            for Rp in Rp_range:
+                mean_nn = []
+                for seed in seed_range:
+                    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
+                    mean_nn.append(mean_dist_nn(posFileExact, L))
+                nn_arr.append(np.mean(mean_nn))
+            
+            ax.plot(Rp_range, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+
+    ax.set_xlabel(r"$R_I$")
+    ax.set_ylabel(r"Mean distance to nearest neighbor")
+    # ax.set_title()
+
+    folder = os.path.abspath('../plots/nn_vs_RI')
+    filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))

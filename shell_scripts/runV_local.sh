@@ -33,7 +33,7 @@ initMode='R'
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='F'
+couplingMode='G'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -50,14 +50,14 @@ couplingMode='F'
 # KBB=10.0
 
 K1=-1.0
-KAVG=0.0
-STDK=8.0
+KAVG=1.0
+STDK=0.0
 
 dT=0.005
 DT=100.0
-DTex=500.0
-eqT=0.0
-simulT=3000
+DTex=1000.0
+eqT=1000.0
+simulT=1000.0
 
 savePos=1
 saveInitPos=0

@@ -25,9 +25,9 @@ cb = mpl.colorbar.ColorbarBase(display_axes, cmap=cm.get_cmap('hsv',quant_steps)
 cb.outline.set_visible(False)                                 
 display_axes.set_axis_off()
 display_axes.set_rlim([-1,1])
-plt.show() # Replace with plt.savefig if you want to save a file
+# plt.show() # Replace with plt.savefig if you want to save a file
 
 folder = os.path.abspath('../plots/for_figures')
-filename = "colorwheel"
+filename = "colorwheel.svg"
 plt.savefig(os.path.join(folder, filename))
 
