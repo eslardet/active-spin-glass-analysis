@@ -7,9 +7,9 @@ import time
 
 
 mode = "G"
-nPart = 50000
+nPart = 10000
 phi = 1.0
-noise = "0.70"
+noise = "0.20"
 #K_avg = 0.0
 #K_avg_range = [1.0]
 #K_avg_range = np.round(np.arange(0.0,0.1,0.5),1)
@@ -18,13 +18,15 @@ noise = "0.70"
 #K_std_range = np.round(np.arange(1,8.1,1),1)
 #K_std_range = [0.0, 1.0, 2.0]
 #K = str(K_avg) + "_" + str(K_std)
-K = "1.0_0.0"
+K = "0.0_8.0"
 Rp = 1.0
-xTy = 8.0
+xTy = 1.0
 # seed_range = np.arange(1,6,1)
-seed = 21
-timestep_range = np.arange(150,201,10)
-time_av = np.arange(-10,1,1)
+seed = 1
+# timestep_range = np.arange(150,201,10)
+timestep_range = [0]
+# time_av = np.arange(-10,1,1)
+time_av = np.arange(0,6,1)
 r_max = 3
 #r_bin_num = 100
 # random_sample = True
