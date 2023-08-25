@@ -25,7 +25,7 @@ plt.rc('legend', fontsize=big)    # legend fontsize
 matplotlib.rcParams["font.family"] = "serif"
 plt.rcParams['text.usetex'] = True
 
-filename = 'plot_paper/coupling_rij.txt'
+filename = 'plot_paper/data/coupling_rij.txt'
 
 K_list = []
 rij_list = []

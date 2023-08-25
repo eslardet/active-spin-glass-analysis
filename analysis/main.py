@@ -1,5 +1,5 @@
 import numpy as np
-from analysis.analysis_functions import *
+from analysis_functions import *
 import os
 import matplotlib.pyplot as plt
 import sys
@@ -31,7 +31,7 @@ seed = 1
 #    plot_dist_coupling_hist(mode, nPart, phi, noise, K, xTy, seed, bin_size=160, bin_ratio=16 , r_max=5)
 #        del_files(mode, nPart, phi, noise, K, Rp, xTy, seed, files=["pos"])
 
-animate(mode, nPart, phi, noise, K, Rp, xTy, seed)
+# animate(mode, nPart, phi, noise, K, Rp, xTy, seed)
 
 #plot_dist_coupling(mode, nPart, phi, noise, K, xTy, seed)
 #dist_coupling(mode, nPart, phi, noise, K, xTy, seed)
@@ -54,3 +54,5 @@ animate(mode, nPart, phi, noise, K, Rp, xTy, seed)
 
 #for noise in noise_range:
 #    snapshot(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True)
+
+print("hello, this is working")

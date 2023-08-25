@@ -1,5 +1,5 @@
 import numpy as np
-from analysis.analysis_functions import *
+from analysis_functions import *
 import os
 import matplotlib.pyplot as plt
 import sys

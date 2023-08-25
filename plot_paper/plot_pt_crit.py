@@ -29,7 +29,7 @@ filename = "phase_transition"
 # colors = plt.cm.PuRd(np.linspace(0.2, 1, num_Kstd))
 colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
 
-file = os.path.abspath("plot_paper/" + filename + ".txt")
+file = os.path.abspath("plot_paper/data/" + filename + ".txt")
 
 with open(file) as f:
         reader = csv.reader(f, delimiter="\n")

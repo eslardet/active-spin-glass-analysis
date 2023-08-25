@@ -12,7 +12,7 @@ import csv, os
 
 num_Kstd = 8
 filename = "phase_transition_rep_R10"
-file = os.path.abspath("plot_paper/" + filename + ".txt")
+file = os.path.abspath("plot_paper/data/" + filename + ".txt")
 with open(file) as f:
     reader = csv.reader(f, delimiter="\n")
     r = list(reader)

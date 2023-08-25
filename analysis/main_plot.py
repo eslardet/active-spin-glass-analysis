@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek as fun
+from analysis_functions import *
 import os
 import matplotlib.pyplot as plt
 import sys
