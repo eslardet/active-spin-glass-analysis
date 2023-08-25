@@ -66,7 +66,7 @@ filename = "phase_transition_F"
 
 colors = plt.cm.OrRd(np.linspace(0.2, 1, num_Kstd))
 
-file = os.path.abspath("plot/" + filename + ".txt")
+file = os.path.abspath("plot/data/" + filename + ".txt")
 
 with open(file) as f:
         reader = csv.reader(f, delimiter="\n")

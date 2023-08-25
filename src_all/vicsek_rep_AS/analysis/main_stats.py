@@ -17,14 +17,14 @@ seed = int(sys.argv[8])
 simulT = float(sys.argv[9])
 
 
-#fun.snapshot(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, pos_ex=True)
-#fun.animate(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+#snapshot(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, pos_ex=True)
+#animate(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
 
-# fun.write_stats(mode, nPart, phi, Pe, K, xTy, seed, remove_pos=True)
-# fun.snapshot(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, save_in_folder=True)
+# write_stats(mode, nPart, phi, Pe, K, xTy, seed, remove_pos=True)
+# snapshot(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, save_in_folder=True)
 
-#fun.plot_porder_time(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-fun.write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, remove_pos=True)
-#sim_dir = fun.get_sim_dir(mode, nPart, phi, noise, K, xTy, seed)
+#plot_porder_time(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, remove_pos=True)
+#sim_dir = get_sim_dir(mode, nPart, phi, noise, K, xTy, seed)
 #os.remove(os.path.join(sim_dir, "initpos"))
 

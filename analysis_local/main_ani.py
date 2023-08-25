@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek_new as fun
+from analysis.analysis_functions import *
 import os
 import matplotlib.pyplot as plt
 import sys
@@ -22,11 +22,11 @@ xTy = 1.0
 seed = 1
 
 
-# fun.write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed)
-# fun.animate(mode, nPart, phi, noise, K, Rp, xTy, seed, max_T=3300)
-# fun.plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed)
-# fun.snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, show_color=True)
+# write_stats(mode, nPart, phi, noise, K, Rp, xTy, seed)
+# animate(mode, nPart, phi, noise, K, Rp, xTy, seed, max_T=3300)
+# plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed)
+# snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, show_color=True)
 
-for K_avg in K_avg_range:
-    K = str(K_avg) + "_" + str(K_std)
-    fun.animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=3000, max_T=3500)
+# for K_avg in K_avg_range:
+#     K = str(K_avg) + "_" + str(K_std)
+#     animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=3000, max_T=3500)

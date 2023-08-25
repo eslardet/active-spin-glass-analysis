@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, colors
 import csv
 # sys.path.insert(0, os.path.abspath('../analysis/'))
-from analysis_functions_vicsek_new import *    
+from analysis.analysis_functions import *    
 
 bin_size=100
 bin_ratio=2

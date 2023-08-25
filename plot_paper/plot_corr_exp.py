@@ -2,7 +2,7 @@ import numpy as np
 import os, sys, csv
 import matplotlib.pyplot as plt
 import matplotlib
-from analysis_functions_vicsek_new import * 
+from analysis.analysis_functions import * 
 
 
 mode = 'G'

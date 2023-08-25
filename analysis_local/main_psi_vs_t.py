@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek_new as fun
+from analysis.analysis_functions import *
 import os
 import matplotlib.pyplot as plt
 import sys
@@ -15,4 +15,4 @@ Rp = 1.0
 xTy = 1.0
 seed = 1
 
-fun.plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed)
+plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed)

@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek as fun
+from analysis.analysis_functions import *
 import matplotlib.pyplot as plt
 from matplotlib import cm, colors
 import freud
@@ -14,8 +14,8 @@ seed = 1
 timestep_range = range(1)
 
 
-inparFile, posFile = fun.get_files(mode, nPart, phi, noise, K, xTy, seed)
-posExactFile = fun.get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name="pos_exact")
+inparFile, posFile = get_files(mode, nPart, phi, noise, K, xTy, seed)
+posExactFile = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed, file_name="pos_exact")
 L = np.sqrt(nPart / (phi*xTy))
 Ly = L
 Lx = L*xTy
@@ -26,8 +26,8 @@ print(Lx, Ly)
 cf = freud.density.CorrelationFunction(bins=25, r_max=r_max)
 
 for t in timestep_range:
-    # x, y, theta = fun.get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
-    x, y, theta, view_time = fun.get_pos_ex_snapshot(file=posExactFile)
+    # x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
+    x, y, theta, view_time = get_pos_ex_snapshot(file=posExactFile)
 
     points = np.zeros((nPart, 3))
     points[:,0] = x

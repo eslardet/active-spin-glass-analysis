@@ -1,5 +1,5 @@
 import numpy as np
-import analysis_functions_vicsek_new as fun
+from analysis.analysis_functions import *
 import os
 import matplotlib.pyplot as plt
 import sys
@@ -21,11 +21,13 @@ r_scale = str(sys.argv[10])
 d_type = str(sys.argv[11])
 max_time = float(sys.argv[12])
 timestep_range = np.arange(0, max_time+1, 1)
-
+corr_r_min = float(sys.argv[13])
+corr_r_max = float(sys.argv[14])
+r_bin_num = int(sys.argv[15])
 
 t0 = time.time()
 
-fun.write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, timestep_range, d_type)
-fun.plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, x_scale=r_scale, y_scale="log")
+write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, timestep_range, d_type, corr_r_min=corr_r_min, corr_r_max=corr_r_max, r_bin_num=r_bin_num)
+plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, x_scale=r_scale, y_scale="log")
 
 print("Time taken: " + str(time.time() - t0))

@@ -11,7 +11,7 @@ phi = 1.0
 noise = "0.60"
 K_avg_range = np.concatenate((np.round(np.arange(-1.0,0.0,0.1),1), np.round(np.arange(0.0,2.1,0.1),1)))
 # K_avg_range_2 = np.arange(0.0,2.1,0.1)
-K_std_range = np.round(np.arange(1.0,8.0,1.0),1)
+K_std_range = np.round(np.arange(1.0,8.1,1.0),1)
 xTy = 5.0
 seed_range = np.arange(1,21,1)
 
@@ -22,8 +22,8 @@ for K_std in K_std_range:
         K = str(K_avg) + "_" + str(K_std)
         p_ss_sum = 0
         for seed in seed_range:
-            sim_dir = fun.get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
-            p_ss_sum += fun.read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
+            sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+            p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)["p_mean"]
         p_ss.append(p_ss_sum/len(seed_range))
 
     ax.plot([(i-0.6)/K_std for i in K_avg_range], p_ss, '-o', label=r"$K_{STD}=$" + str(K_std))

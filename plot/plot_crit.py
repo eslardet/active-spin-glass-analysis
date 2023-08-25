@@ -17,7 +17,7 @@ Rp_plot = []
 save_plot = True
 filename = "G_N1000_phi0.13_n0.20_Kstd8.0_RpI_xTy1.0"
 
-file = os.path.abspath("plot/" + filename + ".txt")
+file = os.path.abspath("plot/data/" + filename + ".txt")
 
 with open(file) as f:
         reader = csv.reader(f, delimiter="\n")

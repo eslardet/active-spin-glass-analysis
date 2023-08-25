@@ -1,6 +1,6 @@
 import numpy as np
 import scipy
-import analysis_functions_vicsek_new as fun
+from analysis.analysis_functions import *
 import os
 import matplotlib.pyplot as plt
 import sys
@@ -23,12 +23,12 @@ loglin=False
 loglog=False
 
 t0 = time.time()
-# fun.plot_corr_density_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=linlin, loglin=loglin, loglog=loglog)
-# fun.plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=timestep_range, linlin=linlin, loglin=loglin, loglog=loglog)
+# plot_corr_density_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=linlin, loglin=loglin, loglog=loglog)
+# plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=timestep_range, linlin=linlin, loglin=loglin, loglog=loglog)
 
-# fun.write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range)
-# r_plot, corr = fun.read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
-# fun.plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, bin_ratio=1)
+# write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range)
+# r_plot, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
+# plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, bin_ratio=1)
 
 r_lower = 0
 r_upper = 3
@@ -39,7 +39,7 @@ K_avg_range = [-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0]
 
 for K_avg in K_avg_range:
     K = str(K_avg) + "_" + str(K_std)
-    r_plot, corr = fun.read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
+    r_plot, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
     lower = np.where(np.array(r_plot) > r_lower)[0][0]
     upper = np.where(np.array(r_plot) < r_upper)[0][-1]
     exponents.append(np.polyfit(r_plot[lower:upper+1], np.log(corr[lower:upper+1]), 1)[0])
@@ -50,7 +50,7 @@ seed_range = np.arange(1,11,1)
 
 for K_avg in K_avg_range:
     K = str(K_avg) + "_" + str(K_std)
-    r_plot, corr = fun.read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
+    r_plot, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
     lower = np.where(np.array(r_plot) > r_lower)[0][0]
     upper = np.where(np.array(r_plot) < r_upper)[0][-1]
     exponents.append(np.polyfit(r_plot[lower:upper+1], np.log(corr[lower:upper+1]), 1)[0])
