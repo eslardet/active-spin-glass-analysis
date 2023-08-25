@@ -2962,11 +2962,17 @@ def get_binder(mode, nPart, phi, noise, K, Rp, xTy, seed_range):
 
     return binder
 
-def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
+def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
     """
     Plot steady state binder cumulant against Kavg, for each fixed K_std value and noise value
     Averaged over a number of realizations
     """
+    folder = os.path.abspath('../plots/binder_vs_Kavg/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, 'data.txt'), "w")
+
     fig, ax = plt.subplots()
     for nPart in nPart_range:
         for Rp in Rp_range:
@@ -2998,16 +3004,25 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
                         binder.append(1 - p_4_av/(3*(p_2_av**2)))
 
                     ax.plot([float(k) for k in K_avg_range], binder, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                    if save_data == True:
+                        save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
+                        for k in K_avg_range:
+                            save_file.write(str(k) + "\t")
+                        save_file.write("\n")
+                        for b in binder:
+                            save_file.write(str(b) + "\t")
+                        save_file.write("\n")
+    if save_file == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Binder cumulant, $G$")
     # ax.set_ylim([0,1])
     # ax.set_xlim([-1,2])
     ax.legend()
 
-    folder = os.path.abspath('../plots/binder_vs_Kavg/')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+
     plt.savefig(os.path.join(folder, filename))
 
 def plot_binder_noise(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
@@ -3158,7 +3173,7 @@ def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed
         save_file = open(os.path.join(folder, filename + '.txt'), "w")
         for i in range(len(K_list)):
             save_file.write(str(K_list[i]) + "\t" + str(rij_list[i]) + "\n")
-    save_file.close()
+        save_file.close()
 
     ## Shift to origin
     if shift == True:
@@ -3484,6 +3499,9 @@ def plot_porder_logL(mode, nPart_range, phi, noise, K, Rp, xTy, seed_range, y_lo
         for p in p_ss_mean:
             save_file.write(str(p) + "\t")
         save_file.write("\n")
+        for p in p_ss_sd:
+            save_file.write(str(p) + "\t")
+        save_file.write("\n")
 
     # noise_range = [float(i) for i in noise_range]
     # ax.plot(noise_range, p_ss, '-o')
@@ -3545,11 +3563,12 @@ def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, 
                     com.append(mean_dist_com(posFileExact, L))
                 com_arr.append(np.mean(com))
             
-            ax.plot(Rp_range, com_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+            ax.plot(Rp_range, com_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
 
     ax.set_xlabel(r"$R_I$")
     ax.set_ylabel(r"Mean distance to centre of mass")
-    # ax.set_title()
+    ax.legend()
+    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $\eta=$' + str(noise))
 
     folder = os.path.abspath('../plots/com_vs_RI')
     filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_xTy' + str(xTy) + '.png'
@@ -3557,6 +3576,54 @@ def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, 
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
+def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
+    """
+    Plot mean distance to centre of mass against the noise strength
+    """
+    folder = os.path.abspath('../plots/nn_vs_noise')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
+    fig, ax = plt.subplots()
+
+    com_arr = []
+    for nPart in nPart_range:
+        for phi in phi_range:
+            L = np.sqrt(nPart / (phi*xTy))
+            for K_avg in K_avg_range:
+                for K_std in K_std_range:
+                    K = str(K_avg) + "_" + str(K_std)
+                    for Rp in Rp_range:
+                        for noise in noise_range:
+                            com = []
+                            for seed in seed_range:
+                                posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
+                                com.append(mean_dist_com(posFileExact, L))
+                            com_arr.append(np.mean(com))
+                    noise_range_plot = [float(n) for n in noise_range]
+                    ax.plot(noise_range_plot, com_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
+                    if save_data == True:
+                        save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
+                        for noise in noise_range:
+                            save_file.write(str(noise) + "\t")
+                        save_file.write("\n")
+                        for p in com_arr:
+                            save_file.write(str(p) + "\t")
+                        save_file.write("\n")
+    ax.set_xlabel(r"$\eta$")
+    ax.set_ylabel(r"Mean distance to centre of mass")
+    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $K_{AVG}=$' + str(K_avg)+ r'; $K_{STD}=$' + str(K_std) + r'; $R_I=$' + str(Rp))
+    ax.legend()
+
+
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    plt.savefig(os.path.join(folder, filename + '.png'))
+
+    if save_data == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
 
 ## But av_n wthin RI will increase with RI
 def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
@@ -3579,7 +3646,7 @@ def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range,
                     com.append(av_n = np.mean(neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=Rp)))
                 com_arr.append(np.mean(com))
             
-            ax.plot(Rp_range, com_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+            ax.plot(Rp_range, com_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
 
     ax.set_xlabel(r"$R_I$")
     ax.set_ylabel(r"Mean number of neighbours")
@@ -3643,14 +3710,69 @@ def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, x
                     mean_nn.append(mean_dist_nn(posFileExact, L))
                 nn_arr.append(np.mean(mean_nn))
             
-            ax.plot(Rp_range, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+            ax.plot(Rp_range, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
 
     ax.set_xlabel(r"$R_I$")
     ax.set_ylabel(r"Mean distance to nearest neighbor")
-    # ax.set_title()
+    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $\eta=$' + str(noise))
+    ax.legend()
 
     folder = os.path.abspath('../plots/nn_vs_RI')
     filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_xTy' + str(xTy) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+
+
+def plot_nn_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
+    """
+    Plot mean distance to nearest neighbor as given in in eq. 7 in Huepe & Aldana, 2008
+    https://hal.elte.hu/~vicsek/downloads/papers/aldana3.pdf
+    """
+    folder = os.path.abspath('../plots/nn_vs_noise')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
+    fig, ax = plt.subplots()
+
+    nn_arr = []
+    for nPart in nPart_range:
+        for phi in phi_range:
+            L = np.sqrt(nPart / (phi*xTy))
+            for K_avg in K_avg_range:
+                for K_std in K_std_range:
+                    K = str(K_avg) + "_" + str(K_std)
+                    for Rp in Rp_range:
+                        for noise in noise_range:
+                            mean_nn = []
+                            for seed in seed_range:
+                                posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
+                                if os.path.exists(posFileExact):
+                                    mean_nn.append(mean_dist_nn(posFileExact, L))
+                            try:
+                                nn_arr.append(np.mean(mean_nn))
+                            except:
+                                print('N=' + str(nPart) + '; phi=' + str(phi) + '; K=' + str(K) + '; noise=' + str(noise))
+                    noise_range_plot = [float(n) for n in noise_range]
+                    ax.plot(noise_range_plot, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
+                    if save_data == True:
+                        save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
+                        for noise in noise_range:
+                            save_file.write(str(noise) + "\t")
+                        save_file.write("\n")
+                        for p in nn_arr:
+                            save_file.write(str(p) + "\t")
+                        save_file.write("\n")
+    ax.set_xlabel(r"$\eta$")
+    ax.set_ylabel(r"Mean distance to nearest neighbor")
+    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $K_{AVG}=$' + str(K_avg)+ r'; $K_{STD}=$' + str(K_std) + r'; $R_I=$' + str(Rp))
+    ax.legend()
+
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    plt.savefig(os.path.join(folder, filename + '.png'))
+
+    if save_data == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))

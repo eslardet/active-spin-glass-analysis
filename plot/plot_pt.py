@@ -28,19 +28,52 @@ plt.rcParams['text.usetex'] = True
 
 # matplotlib.rc('font', **font)
 
-num_Kstd = 9
-filename = "no_rep_full_K0-8"
+# num_Kstd = 8
+# filename = "no_rep_full"
 
-colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
+# colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
+
+# file = os.path.abspath("plot/" + filename + ".txt")
+
+# with open(file) as f:
+#         reader = csv.reader(f, delimiter="\n")
+#         r = list(reader)
+
+# fig, ax = plt.subplots()
+# for k in range(num_Kstd):
+#     params = r[3*k][0].split('\t')
+#     # print(params)
+#     K_std = params[3]
+#     nPart = params[0]
+#     Rp = params[1]
+
+#     K_avg = r[3*k+1][0].split('\t')[:-1]
+#     K_avg_plot = [float(i) for i in K_avg]
+    
+#     p_ss = r[3*k+2][0].split('\t')[:-1]
+#     p_ss_plot = [float(i) for i in p_ss]
+#     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp))
+#     # if str(Rp) == "I":
+#     #     ax.plot(K_avg_plot, p_ss_plot, "--", label=r"$R_I=\infty$", color="black")
+#     # else:
+#     #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
+#     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
+#     ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$G, K_{STD}=\ $" + str(K_std))
+#     # ax.plot(K_avg_plot, p_ss_plot, "-o")
+
+num_Kstd = 9
+filename = "phase_transition_F"
+
+colors = plt.cm.OrRd(np.linspace(0.2, 1, num_Kstd))
 
 file = os.path.abspath("plot/" + filename + ".txt")
 
 with open(file) as f:
-    reader = csv.reader(f, delimiter="\n")
-    r = list(reader)
+        reader = csv.reader(f, delimiter="\n")
+        r = list(reader)
 
 fig, ax = plt.subplots()
-for k in range(num_Kstd):
+for k in range(1, num_Kstd):
     params = r[3*k][0].split('\t')
     # print(params)
     K_std = params[4]
@@ -48,18 +81,14 @@ for k in range(num_Kstd):
     Rp = params[1]
 
     K_avg = r[3*k+1][0].split('\t')[:-1]
-    K_avg_plot = [float(i) for i in K_avg]
+    K_avg_plot = [float(i)/float(K_std) for i in K_avg]
     
     p_ss = r[3*k+2][0].split('\t')[:-1]
     p_ss_plot = [float(i) for i in p_ss]
-    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp))
-    # if str(Rp) == "I":
-    #     ax.plot(K_avg_plot, p_ss_plot, "--", label=r"$R_I=\infty$", color="black")
-    # else:
-    #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
-    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
-    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$K_{STD}=\ $" + str(K_std))
-    # ax.plot(K_avg_plot, p_ss_plot, "-o")
+
+    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$F, K_{STD}=\ $" + str(K_std))
+
+
 
 params = r[3*k][0].split('\t')
 nPart = params[0]
@@ -90,7 +119,7 @@ ax.legend(loc="lower right")
 folder = os.path.abspath('../plots/local')
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename + ".png"))
+# plt.savefig(os.path.join(folder, filename + ".png"))
 
 plt.show()
 

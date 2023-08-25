@@ -11,14 +11,16 @@ import bisect
 import csv, os
 
 save_plot = True
-num_Kstd = 6
-filename = "G_N90000_phi4.0_n0.20_Kstd8.0_Rp1.0_xTy1.0"
+num_Kstd = 8
+filename = "G_N90000_phi10.0_n0.20_Kstd8.0_Rp1.0_xTy1.0"
 
 file = os.path.abspath("plot/" + filename + ".txt")
 
 with open(file) as f:
         reader = csv.reader(f, delimiter="\n")
         r = list(reader)
+
+colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
 
 fig, ax = plt.subplots()
 for k in range(num_Kstd):
@@ -42,7 +44,7 @@ for k in range(num_Kstd):
     # else:
     #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
-    ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$\rho=$" + str(rho))
+    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$\rho=$" + str(rho))
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
 params = r[3*k][0].split('\t')

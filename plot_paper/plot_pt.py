@@ -11,7 +11,8 @@ import bisect
 import csv, os
 
 num_Kstd = 9
-filename = "phase_transition"
+
+filename = "phase_transition_F"
 file = os.path.abspath("plot_paper/" + filename + ".txt")
 with open(file) as f:
     reader = csv.reader(f, delimiter="\n")
@@ -36,15 +37,16 @@ plt.rcParams['text.usetex'] = True
 
 # matplotlib.rc('font', **font)
 
-colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
+colors = plt.cm.PuRd(np.linspace(0.2, 1, num_Kstd))
+# colors = plt.cm.OrRd(np.linspace(0.2, 1, num_Kstd))
 # colors = plt.cm.binary(np.linspace(0.2, 1, num_Kstd))
 
 fig, ax = plt.subplots(figsize=(10,7))
 
-for k in range(num_Kstd):
+for k in range(1,num_Kstd):
     params = r[3*k][0].split('\t')
     # print(params)
-    K_std = params[4]
+    K_std = float(params[4])
     nPart = params[0]
     Rp = params[1]
 
@@ -59,7 +61,7 @@ for k in range(num_Kstd):
     # else:
     #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
-    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$K_{STD}=\ $" + str(K_std))
+    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$K_{STD}=\ $" + str(round(K_std)))
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
 params = r[3*k][0].split('\t')
@@ -93,6 +95,6 @@ if not os.path.exists(folder):
     os.makedirs(folder)
 plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
-plt.show()
+# plt.show()
 
 

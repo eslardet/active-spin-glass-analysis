@@ -10,8 +10,16 @@ import bisect
 
 import csv, os
 
-small = 12
-big = 18
+num_Kstd = 8
+filename = "phase_transition_rep_R10"
+file = os.path.abspath("plot_paper/" + filename + ".txt")
+with open(file) as f:
+    reader = csv.reader(f, delimiter="\n")
+    r = list(reader)
+
+
+small = 18
+big = 28
 
 plt.rc('font', size=big)          # controls default text sizes
 plt.rc('axes', labelsize=big)    # fontsize of the x and y labels
@@ -28,24 +36,14 @@ plt.rcParams['text.usetex'] = True
 
 # matplotlib.rc('font', **font)
 
-num_Kstd = 9
-filename = "no_rep_full_K0-8"
-
 colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
+# colors = plt.cm.binary(np.linspace(0.2, 1, num_Kstd))
 
-file = os.path.abspath("plot/" + filename + ".txt")
+fig, ax = plt.subplots(figsize=(10,7))
 
-with open(file) as f:
-    reader = csv.reader(f, delimiter="\n")
-    r = list(reader)
-
-fig, ax = plt.subplots()
 for k in range(num_Kstd):
     params = r[3*k][0].split('\t')
-    # print(params)
-    K_std = params[4]
-    nPart = params[0]
-    Rp = params[1]
+    K_std = float(params[3])
 
     K_avg = r[3*k+1][0].split('\t')[:-1]
     K_avg_plot = [float(i) for i in K_avg]
@@ -58,7 +56,7 @@ for k in range(num_Kstd):
     # else:
     #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
-    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$K_{STD}=\ $" + str(K_std))
+    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$K_{STD}=\ $" + str(round(K_std)))
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
 params = r[3*k][0].split('\t')
@@ -87,10 +85,10 @@ ax.set_xlim([-1.0,1.0])
 ax.legend(loc="lower right")
 
 
-folder = os.path.abspath('../plots/local')
+folder = os.path.abspath('../plots/for_figures/pt')
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename + ".png"))
+plt.savefig(os.path.join(folder, filename + ".svg"), bbox_inches="tight")
 
 plt.show()
 
