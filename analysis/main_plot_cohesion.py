@@ -10,9 +10,9 @@ nPart = 1000
 nPart_range = [10000]
 #phi_range = np.round(np.arange(0.1,2.1,0.1),1)
 phi = 0.125
-phi_range = [0.4, 1.0]
+phi_range = [0.4]
 noise = '0.20'
-noise_range = [format(i, '.2f') for i in np.arange(0.10,0.81,0.02)]
+noise_range = [format(i, '.2f') for i in np.arange(0.10,0.81,0.04)]
 #noise_range = ["0.60"]
 #K_avg_range = [format(i, '.2f') for i in np.arange(0.4,0.61,0.01)]
 #K_avg_range = np.round(np.concatenate((np.arange(-2.0,0.0,0.1), np.arange(0.0,0.1,0.1))),1)
@@ -39,7 +39,7 @@ save_data = True
 t0 = time.time()
 
 plot_nn_vs_noise(mode=mode, nPart_range=nPart_range, phi_range=phi_range, noise_range=noise_range, K_avg_range=K_avg_range, K_std_range=K_std_range, Rp_range=Rp_range, xTy=xTy, seed_range=seed_range, save_data=save_data)
-plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data)
+# plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data)
 
 print(time.time()-t0)
 #t0 = time.time()

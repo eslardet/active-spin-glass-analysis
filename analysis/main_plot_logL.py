@@ -8,7 +8,7 @@ import time
 
 mode = 'G'
 #nPart=10000
-nPart_range = [1000,2500,6400,10000,22500,40000,90000,160000]
+nPart_range = [1000,2500,6400,10000,22500,40000,90000]
 #phi_range = np.round(np.arange(0.1,2.1,0.1),1)
 phi = 1.0
 noise = '0.20'

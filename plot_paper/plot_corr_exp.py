@@ -2,7 +2,8 @@ import numpy as np
 import os, sys, csv
 import matplotlib.pyplot as plt
 import matplotlib
-from analysis.analysis_functions import * 
+sys.path.insert(1, '/Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis')
+from analysis_functions import * 
 
 
 mode = 'G'

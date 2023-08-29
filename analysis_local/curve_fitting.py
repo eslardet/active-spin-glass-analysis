@@ -27,9 +27,9 @@ with open(file) as f:
 params = r[0][0].split('\t')[:-1]
 rho = float(params[2])
 
-n_list = [float(n) for n in r[1][0].split('\t')[:-3]]
-psi_list = [float(p) for p in r[2][0].split('\t')[:-3]]
-psi_sd_list = [float(p) for p in r[3][0].split('\t')[:-3]]
+n_list = [float(n) for n in r[1][0].split('\t')[:-2]]
+psi_list = [float(p) for p in r[2][0].split('\t')[:-2]]
+psi_sd_list = [float(p) for p in r[3][0].split('\t')[:-2]]
 l_list = np.array([np.sqrt(n/rho) for n in n_list])
 
 print(n_list)
@@ -41,8 +41,8 @@ def func(L, alpha, coeff, p_inf):
 fig, ax = plt.subplots(figsize=(7,5))
 
 # alpha, coeff, p_inf = curve_fit(func, l_list, psi_list, p0=[0.8654663306632585, -2.0327707413968774, 0.9597420767562417], maxfev=5000)[0]
-alpha, coeff, p_inf = curve_fit(func, l_list, psi_list, sigma=psi_sd_list)[0]
-print(alpha, coeff, p_inf)
+# alpha, coeff, p_inf = curve_fit(func, l_list, psi_list, sigma=psi_sd_list)[0]
+# print(alpha, coeff, p_inf)
 
 # pcov = curve_fit(func, l_list, psi_list)[1]
 # print(np.sqrt(np.diag(pcov))[0])
@@ -50,13 +50,13 @@ print(alpha, coeff, p_inf)
 
 ## Plot L vs Psi with fitted curve
 # ax.plot(l_list, psi_list, 'o')
-# # ax.errorbar(l_list, psi_list, yerr=psi_sd_list, fmt='o')
+ax.errorbar(l_list, psi_list, yerr=psi_sd_list, fmt='-o')
 # x_plot = np.linspace(l_list[0],l_list[-1],100)
 # ax.plot(x_plot, func(x_plot, alpha, coeff, p_inf))
-# ax.set_xscale('log')
-# ax.set_xlabel(r"$L$")
-# ax.set_ylabel(r"$\Psi$")
-# plt.show()
+ax.set_xscale('log')
+ax.set_xlabel(r"$L$")
+ax.set_ylabel(r"$\Psi$")
+plt.show()
 
 ## Plot L vs Psi - Psi_inf with fitted line
 # psi_2_list = np.array([p-p_inf for p in psi_list])

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import sys
 import time
 
-mode = 'F'
+mode = 'G'
 #nPart=10000
 nPart_range = [10000]
 #phi_range = np.round(np.arange(0.1,2.1,0.1),1)
@@ -19,8 +19,8 @@ noise_range = ["0.20"]
 #K_avg_range = [format(i, '.3f') for i in np.arange(0.47,0.49,0.001)]
 #K_avg_range = np.round(np.arange(0.0,1.1,0.1),2)
 K_avg_range = np.round(np.concatenate((np.arange(-1.0,0.0,0.1), np.arange(0.0,1.1,0.1))),1)
-#K_std_range = [8.0]
-K_std_range = np.round(np.arange(1.0,8.1,1.0),1)
+K_std_range = [8.0]
+# K_std_range = np.round(np.arange(1.0,8.1,1.0),1)
 #K_std_range = [1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,10.0,20.0]
 #K_std_range = [1.0, 4.0, 8.0]
 K_avg = 0.2
@@ -30,8 +30,8 @@ K_std = 8.0
 #alpha_range = np.round(np.arange(0.0, 1.01, 0.1))
 xTy = 1.0
 Rp = 1.0
-Rp_range = [1.0]
-#Rp_range = [1.0, 2.0, 3.0, 4.0, 5.0, 10.0, 15.0, 20.0, 30.0]
+# Rp_range = [1.0]
+Rp_range = [1.0, 2.0, 3.0, 4.0, 5.0]
 #Rp_range = np.arange(1.0,5.1,1.0)
 seed_range = np.arange(1,21,1)
 save_data = True

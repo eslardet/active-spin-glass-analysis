@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, colors
 import csv
 # sys.path.insert(0, os.path.abspath('../analysis/'))
-from analysis.analysis_functions import *    
+sys.path.insert(1, '/Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis')
+from analysis_functions import *    
 
 bin_size=100
 bin_ratio=2

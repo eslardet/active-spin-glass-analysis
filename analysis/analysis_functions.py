@@ -2575,6 +2575,7 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
         ax.set_ylim(bottom=0)
     if r_scale == "log":
         ax.set_xscale('log')
+        ax.set_xlim(left=1)
 
     ax.set_xlabel(r"$r$", fontsize=12)
     ax.set_ylabel(r"$C(r)$", fontsize=12)
