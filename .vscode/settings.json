@@ -66,5 +66,25 @@
     "C_Cpp.errorSquiggles": "disabled",
     "python.analysis.extraPaths": [
         "./analysis"
-    ]
+    ],
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#a9b3ee",
+        "activityBar.background": "#a9b3ee",
+        "activityBar.foreground": "#15202b",
+        "activityBar.inactiveForeground": "#15202b99",
+        "activityBarBadge.background": "#da455a",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "commandCenter.border": "#15202b99",
+        "sash.hoverBorder": "#a9b3ee",
+        "statusBar.background": "#7f8ee5",
+        "statusBar.foreground": "#15202b",
+        "statusBarItem.hoverBackground": "#5569dc",
+        "statusBarItem.remoteBackground": "#7f8ee5",
+        "statusBarItem.remoteForeground": "#15202b",
+        "titleBar.activeBackground": "#7f8ee5",
+        "titleBar.activeForeground": "#15202b",
+        "titleBar.inactiveBackground": "#7f8ee599",
+        "titleBar.inactiveForeground": "#15202b99"
+    },
+    "peacock.color": "#7f8ee5"
 }

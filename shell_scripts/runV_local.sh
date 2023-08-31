@@ -28,12 +28,12 @@ vp=1.0
 Rp=1.0
 xTy=1.0
 
-initMode='R'
+initMode='S'
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
 
-couplingMode='F'
+couplingMode='G'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -49,14 +49,14 @@ couplingMode='F'
 # KAB=0.0
 # KBB=10.0
 
-KAVG=0.0
-STDK=8.0
+KAVG=2.0
+STDK=1.0
 
 dT=0.005
-DT=100.0
-DTex=1000.0
-eqT=0.0
-simulT=1.0
+DT=10.0
+DTex=100.0
+eqT=1000.0
+simulT=1500.0
 
 savePos=1
 saveInitPos=0

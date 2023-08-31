@@ -88,14 +88,14 @@ ax.set_xlim([-1.0,1.0])
 # ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd), fontsize=10)
 # ax.set_title("Rep vs no rep MF; " + r"$N=$" + str(nPart) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd))
 # ax.legend(loc="lower right", fontsize=14)
-ax.legend(loc="lower right")
+ax.legend()
 
 
 folder = os.path.abspath('../plots/for_figures/pt_rho')
 if not os.path.exists(folder):
     os.makedirs(folder)
-# plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
+plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
-plt.show()
+# plt.show()
 
 

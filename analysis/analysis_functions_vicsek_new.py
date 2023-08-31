@@ -62,7 +62,6 @@ def get_params(inparFile):
     except:
         inpar_dict["Rp"] = str(r[5][0])
     inpar_dict["xTy"] = float(r[6][0])
-    inpar_dict["start_mode"] = r[7][0]
     inpar_dict["mode"] = r[8][0]
     
     if inpar_dict["mode"] == 'C':
@@ -417,14 +416,10 @@ def plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_
     DT = inpar_dict["DT"]
     simulT = inpar_dict["simulT"]
     eqT = inpar_dict["eqT"]
-    start_mode = inpar_dict["start_mode"]
     if min_T == None:
         min_T = 0
     if max_T == None:
-        if start_mode == "R":
-            max_T = simulT + eqT
-        else:
-            max_T = simulT
+        max_T = simulT + eqT
     
     p_order = []
 
@@ -468,10 +463,7 @@ def del_pos(mode, nPart, phi, noise, K, Rp, xTy, seed):
     Delete position file to save space
     """
     sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
-    if os.path.exists(os.path.join(sim_dir, "pos")):
-        os.remove(os.path.join(sim_dir, "pos"))
-    else:
-        print("No position file to delete:" + sim_dir)
+    os.remove(os.path.join(sim_dir, "pos"))
 
 def del_files(mode, nPart, phi, noise, K, Rp, xTy, seed, files):
     """
@@ -2583,7 +2575,6 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
         ax.set_ylim(bottom=0)
     if r_scale == "log":
         ax.set_xscale('log')
-        ax.set_xlim(left=1)
 
     ax.set_xlabel(r"$r$", fontsize=12)
     ax.set_ylabel(r"$C(r)$", fontsize=12)
@@ -3552,53 +3543,28 @@ def mean_dist_com(file, L):
     mean_dist = dist/nPart
     return mean_dist
 
-def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range, from_stats=True, save_data=False):
+def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
     """
     Plot mean distance to centre of mass against the radius of interaction
     """
-    folder = os.path.abspath('../plots/com_vs_RI')
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    if save_data == True:
-        filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg_range[-1])+ '_Kstd' + str(K_std_range[-1]) + '_xTy' + str(xTy)
-        save_file = open(os.path.join(folder, filename + '.txt'), "w")
+    
     L = np.sqrt(nPart / (phi*xTy))
 
     fig, ax = plt.subplots()
 
     com_arr = []
-    com_arr_sd = []
     for K_avg in K_avg_range:
         for K_std in K_std_range:
             K = str(K_avg) + "_" + str(K_std)
             for Rp in Rp_range:
                 com = []
                 for seed in seed_range:
-                    if from_stats == True:
-                        sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
-                        if not os.path.exists(os.path.join(sim_dir, 'stats_cohesion')):
-                            print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                        else:
-                            stats_dict = read_cohesion_stats(mode, nPart, phi, noise, K, Rp, xTy, seed)
-                            com_arr.append(stats_dict["com_dist"])
-                    else:
-                        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
-                        if os.path.exists(posFileExact):
-                            com_arr.append(mean_dist_com(posFileExact, L))
+                    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
+                    com.append(mean_dist_com(posFileExact, L))
                 com_arr.append(np.mean(com))
-                com_arr_sd.append(np.std(com))
             
             ax.plot(Rp_range, com_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
-            if save_data == True:
-                save_file.write(str(nPart) + "\t" + str(noise) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
-                for r in Rp_range:
-                    save_file.write(str(r) + "\t")
-                save_file.write("\n")
-                for p in com_arr:
-                    save_file.write(str(p) + "\t")
-                for p in com_arr_sd:
-                    save_file.write(str(p) + "\t")
-                save_file.write("\n")
+
     ax.set_xlabel(r"$R_I$")
     ax.set_ylabel(r"Mean distance to centre of mass")
     ax.legend()
@@ -3610,21 +3576,19 @@ def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, 
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, from_stats=True, save_data=False):
+def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
     """
     Plot mean distance to centre of mass against the noise strength
     """
-    folder = os.path.abspath('../plots/com_vs_noise')
+    folder = os.path.abspath('../plots/nn_vs_noise')
     if not os.path.exists(folder):
         os.makedirs(folder)
     if save_data == True:
-        filename = mode + '_N' + str(nPart_range[-1]) + '_phi' + str(phi_range[-1]) + '_Kavg' + str(K_avg_range[-1])+ '_Kstd' + str(K_std_range[-1]) + '_Rp' + str(Rp_range[-1]) + '_xTy' + str(xTy)
-        save_file = open(os.path.join(folder, filename + '.txt'), "w")
+        save_file = open(os.path.join(folder, "data.txt"), "w")
 
     fig, ax = plt.subplots()
 
     com_arr = []
-    com_arr_sd = []
     for nPart in nPart_range:
         for phi in phi_range:
             L = np.sqrt(nPart / (phi*xTy))
@@ -3635,19 +3599,9 @@ def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_
                         for noise in noise_range:
                             com = []
                             for seed in seed_range:
-                                if from_stats == True:
-                                    sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
-                                    if not os.path.exists(os.path.join(sim_dir, 'stats_cohesion')):
-                                        print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                                    else:
-                                        stats_dict = read_cohesion_stats(mode, nPart, phi, noise, K, Rp, xTy, seed)
-                                        com_arr.append(stats_dict["com_dist"])
-                                else:
-                                    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
-                                    if os.path.exists(posFileExact):
-                                        com_arr.append(mean_dist_com(posFileExact, L))
+                                posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
+                                com.append(mean_dist_com(posFileExact, L))
                             com_arr.append(np.mean(com))
-                            com_arr_sd.append(np.std(com))
                     noise_range_plot = [float(n) for n in noise_range]
                     ax.plot(noise_range_plot, com_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
                     if save_data == True:
@@ -3657,9 +3611,6 @@ def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_
                         save_file.write("\n")
                         for p in com_arr:
                             save_file.write(str(p) + "\t")
-                        for p in com_arr_sd:
-                            save_file.write(str(p) + "\t")
-                    
                         save_file.write("\n")
     ax.set_xlabel(r"$\eta$")
     ax.set_ylabel(r"Mean distance to centre of mass")
@@ -3672,6 +3623,7 @@ def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_
 
     if save_data == True:
         save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
 
 ## But av_n wthin RI will increase with RI
 def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
@@ -3737,57 +3689,29 @@ def mean_dist_nn(file, L):
 # Mean number of neighbours in R_I
 # ?
 
-def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range, from_stats=True, save_data=False):
+def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
     """
     Plot mean distance to nearest neighbor as given in in eq. 7 in Huepe & Aldana, 2008
     https://hal.elte.hu/~vicsek/downloads/papers/aldana3.pdf
     """
-    folder = os.path.abspath('../plots/nn_vs_RI')
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    if save_data == True:
-        filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg_range[-1])+ '_Kstd' + str(K_std_range[-1]) + '_xTy' + str(xTy)
-        save_file = open(os.path.join(folder, filename + '.txt'), "w")
+    
     L = np.sqrt(nPart / (phi*xTy))
 
     fig, ax = plt.subplots()
 
     nn_arr = []
-    nn_arr_sd = []
     for K_avg in K_avg_range:
         for K_std in K_std_range:
             K = str(K_avg) + "_" + str(K_std)
             for Rp in Rp_range:
                 mean_nn = []
                 for seed in seed_range:
-                    if from_stats == True:
-                        sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
-                        if not os.path.exists(os.path.join(sim_dir, 'stats_cohesion')):
-                            print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                        else:
-                            stats_dict = read_cohesion_stats(mode, nPart, phi, noise, K, Rp, xTy, seed)
-                            mean_nn.append(stats_dict["nn_dist"])
-                    else:
-                        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
-                        if os.path.exists(posFileExact):
-                            mean_nn.append(mean_dist_nn(posFileExact, L))
-                try:
-                    nn_arr_sd.append(np.std(mean_nn))
-                    nn_arr.append(np.mean(mean_nn))
-                except:
-                    print('N=' + str(nPart) + '; phi=' + str(phi) + '; K=' + str(K) + '; noise=' + str(noise))
+                    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
+                    mean_nn.append(mean_dist_nn(posFileExact, L))
+                nn_arr.append(np.mean(mean_nn))
             
             ax.plot(Rp_range, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
-            if save_data == True:
-                save_file.write(str(nPart) + "\t" + str(noise) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
-                for r in Rp_range:
-                    save_file.write(str(r) + "\t")
-                save_file.write("\n")
-                for n in nn_arr:
-                    save_file.write(str(n) + "\t")
-                for n_sd in nn_arr_sd:
-                    save_file.write(str(n_sd) + "\t")
-                save_file.write("\n")
+
     ax.set_xlabel(r"$R_I$")
     ax.set_ylabel(r"Mean distance to nearest neighbor")
     # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $\eta=$' + str(noise))
@@ -3799,11 +3723,8 @@ def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, x
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-    if save_data == True:
-        save_file.close()
 
-
-def plot_nn_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, from_stats=True, save_data=False):
+def plot_nn_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
     """
     Plot mean distance to nearest neighbor as given in in eq. 7 in Huepe & Aldana, 2008
     https://hal.elte.hu/~vicsek/downloads/papers/aldana3.pdf
@@ -3812,13 +3733,11 @@ def plot_nn_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_s
     if not os.path.exists(folder):
         os.makedirs(folder)
     if save_data == True:
-        filename = mode + '_N' + str(nPart_range[-1]) + '_phi' + str(phi_range[-1]) + '_Kavg' + str(K_avg_range[-1])+ '_Kstd' + str(K_std_range[-1]) + '_Rp' + str(Rp_range[-1]) + '_xTy' + str(xTy)
-        save_file = open(os.path.join(folder, filename + '.txt'), "w")
+        save_file = open(os.path.join(folder, "data.txt"), "w")
 
     fig, ax = plt.subplots()
 
     nn_arr = []
-    nn_arr_sd = []
     for nPart in nPart_range:
         for phi in phi_range:
             L = np.sqrt(nPart / (phi*xTy))
@@ -3829,20 +3748,11 @@ def plot_nn_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_s
                         for noise in noise_range:
                             mean_nn = []
                             for seed in seed_range:
-                                if from_stats == True:
-                                    sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
-                                    if not os.path.exists(os.path.join(sim_dir, 'stats_cohesion')):
-                                        print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
-                                    else:
-                                        stats_dict = read_cohesion_stats(mode, nPart, phi, noise, K, Rp, xTy, seed)
-                                        mean_nn.append(stats_dict["nn_dist"])
-                                else:
-                                    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
-                                    if os.path.exists(posFileExact):
-                                        mean_nn.append(mean_dist_nn(posFileExact, L))
+                                posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
+                                if os.path.exists(posFileExact):
+                                    mean_nn.append(mean_dist_nn(posFileExact, L))
                             try:
                                 nn_arr.append(np.mean(mean_nn))
-                                nn_arr_sd.append(np.std(mean_nn))
                             except:
                                 print('N=' + str(nPart) + '; phi=' + str(phi) + '; K=' + str(K) + '; noise=' + str(noise))
                     noise_range_plot = [float(n) for n in noise_range]
@@ -3852,10 +3762,8 @@ def plot_nn_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_s
                         for noise in noise_range:
                             save_file.write(str(noise) + "\t")
                         save_file.write("\n")
-                        for n in nn_arr:
-                            save_file.write(str(n) + "\t")
-                        for n_sd in nn_arr_sd:
-                            save_file.write(str(n_sd) + "\t")
+                        for p in nn_arr:
+                            save_file.write(str(p) + "\t")
                         save_file.write("\n")
     ax.set_xlabel(r"$\eta$")
     ax.set_ylabel(r"Mean distance to nearest neighbor")
@@ -3867,39 +3775,4 @@ def plot_nn_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_s
 
     if save_data == True:
         save_file.close()
-
-
-def write_cohesion_stats(mode, nPart, phi, noise, K, Rp, xTy, seed):
-    """
-    Write stats for cohesion (mean distance to centre of mass and mean distance to nearest neighbour) within the simulation folder
-    """
-    posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
-    if not os.path.exists(posFileExact):
-        print(posFileExact)
-        raise Exception("File does not exist")
-    
-    L = np.sqrt(nPart / (float(phi)*xTy))
-    com = mean_dist_com(posFileExact, L)
-    nn = mean_dist_nn(posFileExact, L)
-
-    sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
-    statsFile = open(os.path.join(sim_dir, "stats_cohesion"), "w")
-    statsFile.write(str(com) + '\n')
-    statsFile.write(str(nn) + '\n')
-
-    statsFile.close()
-
-def read_cohesion_stats(mode, nPart, phi, noise, K, Rp, xTy, seed):
-    """
-    Read stats file and create dictionary with those statistics
-    """
-    sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
-
-    with open(os.path.join(sim_dir, "stats_cohesion")) as file:
-        reader = csv.reader(file, delimiter="\n")
-        r = list(reader)
-    stats_dict = {}
-    stats_dict["com_dist"] = float(r[0][0])
-    stats_dict["nn_dist"] = float(r[1][0])
-
-    return stats_dict
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))

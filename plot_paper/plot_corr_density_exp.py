@@ -43,25 +43,23 @@ plt.rcParams['text.usetex'] = True
 
 fig, ax = plt.subplots(figsize=(10,7))
 
-labels = [r"$C_\parallel(r)$", r"$C_\perp(r)$"]
-d_type_list = ['dv_par', 'dv_perp']
-for d_type in d_type_list:
-    for nPart in nPart_range:
-        for K_std in K_std_range:
-            exponents = []
-            for K_avg in K_avg_range:
-                K = str(K_avg) + "_" + str(K_std)
-                exponents.append(get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r, max_r))
-            ax.plot(K_avg_range, exponents, '-o', label=labels[d_type_list.index(d_type)])
+for nPart in nPart_range:
+    for K_std in K_std_range:
+        exponents = []
+        for K_avg in K_avg_range:
+            K = str(K_avg) + "_" + str(K_std)
+            exponents.append(get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
+        ax.plot(K_avg_range, exponents, '-o')
 
 ax.set_xlabel(r"$K_{AVG}$")
 ax.set_ylabel(r"$\lambda$")
-ax.legend(loc="lower right")
+# ax.legend(loc="lower right")
 
-filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
-folder = os.path.abspath('../plots/for_figures/correlation_velocity_exp')
+# filename =  mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+filename = "corr_density_exp"
+folder = os.path.abspath('../plots/for_figures/correlation_density_exp')
 if not os.path.exists(folder):
     os.makedirs(folder)
 plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
-plt.show()
+# plt.show()
