@@ -51,19 +51,19 @@ for d_type in d_type_list:
             exponents = []
             for K_avg in K_avg_range:
                 K = str(K_avg) + "_" + str(K_std)
-                exponents.append(get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r, max_r))
+                exponents.append(-get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r, max_r))
             ax.plot(K_avg_range, exponents, '-o', label=labels[d_type_list.index(d_type)])
 
 for K_std in K_std_range:
     exponents = []
     for K_avg in K_avg_range:
         K = str(K_avg) + "_" + str(K_std)
-        exponents.append(get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
+        exponents.append(-get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
 ax.plot(K_avg_range, exponents, '-o', label=r"$C_\rho(r)$")
 
 ax.set_xlabel(r"$K_{AVG}$")
 ax.set_ylabel(r"$\lambda$")
-ax.legend(loc="lower right")
+ax.legend()
 
 # filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
 filename = "corr_exp"

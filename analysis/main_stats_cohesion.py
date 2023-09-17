@@ -10,7 +10,7 @@ nPart = int(sys.argv[2])
 phi = float(sys.argv[3])
 noise = sys.argv[4]
 K = str(sys.argv[5]) + "_" + str(sys.argv[6])
-Rp = sys.argv[7]
+Rp = float(sys.argv[7])
 xTy = float(sys.argv[8])
 seed = int(sys.argv[9])
 

@@ -28,7 +28,7 @@ vp=1.0
 Rp=1.0
 xTy=1.0
 
-initMode='S'
+initMode='R'
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
@@ -49,19 +49,19 @@ couplingMode='G'
 # KAB=0.0
 # KBB=10.0
 
-KAVG=2.0
+KAVG=1.0
 STDK=1.0
 
 dT=0.005
 DT=10.0
 DTex=100.0
-eqT=1000.0
-simulT=1500.0
+eqT=0.0
+simulT=1000.0
 
 savePos=1
 saveInitPos=0
 saveForce=0
-saveCoupling=0
+saveCoupling=1
 
 intMethod='E'
 

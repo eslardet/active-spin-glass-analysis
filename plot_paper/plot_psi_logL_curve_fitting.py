@@ -86,6 +86,6 @@ folder = os.path.abspath('../plots/for_figures/p_order_vs_logL')
 if not os.path.exists(folder):
     os.makedirs(folder)
 filename = 'psi_fit'
-plt.savefig(os.path.join(folder, filename + ".svg"), bbox_inches="tight")
+# plt.savefig(os.path.join(folder, filename + ".svg"), bbox_inches="tight")
 
 # plt.show()

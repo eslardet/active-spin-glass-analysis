@@ -48,7 +48,7 @@ for nPart in nPart_range:
         exponents = []
         for K_avg in K_avg_range:
             K = str(K_avg) + "_" + str(K_std)
-            exponents.append(get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
+            exponents.append(-1/get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
         ax.plot(K_avg_range, exponents, '-o')
 
 ax.set_xlabel(r"$K_{AVG}$")
@@ -60,6 +60,6 @@ filename = "corr_density_exp"
 folder = os.path.abspath('../plots/for_figures/correlation_density_exp')
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
+# plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
-# plt.show()
+plt.show()

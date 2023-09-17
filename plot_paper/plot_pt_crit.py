@@ -102,8 +102,8 @@ folder = os.path.abspath('../plots/for_figures/crit')
 if not os.path.exists(folder):
     os.makedirs(folder)
 filename = "collapse"
-plt.savefig(os.path.join(folder, filename + ".svg"), bbox_inches='tight')
+# plt.savefig(os.path.join(folder, filename + ".svg"), bbox_inches='tight')
 
-# plt.show()
+plt.show()
 
 

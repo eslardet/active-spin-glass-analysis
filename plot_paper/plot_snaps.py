@@ -67,4 +67,6 @@ folder = os.path.abspath('../plots/for_figures/snaps')
 filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.pdf'
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename),bbox_inches='tight', transparent=True,pad_inches=0)
+# plt.savefig(os.path.join(folder, filename),bbox_inches='tight', transparent=True,pad_inches=0)
+
+plt.show()

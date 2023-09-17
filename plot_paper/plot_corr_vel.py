@@ -14,9 +14,10 @@ K_arr = [1.0, 1.5, 2.0]
 # K_avg_range = np.concatenate((np.round(np.arange(-1.0,0.0,0.1),1), np.round(np.arange(0.0, 0.6, 0.1), 1),K_arr))
 # K_avg_range = np.delete(K_avg_range, 9)
 # K_avg_range = np.concatenate((np.round(np.arange(-1.0,0.0,0.2),1), np.round(np.arange(0.0, 0.6, 0.2), 1),K_arr))
-K_avg_range = [-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0]
+# K_avg_range = [-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0]
+K_avg_range = [-0.5, 0.0, 0.5, 1.0]
 # K_avg_range = [-0.5,0.0]
-K_std_range = [8.0]
+K_std_range = [0.0]
 Rp = 1.0
 xTy = 1.0
 seed_range = np.arange(1,21,1)
@@ -24,7 +25,7 @@ r_scale = "log"
 y_scale = "log"
 timestep_range = [0,1,2,3,4,5]
 
-d_type = "dv_perp"
+d_type = "dv_par"
 x_scale = "log"
 bin_ratio = 2
 
@@ -68,7 +69,7 @@ filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + 
 folder = os.path.abspath('../plots/for_figures/correlation_velocity')
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
-plt.savefig(os.path.join(folder, filename + ".svg"), bbox_inches="tight")
+# plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
+# plt.savefig(os.path.join(folder, filename + ".svg"), bbox_inches="tight")
 
-# plt.show()
+plt.show()
