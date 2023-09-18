@@ -61,7 +61,16 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "algorithm": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "__hash_table": "cpp",
+        "__node_handle": "cpp",
+        "__verbose_abort": "cpp",
+        "bit": "cpp",
+        "complex": "cpp",
+        "list": "cpp",
+        "optional": "cpp",
+        "sstream": "cpp",
+        "unordered_map": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled",
     "python.analysis.extraPaths": [

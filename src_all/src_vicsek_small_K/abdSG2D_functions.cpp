@@ -30,7 +30,7 @@ mt19937 rnd_gen;
 
 uniform_real_distribution<double> uniDist(0.0,1.0);
 normal_distribution<double> normDist(0.0,1.0);
-uniform_real_distribution<double> whiteNoise(-1.0,1.0);
+normal_distribution<double> whiteNoise(0.0,1.0);
 
 /////////////////////
 // currentDateTime //
@@ -54,10 +54,6 @@ string currentDateTime() {
 // This function checks the parameters combination
 void checkParameters()
 {
-    if(Rr<1.0) {
-        cerr << "Invalid value of Rr, must be >= 1.0!" << endl;
-        ::exit(1);
-    }
     
     switch(initMode)
     {
@@ -67,7 +63,7 @@ void checkParameters()
             break;
 
         case 'S' : // Starting from previous simulation
-            logFile << "Initializing in mode 'S', strating off from previous simulation" << endl;
+            logFile << "Initializing in mode 'S', starting off from previous simulation" << endl;
             break;
 
         default :
@@ -77,27 +73,6 @@ void checkParameters()
 
     }
 
-    switch(potMode)
-    {
-
-        case 'W' : // WCA Potential
-            logFile << "Initializing repulsion potential in mode 'W', WCA potential" << endl;
-            break;
-
-        case 'H' : // Harmonic Potential
-            logFile << "Initializing repulsion potential in mode 'H', Harmonic potential" << endl;
-            break;
-
-        case 'C' : // Continuous Potential (repulsive part of WCA)
-            logFile << "Initializing repulsion potential in mode 'C', Continuous potential" << endl;
-            break;
-
-        default :
-            cerr << "Invalid Potential Mode!" << endl;
-            cerr << " --> Valid modes are : 'W', 'H', 'C' " << endl;
-            ::exit(1);
-
-    }
 
     switch(couplingMode)
     {
@@ -114,11 +89,11 @@ void checkParameters()
             break;
 
         case 'F' : // Normally distributed ferromagnetic couplings
-            logFile << "Initializing couplings in mode 'F', normally distributed ferromagnetic couplings" << endl;
+            logFile << "Initializing couplings in mode 'F', fraction mode" << endl;
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings
-            logFile << "Initializing couplings in mode 'A', normally distributed antiferromagnetic couplings" << endl;
+            logFile << "Initializing couplings in mode 'A', non-reciprocal couplings" << endl;
             break;
 
         // case 'B' : // Bimodal Gaussian distributed couplings
@@ -159,199 +134,187 @@ void checkParameters()
 // Initialize positions, and velocities
 void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
 {
-    double KK;
+    double KK, KK2;
+    double alpha, Kp, Kn;
 
     // Seed the random engines
     rnd_gen.seed (seed);
-
-    // Initialize particle hard-core radius
-    switch(potMode)
-    {
-        case 'W' :
-            beta = pow(2.0,double(1.0)/double(6.0));
-            break;
-
-        case 'H' :
-            beta = 2.0;
-            break;
-
-        case 'C' : // New //
-            beta = 1;
-            break;
-        
-        default :
-            cerr << "Invalid Potential Mode!" << endl;
-            ::exit(1);
-    }
+    
+    beta = 1.0;
     betasq = beta*beta;
 
-    // Initialize Lennard-Jones potential lengthscale
-    if( Rr > 1.0 ){
-        rr = Rr*beta;
-        rrsq = rr*rr;
-    }else{
-        rr = beta;
-        rrsq = betasq;
-    }
-
     // Initialize Vicsek interaction
-    if( Rp > 1.0 ){
-        rp = Rp*beta;
-        rpsq = rp*rp;
-    }else{
-        rp = beta;
-        rpsq = betasq;
-    }
+    rp = Rp;
+    rpsq = rp*rp;
 
     // Neighbor list radius
-    rc = MAX(rr,rp);
-    rl = rc+0.5*beta;
+    rc = rp;
+    rl = rc+0.5;
     rlsq = rl*rl;
 
-    // initialize particles positions & polarities
-    switch(initMode)
+    // // initialize particles positions & polarities
+    // switch(initMode)
+    // {
+    //     case 'R' : // Particles placed randomly in the box
+    initialConditionsRandom(x,y,p);
+
+    // Allocation of memory
+    allocateSRKmem();
+    cout << K.max_size();
+
+    // Initialize the coupling array
+    switch(couplingMode)
     {
-        case 'R' : // Particles placed randomly in the box
-            initialConditionsRandom(x,y,p);
-
-            // Allocation of memory
-            allocateSRKmem();
-
-            // Initialize the coupling array
-            switch(couplingMode)
-            {
-                case 'C' : // Constant coupling
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            K[i][j] = K0; 
-                            K[j][i] = K0; 
-                        }
-                    }
-                    break;
-
-                case 'T' : // Two-populations
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            if(i<nPart/2.0){
-                                if(j<nPart/2.0){
-                                    K[i][j] = KAA;
-                                    K[j][i] = KAA;
-                                }else{
-                                    K[i][j] = KAB;
-                                    K[j][i] = KAB;
-                                }
-                            }else{
-                                K[i][j] = KBB;
-                                K[j][i] = KBB;
-                            }
-                        }
-                    }
-                    break;
-
-                case 'G' : // Gaussian distributed couplings
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            KK = KAVG + STDK*normDist(rnd_gen);
-                            K[i][j] = KK;
-                            K[j][i] = KK;
-                        }
-                    }
-                    break;
-
-                case 'F' : // Normally distributed ferromagnetic couplings
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            do{
-                                KK = KAVG + STDK*normDist(rnd_gen);    
-                            }while (KK<0.0);
-                            K[i][j] = KK;
-                            K[j][i] = KK;
-                        }
-                    }
-                    break;
-
-                case 'A' : // Normally distributed antiferromagnetic couplings
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            do{
-                                KK = KAVG + STDK*normDist(rnd_gen);    
-                            }while (KK>0.0);
-                            K[i][j] = KK;
-                            K[j][i] = KK;
-                        }
-                    }
-                    break;
-            }
-
-            if (saveCoupling) {
-                couplingFile.open("coupling",ios::out);
-                if(couplingFile.fail())
-                {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-                couplingFile.precision(8);
-                saveCouplings(K,couplingFile);
-                couplingFile.close();
+        case 'C' : // Constant coupling
+            for(int i=0 ; i<nPart ; i++){
+                // K[i][i] = 0.0;
+                for(int j=0 ; j<i ; j++){
+                    K[i*(i-1)/2+j] = K0; 
+                }
             }
             break;
 
-        case 'S' : // Particles configured starting from previous simulation
-            // initial condition stuff (inc reading pos_exact file and coupling file)
-
-            initialConditionsSim(x,y,p);
-
-            allocateSRKmem();
-
-            // read coupling file (not necessary for constant mode)
-            switch(couplingMode)
-            {
-                case 'C' : // Constant coupling
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            K[i][j] = K0; 
-                            K[j][i] = K0; 
+        case 'T' : // Two-populations
+            for(int i=0 ; i<nPart ; i++){
+                // K[i][i] = 0.0;
+                for(int j=0 ; j<i ; j++){
+                    if(i<nPart/2.0){
+                        if(j<nPart/2.0){
+                            K[i*(i-1)/2+j] = KAA;
+                        }else{
+                            K[i*(i-1)/2+j] = KAB;
                         }
+                    }else{
+                        K[i*(i-1)/2+j] = KBB;
                     }
-                    break;
-
-                case 'T' : // Two-populations
-                    for(int i=0 ; i<nPart ; i++){
-                        K[i][i] = 0.0;
-                        for(int j=i+1 ; j<nPart ; j++){
-                            if(i<nPart/2.0){
-                                if(j<nPart/2.0){
-                                    K[i][j] = KAA;
-                                    K[j][i] = KAA;
-                                }else{
-                                    K[i][j] = KAB;
-                                    K[j][i] = KAB;
-                                }
-                            }else{
-                                K[i][j] = KBB;
-                                K[j][i] = KBB;
-                            }
-                        }
-                    }
-                    break;
-
-                default : // Other random coupling modes
-                    couplingFile.open("coupling", ios::in);
-                    if(couplingFile.fail())
-                    {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-                    for(int i=0 ; i<nPart ; i++)
-                    {
-                        for(int j=i+1 ; j<nPart ; j++){
-                            couplingFile >> K[i][j];        
-                        }
-                    }
-                    couplingFile.close();
-                    break;
-
+                }
             }
+            break;
+
+        case 'G' : // Gaussian distributed couplings
+            for(int i=0 ; i<nPart ; i++){
+                // K[i][i] = 0.0;
+                for(int j=0 ; j<i ; j++){
+                    KK = KAVG + STDK*normDist(rnd_gen);
+                    K[i*(i-1)/2+j] = KK;
+                }
+            }
+            break;
+
+        case 'F' : // Fraction of particles ferro and anti-ferro magnetic
+            // alpha = SQR(KAVG-K1)/(SQR(STDK)+SQR(KAVG-K1));
+            // K0 = (SQR(STDK)+KAVG*(KAVG-K1))/(KAVG-K1);
+            if(STDK==0) {
+                Kp = KAVG;
+                Kn = 0;
+                alpha = 1;
+            }
+            else {
+                alpha = 0.5 - 0.5 * erf(-KAVG/(sqrt(2)*STDK));
+                Kp = KAVG + STDK*sqrt((1-alpha)/alpha);
+                Kn = KAVG - STDK*sqrt(alpha/(1-alpha));
+            }
+            cout << " ----> alpha = " << alpha << "; K+ = " << Kp << "; K- = " << Kn << endl;
+            for(int i=0 ; i<nPart ; i++){
+                // K[i][i] = 0.0;
+                for(int j=0 ; j<i ; j++){
+                    if(uniDist(rnd_gen) < alpha) {
+                        KK = Kp; // Kp is alpha proportion (positive one K+)
+                        }
+                    else{
+                        KK = Kn; // Kn is negative one K-
+                    }
+                    K[i*(i-1)/2+j] = KK;
+                }
+            }
+            break;
+
+        case 'A' : // Normally distributed antiferromagnetic couplings
+            {cerr<<"Need to use full coupling store version of code!"<<endl; ::exit(1);}
+            break;
+    }
+
+            // if (saveCoupling) {
+            //     couplingFile.open("coupling",ios::out);
+            //     if(couplingFile.fail())
+            //     {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
+            //     couplingFile.precision(4);
+            //     saveCouplings(K,couplingFile);
+            //     couplingFile.close();
+            // }
+            // break;
+
+    if (initMode == 'S') 
+    {
+        initialConditionsSim(x,y,p);
+        allocateSRKmem();
+    }
+    //     case 'S' : // Particles configured starting from previous simulation
+    //         // initial condition stuff (inc reading pos_exact file and coupling file)
+
+    //         initialConditionsSim(x,y,p);
+
+    //         allocateSRKmem();
+
+    //         // read coupling file (not necessary for constant mode)
+    //         switch(couplingMode)
+    //         {
+    //             case 'C' : // Constant coupling
+    //                 for(int i=0 ; i<nPart ; i++){
+    //                     K[i][i] = 0.0;
+    //                     for(int j=i+1 ; j<nPart ; j++){
+    //                         K[i][j] = K0; 
+    //                         K[j][i] = K0; 
+    //                     }
+    //                 }
+    //                 break;
+
+    //             case 'T' : // Two-populations
+    //                 for(int i=0 ; i<nPart ; i++){
+    //                     K[i][i] = 0.0;
+    //                     for(int j=i+1 ; j<nPart ; j++){
+    //                         if(i<nPart/2.0){
+    //                             if(j<nPart/2.0){
+    //                                 K[i][j] = KAA;
+    //                                 K[j][i] = KAA;
+    //                             }else{
+    //                                 K[i][j] = KAB;
+    //                                 K[j][i] = KAB;
+    //                             }
+    //                         }else{
+    //                             K[i][j] = KBB;
+    //                             K[j][i] = KBB;
+    //                         }
+    //                     }
+    //                 }
+    //                 break;
+
+    //             default : // Other random coupling modes
+    //                 couplingFile.open("coupling", ios::in);
+    //                 if(couplingFile.fail())
+    //                 {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
+    //                 for(int i=0 ; i<nPart ; i++)
+    //                 {
+    //                     for(int j=i+1 ; j<nPart ; j++){
+    //                         couplingFile >> K[i][j];        
+    //                     }
+    //                 }
+    //                 couplingFile.close();
+    //                 break;
+
+    //         }
+    // }
+}
+
+void finalize(void)
+{
+    if (saveCoupling) {
+    couplingFile.open("coupling",ios::out);
+    if(couplingFile.fail())
+    {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
+    couplingFile.precision(4);
+    saveCouplings(K,couplingFile);
+    couplingFile.close();
     }
 }
 
@@ -367,13 +330,15 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     startT = 0.0;
 
     // Open file to write initial conditions
-    initposFile.open("initpos",ios::out);
-    if (initposFile.fail()) 
-    {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
-    initposFile.precision(8);
+    if (saveInitPos) {
+        initposFile.open("initpos",ios::out);
+        if (initposFile.fail()) 
+        {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
+        initposFile.precision(8);
+    }
 
     // Calculate size of the box
-    L = sqrt(double(nPart)*PI*SQR(beta/2.0)/(phi*xTy));
+    L = sqrt(double(nPart)/(phi*xTy));
     
     xmin = 0.0;
     xmax = xTy*L;
@@ -398,8 +363,10 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
         p[i] = 2.0*PI*uniDist(rnd_gen); 
     }
 
-    // Save initial conditions
-    saveInitFrame(x,y,p,initposFile);
+    // // Save initial conditions
+    // if (saveInitPos) {
+    //     saveInitFrame(x,y,p,initposFile);
+    // }
 
     // Initialize lengthscales related to the cell list
     lx = rl; 
@@ -416,14 +383,15 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     // Build map of cells
     buildMap();
 
-    // Proceed to one-step energy minimization via FIRE
-    U = -1.0;
-    fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
+    // // Proceed to one-step energy minimization via FIRE
+    // U = -1.0;
+    // fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
 
     // Save initial conditions
-    saveInitFrame(x,y,p,initposFile);
-    initposFile.close();
-
+    if (saveInitPos) {
+        saveInitFrame(x,y,p,initposFile);
+        initposFile.close();
+    }
     return; 
 }
 
@@ -435,7 +403,7 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
 {
 
     // Calculate size of the box
-    L = sqrt(double(nPart)*PI*SQR(beta/2.0)/(phi*xTy));
+    L = sqrt(double(nPart)/(phi*xTy));
     
     xmin = 0.0;
     xmax = xTy*L;
@@ -465,7 +433,7 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
 
     // Timing
     Neq = (int) ceil(eqT/dT);
-    Nsimul = (int) ceil((simulT-startT)/dT);
+    Nsimul = (int) ceil((simulT-startT-eqT)/dT);
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);
     logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
@@ -515,38 +483,10 @@ void allocateSRKmem(void)
     lscl.resize(nPart);
     mp.resize(nCell, vector<int>(nNeighbor));
 
-    K.resize(nPart, vector<double>(nPart));
+    // K.resize(nPart, vector<double>(nPart));
+    K.resize(nPart*(nPart-1)/2);
 
     return;
-}
-
-//////////////////
-// checkOverlap //
-//////////////////
-// Checks for overlaps between particles
-bool checkOverlap(vector<double> x, vector<double> y)
-{
-    double xij,yij,rij;
-    bool overlap = false;
-
-    for (int i=0 ; i<nPart ; i++) {
-        for (int j=i+1 ; j<nPart ; j++) {
-
-            xij = x[i]-x[j];
-            xij = xij - Lx*rint(xij/Lx);
-
-            if (fabs(xij) < beta) {
-
-                yij = y[i]-y[j];
-                yij = yij - Ly*rint(yij/Ly);
-
-                rij = sqrt(SQR(xij)+SQR(yij));
-
-                if(rij < beta) return true;
-            }
-        }
-    }
-    return overlap;
 }
 
 //// Change to 2D //////
@@ -558,7 +498,7 @@ double volumeFraction(void)
 {
     double phi;
     double boxsize = Lx*Ly;
-    phi = nPart*PI*pow(beta/2, 2) / boxsize;
+    phi = nPart/ boxsize;
     return phi;
 }
 
@@ -717,8 +657,9 @@ void SRK2(vector<double>& x, vector<double>& fx,
           vector<double>& y, vector<double>& fy, 
           vector<double>& p, vector<double>& fp)
 {
-    double sig_T = sqrt(2.0*dT);
-    double sig_R = sqrt(6.0*dT);
+    double sig_T = 0.0;
+    double sig_R = noise*sqrt(dT);
+    vector<float> nei(nPart); // number of neighbours
 
     // Check the neighbor list and update if necessary
     if ( checkNL(x,y) ) {
@@ -726,25 +667,37 @@ void SRK2(vector<double>& x, vector<double>& fx,
     }
 
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
-    force(x,y,p,fx,fy,fp);
+    std::vector<float> nnei = force(x,y,p,fx,fy,fp);
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
         X[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         Y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
-        P[i] = p[i] + fp[i]*dT + sig_R*normDist(rnd_gen);
+        if (nnei[i] == 0) {
+            P[i] = p[i] + sig_R*whiteNoise(rnd_gen);
+        }
+        else {
+            P[i] = p[i] + fp[i]*dT/(nnei[i]) + sig_R*whiteNoise(rnd_gen);
+        }
     }
 
+
+
     // Calculate Forces on particle i at positions {R_i}, F_i({R_i(t)})
-    force(X,Y,P,Fx,Fy,Fp);
+    std::vector<float> NNei = force(X,Y,P,Fx,Fy,Fp);
 
     // Calculate Final updated positions
     for (int i=0 ; i<nPart ; i++ ) {
         x[i] += (fx[i]+Fx[i])/2.0*dT + sig_T*normDist(rnd_gen);
         y[i] += (fy[i]+Fy[i])/2.0*dT + sig_T*normDist(rnd_gen);
-        p[i] += (fp[i]+Fp[i])/2.0*dT + sig_R*normDist(rnd_gen);
+        p[i] += sig_R*whiteNoise(rnd_gen);
+        if (nnei[i] != 0) {
+            p[i] += fp[i]/(2.0*nnei[i])*dT;
+        }
+        if (NNei[i] != 0) {
+            p[i] += Fp[i]/(2.0*NNei[i])*dT;
+        }
     }
-
     return;
 }
 
@@ -756,8 +709,8 @@ void EM(vector<double>& x, vector<double>& fx,
         vector<double>& y, vector<double>& fy, 
         vector<double>& p, vector<double>& fp)
 {
-    double sig_T = sqrt(2.0*dT);
-    double sig_R = sqrt(6.0*dT);
+    double sig_T = 0.0;
+    double sig_R = noise*sqrt(dT);
 
     // Check the neighbor list and update if necessary
     if ( checkNL(x,y) ) {
@@ -765,13 +718,18 @@ void EM(vector<double>& x, vector<double>& fx,
     }
 
     // Calculate Forces on particle i at positions {r_i}, F_i({r_i(t)})
-    force(x,y,p,fx,fy,fp);
+    std::vector<float> nnei = force(x,y,p,fx,fy,fp);
 
     // Calculate updated positions
     for (int i=0 ; i<nPart ; i++ ) {
         x[i] = x[i] + fx[i]*dT + sig_T*normDist(rnd_gen);
         y[i] = y[i] + fy[i]*dT + sig_T*normDist(rnd_gen);
-        p[i] = p[i] + fp[i]*dT + sig_R*normDist(rnd_gen);
+        if (nnei[i] == 0) {
+            p[i] = p[i] + sig_R*whiteNoise(rnd_gen);
+        }
+        else {
+            p[i] = p[i] + fp[i]*dT/nnei[i] + sig_R*whiteNoise(rnd_gen);
+        }
     }
 
     return;
@@ -781,27 +739,30 @@ void EM(vector<double>& x, vector<double>& fx,
 // force //
 ///////////
 // consists in : Lennard-Jones potential between particles, active propulsion and alignment interactions
-void force(vector<double> xx, vector<double> yy, vector<double> pp,
-           vector<double>& ffx, vector<double>& ffy, vector<double>& ffp)
+std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp,
+                        vector<double>& ffx, vector<double>& ffy, vector<double>& ffp)
 {
     double xij,yij,rij,rijsq;
     double pi,pj,pij,Kij;
     double ff;
 
+    std::vector<float> nei(nPart); // number of neighbours
+
+
     for (int i=0 ; i<nPart ; i++) {
         pi = pp[i];
         // Self-propelling force
-        ffx[i] = Pe*cos(pi);
-        ffy[i] = Pe*sin(pi);
+        ffx[i] = vp*cos(pi);
+        ffy[i] = vp*sin(pi);
         ffp[i] = 0.0;
     }
-    
+
     for (int i=0 ; i<nPart ; i++) {
 
         pi = pp[i];
         // // Self-propelling force
-        // ffx[i] = Pe*cos(pi);
-        // ffy[i] = Pe*sin(pi);
+        // ffx[i] = vp*cos(pi);
+        // ffy[i] = vp*sin(pi);
         // ffp[i] = 0.0;
 
         for (int j=cl[i] ; j<cl[i+1] ; j++) {
@@ -809,58 +770,38 @@ void force(vector<double> xx, vector<double> yy, vector<double> pp,
             xij = xx[i]-xx[nl[j]];
             xij = xij - Lx*rint(xij/Lx);
 
-            if (fabs(xij) <= rc) { // rc = MAX(rr,rp)
+            if (fabs(xij) <= rc) { // rc = rp
                 yij = yy[i]-yy[nl[j]];
                 yij = yij - Ly*rint(yij/Ly);
 
                 rijsq = SQR(xij)+SQR(yij);
 
-                // Potential
-                if (rijsq <= rrsq) {
-                    rij = sqrt(rijsq);
-
-                    switch(potMode)
-                    {
-                        case 'W':
-                            ff = gx*(48.0*pow(rij,-13.0)-24.0*pow(rij,-7.0));
-                            break;
-                        
-                        case 'C': // Continuous potential
-                            ff = gx*12.0*pow(rij,-13.0);
-                            break;
-
-                        case 'H':
-                            ff = gx*(2-rij);
-                            break;
-                        
-                        default:
-                            cerr << "Invalid Potential Mode!" << endl;
-                            ::exit(1);
-                        }
-                    
-
-                    ffx[i] += ff*xij/rij;
-                    ffy[i] += ff*yij/rij;
-
-                    ffx[nl[j]] -= ff*xij/rij;
-                    ffy[nl[j]] -= ff*yij/rij;
-                }
-
                 // Vicsek alignment
                 if (rijsq <= rpsq){
                     pj = pp[nl[j]];
-                    Kij = K[i][nl[j]];
+                    if (i > nl[j]){
+                        Kij = K[i*(i-1)/2+nl[j]];
+                    }
+                    else if (i < nl[j]){
+                        Kij = K[nl[j]*(nl[j]-1)/2+i];
+                    }
+                    else {
+                        Kij = 0.0;
+                    }
+                    // Kij = K[i][nl[j]];
                     pij = pi-pj;
                     ff = -Kij*sin(pij);
 
                     ffp[i]     += ff;
                     ffp[nl[j]] -= ff;
+
+                    nei[i] += 1.0;
+                    nei[nl[j]] += 1.0;
                 }
             }
         }
     }
-
-    return;
+    return nei;
 }
 
 //////////////////////

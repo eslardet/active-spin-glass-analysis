@@ -13,10 +13,10 @@ std::fstream logFile,posFile,posExactFile,forceFile,couplingFile;
 // Input parameters
 int nPart;
 unsigned int seed;
-double phi;
-double gx,Pe,Rr,Rp;
-bool savePos,saveForce,saveCoupling;
-char initMode,potMode,couplingMode,intMethod;
+double phi,noise,vp;
+double Rp;
+bool savePos,saveForce,saveCoupling,saveInitPos;
+char initMode,couplingMode,intMethod;
 double dT,DT,DTex,eqT,simulT,startT;
 int Nsimul,Neq,Nskip,Nskipexact;
 double xmin,xmax;
@@ -28,8 +28,9 @@ double K0; // mode 'C': K0: Coupling constant
 double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
                     //           KAB: Coupling constant for A-B interactions 
                     //           KBB: Coupling constant for B-B interactions
-double KAVG,STDK; // mode 'G', 'F', 'A': KAVG: Average coupling constant
-                  //                     STDK: Standard deviation of coupling constant
+double KAVG,STDK; // mode 'G', 'A': KAVG: Average coupling constant
+                  //                STDK: Standard deviation of coupling constant
+// double alpha; // Fraction of particles with +K0 coupling for mode F
 
 ///////////////
 // saveFrame //
@@ -53,7 +54,7 @@ inline void saveHeader(std::fstream& File)
 	File << nPart << std::endl;
     File << phi << std::endl;
     File << seed << std::endl;
-    File << Rr << '\t' << Rp << std::endl;
+    File << Rp << std::endl;
     File << xmin << '\t' << xmax << std::endl;
     File << ymin << '\t' << ymax << std::endl;
 }
