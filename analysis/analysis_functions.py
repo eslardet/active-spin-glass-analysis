@@ -2588,7 +2588,7 @@ def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, 
         bin_ratio = int(bin_ratio)
         r_plot_new = []
         corr_new = []
-        for i in np.arange(0, r_bin_num, bin_ratio):
+        for i in np.arange(0, int(r_bin_num), bin_ratio):
             i = int(i)
             if i+bin_ratio+1>len(r_plot):
                 r_plot_new.append(np.mean(r_plot[i:]))
@@ -2596,6 +2596,9 @@ def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, 
             else:
                 r_plot_new.append(np.mean(r_plot[i:i+bin_ratio]))
                 corr_new.append(np.mean(corr_bin_av[i:i+bin_ratio]))
+
+        # r_plot_new += r_plot[int(r_bin_num/3):]
+        # corr_new += corr_bin_av[int(r_bin_num/3):]
 
         r_plot = r_plot_new
         corr_bin_av = corr_new

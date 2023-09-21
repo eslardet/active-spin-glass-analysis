@@ -18,7 +18,7 @@ with open(file) as f:
     r = list(reader)
 
 
-small = 18
+small = 22
 big = 28
 
 plt.rc('font', size=big)          # controls default text sizes
@@ -29,6 +29,7 @@ plt.rc('legend', fontsize=small)    # legend fontsize
 
 matplotlib.rcParams["font.family"] = "serif"
 plt.rcParams['text.usetex'] = True
+plt.rcParams['axes.labelpad']=10
 
 # font = {'family' : 'normal',
 #         'weight' : 'normal',
@@ -40,6 +41,7 @@ colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
 # colors = plt.cm.binary(np.linspace(0.2, 1, num_Kstd))
 
 fig, ax = plt.subplots(figsize=(10,7))
+ax.vlines(0, 0, 1, linestyle="dashed", color="black")
 
 for k in range(num_Kstd):
     params = r[3*k][0].split('\t')
@@ -56,7 +58,7 @@ for k in range(num_Kstd):
     # else:
     #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
-    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$K_{STD}=\ $" + str(round(K_std)))
+    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$\sigma_K=" + str(round(K_std)) + r"$")
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
 params = r[3*k][0].split('\t')
@@ -69,20 +71,13 @@ Kstd = params[3]
 rho = 1.0
 phi = 0.1
 
-ax.set_xlabel(r"$K_{AVG}$")
+ax.set_xlabel(r"$\overline{K}$")
 ax.set_ylabel(r"$\Psi$")
 # ax.set_xlabel(r"$K_{AVG}$", fontsize=16)
 # ax.set_ylabel(r"Polar order parameter, $\Psi$", fontsize=16)
 ax.set_ylim([0,1])
 ax.set_xlim([-1.0,5.0])
-# ax.set_title("With repulsion", fontsize=14)
-# plt.suptitle("With repulsion", fontsize=14)
-# ax.set_title("With repulsion ($N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp) + ")", fontsize=14)
-# ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(rho) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp), fontsize=10)
-# ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd), fontsize=10)
-# ax.set_title("Rep vs no rep MF; " + r"$N=$" + str(nPart) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd))
-# ax.legend(loc="lower right", fontsize=14)
-ax.legend(loc="lower right")
+ax.legend(loc="lower right", frameon=False)
 
 
 folder = os.path.abspath('../plots/for_figures/pt')

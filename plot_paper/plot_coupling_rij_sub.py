@@ -13,8 +13,8 @@ from analysis_functions import *
 small = 22
 big = 28
 
-plt.rc('font', size=big)          # controls default text sizes
-plt.rc('axes', labelsize=big)    # fontsize of the x and y labels
+plt.rc('font', size=small)          # controls default text sizes
+plt.rc('axes', labelsize=small)    # fontsize of the x and y labels
 plt.rc('xtick', labelsize=small)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=small)    # fontsize of the tick labels
 plt.rc('legend', fontsize=small)    # legend fontsize
@@ -30,9 +30,11 @@ bin_ratio=2
 K_max=4
 r_max=2
 
-K_std = 8.0
-
-for K_std in np.arange(4.0, 7.1, 1.0):
+fig, axs = plt.subplots(2,1, figsize=(8,8))
+counter = 0
+labels = ["(a)", "(b)"]
+for K_std in [1.0, 8.0]:
+    ax = axs[counter]
     filename = 'G_N10000_phi1.0_n0.20_K0.0_' + str(K_std) + '_Rp1.0_xTy1.0_hist'
     file = os.path.abspath('../plot_data/dist_coupling/' + filename + '.txt')
 
@@ -48,27 +50,41 @@ for K_std in np.arange(4.0, 7.1, 1.0):
     ## If wanting to shift K_avg to origin
     # K_list = [k - K_avg for k in K_list]
 
-    fig, ax = plt.subplots(figsize=(10,10/bin_ratio))
-
     cmap = cm.plasma
     norm = colors.Normalize(vmin=0, vmax=0.35)
     h = ax.hist2d(K_list, rij_list, bins=(bin_size, int(bin_size/bin_ratio)), range=[[-K_max,K_max], [0,r_max]], cmap=cmap, norm=norm, density=True)
     # cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
     # cbar = fig.colorbar(h[3], ax=ax, label="Density")
     # cbar = plt.colorbar(h[3])
-    cbar = fig.colorbar(h[3])
-    cbar.ax.get_yaxis().labelpad = 40
-    cbar.ax.set_ylabel('Density', rotation=270)
+    # cbar = fig.colorbar(h[3])
+    # cbar.ax.get_yaxis().labelpad = 40
+    # cbar.ax.set_ylabel('Density', rotation=270)
     ax.set_ylim(bottom=0)
-    ax.set_xlabel(r"$K_{ij}/\sigma_K$")
     ax.set_ylabel(r"$r_{ij}$")
-    # ax.set_xlim(-5,5)
+    # ax.text(-0.12, 1.0, labels[counter], transform=ax.transAxes, va='top', ha='right')
 
-    folder = os.path.abspath('../plots/for_figures/coupling_rij')
-    # filename =  'coupling_rij_hist.pdf'
-    filename += '.pdf'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename), bbox_inches="tight")
+    counter += 1
 
-# plt.show()
+ax.set_xlabel(r"$K_{ij}/\sigma_K$")
+# ax.set_xlim(-5,5)
+
+# fig.subplots_adjust(right=0.8)
+# cbar = fig.add_axes([0.85, 0.15, 0.03, 0.7])
+# fig.colorbar(h[3], cax=cbar, ticks=[0.0, 0.1, 0.2, 0.3])
+# cbar.get_yaxis().labelpad = 40
+# cbar.set_ylabel('Density', rotation=270)
+
+fig.subplots_adjust(top=0.8)
+cbar = fig.add_axes([0.15, 0.85, 0.7, 0.03])
+fig.colorbar(h[3], cax=cbar, ticks=[0.0, 0.1, 0.2, 0.3], orientation="horizontal")
+# cbar.get_xaxis().labelpad = 40
+cbar.set_ylabel('Density')
+
+folder = os.path.abspath('../plots/for_figures/coupling_rij')
+filename =  'coupling_rij_hist_subplots_no_text'
+if not os.path.exists(folder):
+    os.makedirs(folder)
+# plt.savefig(os.path.join(folder, filename + '.pdf'), bbox_inches="tight")
+# plt.savefig(os.path.join(folder, filename + '.svg'), bbox_inches="tight")
+
+plt.show()

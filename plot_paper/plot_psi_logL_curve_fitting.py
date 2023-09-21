@@ -6,7 +6,7 @@ import matplotlib
 
 matplotlib.rcParams["font.family"] = "serif"
 plt.rcParams['text.usetex'] = True
-small = 18
+small = 22
 big = 28
 
 plt.rc('font', size=big)          # controls default text sizes
@@ -38,6 +38,9 @@ def func(L, alpha, coeff, p_inf):
 
 
 alpha, coeff, p_inf = curve_fit(func, l_list, psi_list)[0]
+pcov = curve_fit(func, l_list, psi_list)[1]
+print(np.diag(pcov))
+print(np.sqrt(pcov))
 # alpha, coeff, p_inf = curve_fit(func, l_list, psi_list, sigma=psi_sd_list)[0]
 print(alpha, coeff, p_inf)
 
@@ -58,17 +61,19 @@ ax.set_ylabel(r"$\Psi$")
 ax.set_xbound(upper=10**3)
 ax.set_ybound([0.95867, 0.967])
 
-## Plot L vs Psi - Psi_inf with fitted line
-# psi_2_list = np.array([p-p_inf for p in psi_list])
-# # slope, coeff = np.polyfit(np.log(l_list), np.log(psi_2_list), 1)
-# # print(slope, coeff)
-# ax.loglog(l_list, psi_2_list, 'o')
-# ax.loglog(l_list, np.exp(-alpha*np.log(l_list)+coeff), '--', label="Slope=" + str(round(-alpha,2)))
-# ax.set_xlabel(r"$L$")
-# ax.set_ylabel(r"$\Psi-\Psi_{\infty}$")
-# ax.legend(fontsize=big)
-# # ax.set_xbound(upper=10**3)
-# ax.set_ybound([5*10**-4, 10**-2])
+# Plot L vs Psi - Psi_inf with fitted line
+psi_2_list = np.array([p-p_inf for p in psi_list])
+# slope, coeff = np.polyfit(np.log(l_list), np.log(psi_2_list), 1)
+# print(slope, coeff)
+
+ax_in = fig.add_axes([0.5, 0.5, 0.38, 0.35])
+ax_in.loglog(l_list, psi_2_list, 'o')
+ax_in.loglog(l_list, np.exp(-alpha*np.log(l_list)+coeff), '--', label=r"Slope $=" + str(round(-alpha,2)) + r"$")
+ax_in.set_xlabel(r"$L$", fontsize=small)
+ax_in.set_ylabel(r"$\Psi-\Psi_{\infty}$", fontsize=small)
+ax_in.legend(frameon=False)
+# ax.set_xbound(upper=10**3)
+ax_in.set_ybound([5*10**-4, 10**-2])
 
 
 
@@ -85,7 +90,7 @@ ax.set_ybound([0.95867, 0.967])
 folder = os.path.abspath('../plots/for_figures/p_order_vs_logL')
 if not os.path.exists(folder):
     os.makedirs(folder)
-filename = 'psi_fit'
-# plt.savefig(os.path.join(folder, filename + ".svg"), bbox_inches="tight")
+filename = 'psi_logL'
+# plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
-# plt.show()
+plt.show()

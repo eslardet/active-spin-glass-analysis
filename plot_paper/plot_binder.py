@@ -7,19 +7,12 @@ from decimal import Decimal
 import freud
 import scipy.stats as sps
 import bisect
+from matplotlib.ticker import AutoMinorLocator
 
 import csv, os
 
-num_Kstd = 1
 
-filename = "binder_Kstd1_all"
-file = os.path.abspath("plot_paper/data/" + filename + ".txt")
-with open(file) as f:
-    reader = csv.reader(f, delimiter="\n")
-    r = list(reader)
-
-
-small = 18
+small = 22
 big = 28
 
 plt.rc('font', size=big)          # controls default text sizes
@@ -30,71 +23,60 @@ plt.rc('legend', fontsize=small)    # legend fontsize
 
 matplotlib.rcParams["font.family"] = "serif"
 plt.rcParams['text.usetex'] = True
+# plt.rcParams['axes.labelpad']=10
 
-# font = {'family' : 'normal',
-#         'weight' : 'normal',
-#         'size'   : 14}
+num_Kstd = 1
 
-# matplotlib.rc('font', **font)
+filename = "binder_pt"
+file = os.path.abspath("plot_paper/data/" + filename + ".txt")
+with open(file) as f:
+    reader = csv.reader(f, delimiter="\n")
+    r_pt = list(reader)
 
-colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
-# colors = plt.cm.OrRd(np.linspace(0.2, 1, num_Kstd))
-# colors = plt.cm.binary(np.linspace(0.2, 1, num_Kstd))
+filename = "binder_Kstd1_all"
+file = os.path.abspath("plot_paper/data/" + filename + ".txt")
+with open(file) as f:
+    reader = csv.reader(f, delimiter="\n")
+    r_binder = list(reader)
+
 
 fig, ax = plt.subplots(figsize=(10,7))
 
+ax_in = ax.inset_axes([0.15, 0.5, 0.45, 0.45])
+
 for k in range(num_Kstd):
-    params = r[3*k][0].split('\t')
-    # print(params)
-    K_std = float(params[4])
-    nPart = params[0]
-    Rp = params[1]
 
-    K_avg = r[3*k+1][0].split('\t')[:-1]
+    K_avg = r_pt[3*k+1][0].split('\t')[:-1]
     K_avg_plot = [float(i) for i in K_avg]
-    
-    p_ss = r[3*k+2][0].split('\t')[:-1]
+    p_ss = r_pt[3*k+2][0].split('\t')[:-1]
     p_ss_plot = [float(i) for i in p_ss]
-    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp))
-    # if str(Rp) == "I":
-    #     ax.plot(K_avg_plot, p_ss_plot, "--", label=r"$R_I=\infty$", color="black")
-    # else:
-    #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
-    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
     ax.plot(K_avg_plot, p_ss_plot, "-o")
-    # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
-params = r[3*k][0].split('\t')
-nPart = params[0]
-Rp = params[1]
-noise = params[3]
-# noise = "0.20"
-Kstd = params[3]
-# Kstd = "8.0"
-rho = 1.0
-phi = 0.1
+    K_avg = r_binder[3*k+1][0].split('\t')[:-1]
+    K_avg_plot = [float(i) for i in K_avg]
+    p_ss = r_binder[3*k+2][0].split('\t')[:-1]
+    p_ss_plot = [float(i) for i in p_ss]
+    ax_in.plot(K_avg_plot, p_ss_plot, "-o", markersize=4)
 
-ax.set_xlabel(r"$K_{AVG}$")
-ax.set_ylabel(r"$G$")
-# ax.set_xlabel(r"$K_{AVG}$", fontsize=16)
-# ax.set_ylabel(r"Polar order parameter, $\Psi$", fontsize=16)
-# ax.set_ylim([0,1])
-# ax.set_xlim([-1.0,2.0])
-# ax.set_title("With repulsion", fontsize=14)
-# plt.suptitle("With repulsion", fontsize=14)
-# ax.set_title("With repulsion ($N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp) + ")", fontsize=14)
-# ax.set_title(r"$N=$" + str(nPart) + r"; $\rho=$" + str(rho) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp), fontsize=10)
-# ax.set_title(r"$N=$" + str(nPart) + r"; $\phi=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd), fontsize=10)
-# ax.set_title("Rep vs no rep MF; " + r"$N=$" + str(nPart) + r"; $\eta=$" + str(noise) + r"; $K_{STD}=$" + str(Kstd))
-# ax.legend(loc="lower right", fontsize=14)
-# ax.legend(loc="lower right")
+ax.set_xlabel(r"$\overline{K}$", labelpad=10)
+ax.set_ylabel(r"$\Psi$", labelpad=10)
+ax.set_ylim([0,1])
+ax.set_xlim(0.3, 0.7)
+
+
+ax_in.set_xlabel(r"$\overline{K}$", labelpad=8, fontsize=22)
+ax_in.set_ylabel(r"$G$", labelpad=0, fontsize=22)
+ax_in.set_xlim(0.3, 0.7)
+ax_in.set_ylim(-1.0, 0.8)
+ax_in.set_yticks([-1.0, -0.5, 0.0, 0.5], fontsize=18)
+ax_in.set_xticks(np.arange(0.3, 0.71, 0.1), fontsize=18)
 
 
 folder = os.path.abspath('../plots/for_figures/binder')
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename + ".svg"), bbox_inches="tight")
+plt.savefig(os.path.join(folder, "binder_Kstd1.pdf"), bbox_inches="tight")
 
-plt.show()
+# plt.show()
 
 

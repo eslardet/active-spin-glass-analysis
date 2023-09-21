@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 sys.path.insert(1, '/Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis')
 from analysis_functions import * 
+import itertools
+
 
 
 mode = 'G'
@@ -28,18 +30,21 @@ d_type = "dv_par"
 min_r = 2
 max_r = 10
 
-small = 18
+small = 22
 big = 28
 
 plt.rc('font', size=big)          # controls default text sizes
 plt.rc('axes', labelsize=big)    # fontsize of the x and y labels
 plt.rc('xtick', labelsize=small)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=small)    # fontsize of the tick labels
-plt.rc('legend', fontsize=big)    # legend fontsize
+plt.rc('legend', fontsize=small)    # legend fontsize
 
 matplotlib.rcParams["font.family"] = "serif"
 plt.rcParams['text.usetex'] = True
+plt.rcParams['axes.labelpad'] = 10
+plt.rcParams['lines.markersize'] = 8
 
+marker = itertools.cycle(('o', 'v', 's')) 
 
 fig, ax = plt.subplots(figsize=(10,7))
 
@@ -51,19 +56,21 @@ for d_type in d_type_list:
             exponents = []
             for K_avg in K_avg_range:
                 K = str(K_avg) + "_" + str(K_std)
-                exponents.append(-get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r, max_r))
-            ax.plot(K_avg_range, exponents, '-o', label=labels[d_type_list.index(d_type)])
+                exponents.append(get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r, max_r))
+            
+            ax.plot(K_avg_range, exponents, linestyle="-", marker=next(marker), label=labels[d_type_list.index(d_type)])
 
 for K_std in K_std_range:
     exponents = []
     for K_avg in K_avg_range:
         K = str(K_avg) + "_" + str(K_std)
-        exponents.append(-get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
-ax.plot(K_avg_range, exponents, '-o', label=r"$C_\rho(r)$")
+        exponents.append(get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
+ax.plot(K_avg_range, exponents, linestyle="-", marker=next(marker), label=r"$C_\rho(r)$")
 
-ax.set_xlabel(r"$K_{AVG}$")
+ax.set_xlabel(r"$\overline{K}$")
 ax.set_ylabel(r"$\lambda$")
-ax.legend()
+# ax.set_ylim(-2.8,-0.5)
+ax.legend(frameon=False)
 
 # filename = d_type + '_' + mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
 filename = "corr_exp"
