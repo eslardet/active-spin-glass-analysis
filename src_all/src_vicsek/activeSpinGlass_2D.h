@@ -8,7 +8,7 @@
 #define activeSpinGlass_2D_h
 
 std::fstream inputFile,initposFile;
-std::fstream logFile,posFile,posExactFile,forceFile,couplingFile;
+std::fstream logFile,posFile,posExactFile,forceFile,couplingFile,seedFile;
 
 // Input parameters
 int nPart;

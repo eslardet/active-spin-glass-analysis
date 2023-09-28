@@ -55,8 +55,8 @@ STDK=8.0
 dT=0.005
 DT=10.0
 DTex=100.0
-eqT=50.0
-simulT=200.0
+eqT=0.0
+simulT=400.0
 
 savePos=1
 saveInitPos=0

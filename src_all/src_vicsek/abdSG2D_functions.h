@@ -14,7 +14,7 @@
 ///////////////////////////////
 // Define external variables //
 ///////////////////////////////
-extern std::fstream initposFile,logFile,couplingFile, posExactFile;
+extern std::fstream initposFile,logFile,couplingFile,posExactFile,seedFile;
 
 extern int nPart;
 extern unsigned int seed;
@@ -184,7 +184,5 @@ inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& Fi
         }
     }
 }
-
-
 
 #endif
