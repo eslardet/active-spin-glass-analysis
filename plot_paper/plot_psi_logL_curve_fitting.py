@@ -15,7 +15,8 @@ plt.rc('xtick', labelsize=small)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=small)    # fontsize of the tick labels
 plt.rc('legend', fontsize=small)    # legend fontsize
 
-filename = 'C_noise0.20_phi1.0_K1.0_Rp1.0_xTy1.0'
+# filename = 'C_noise0.20_phi1.0_K1.0_Rp1.0_xTy1.0'
+filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0'
 
 file = os.path.abspath('../plots/p_order_vs_N/' + filename + '.txt')
 
@@ -39,8 +40,8 @@ def func(L, alpha, coeff, p_inf):
 
 alpha, coeff, p_inf = curve_fit(func, l_list, psi_list)[0]
 pcov = curve_fit(func, l_list, psi_list)[1]
-print(np.diag(pcov))
-print(np.sqrt(pcov))
+# print(np.diag(pcov))
+# print(np.sqrt(pcov))
 # alpha, coeff, p_inf = curve_fit(func, l_list, psi_list, sigma=psi_sd_list)[0]
 print(alpha, coeff, p_inf)
 
@@ -90,7 +91,7 @@ ax_in.set_ybound([5*10**-4, 10**-2])
 folder = os.path.abspath('../plots/for_figures/p_order_vs_logL')
 if not os.path.exists(folder):
     os.makedirs(folder)
-filename = 'psi_logL'
-# plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
+filename = 'psi_logL_K1.0_1.0'
+plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
-plt.show()
+# plt.show()

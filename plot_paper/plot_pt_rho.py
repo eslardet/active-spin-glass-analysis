@@ -57,7 +57,7 @@ for k in range(num_rho):
     # else:
     #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
     # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
-    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$\rho=" + str(round(float(rho))) + r"$")
+    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$\rho=" + str(round(float(rho),2)) + r"$")
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
 params = r[3*k][0].split('\t')
@@ -82,7 +82,7 @@ ax.legend(frameon=False)
 folder = os.path.abspath('../plots/for_figures/pt')
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
+# plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
 plt.show()
 

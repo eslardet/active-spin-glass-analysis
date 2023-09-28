@@ -3084,7 +3084,10 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
                         for b in binder:
                             save_file.write(str(b) + "\t")
                         save_file.write("\n")
-    if save_file == True:
+
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+
+    if save_data == True:
         save_file.close()
         os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
     ax.set_xlabel(r"$K_{AVG}$")
@@ -3093,9 +3096,7 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
     # ax.set_xlim([-1,2])
     ax.legend()
 
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
-
-    plt.savefig(os.path.join(folder, filename))
+    plt.savefig(os.path.join(folder, filename + '.png'))
 
 def plot_binder_noise(mode, nPart_range, phi, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range):
     """

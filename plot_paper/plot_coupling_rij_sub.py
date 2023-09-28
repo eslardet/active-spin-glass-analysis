@@ -61,7 +61,7 @@ for K_std in [1.0, 8.0]:
     # cbar.ax.set_ylabel('Density', rotation=270)
     ax.set_ylim(bottom=0)
     ax.set_ylabel(r"$r_{ij}$")
-    # ax.text(-0.12, 1.0, labels[counter], transform=ax.transAxes, va='top', ha='right')
+    ax.text(-0.12, 1.0, labels[counter], transform=ax.transAxes, va='top', ha='right')
 
     counter += 1
 
@@ -74,17 +74,17 @@ ax.set_xlabel(r"$K_{ij}/\sigma_K$")
 # cbar.get_yaxis().labelpad = 40
 # cbar.set_ylabel('Density', rotation=270)
 
-fig.subplots_adjust(top=0.8)
-cbar = fig.add_axes([0.15, 0.85, 0.7, 0.03])
-fig.colorbar(h[3], cax=cbar, ticks=[0.0, 0.1, 0.2, 0.3], orientation="horizontal")
-# cbar.get_xaxis().labelpad = 40
-cbar.set_ylabel('Density')
+fig.subplots_adjust(right=0.8)
+cbar = fig.add_axes([0.85, 0.15, 0.03, 0.7])
+fig.colorbar(h[3], cax=cbar, ticks=[0.0, 0.1, 0.2, 0.3], orientation="vertical")
+cbar.get_yaxis().labelpad = 40
+cbar.set_ylabel('Density', rotation=270)
 
 folder = os.path.abspath('../plots/for_figures/coupling_rij')
-filename =  'coupling_rij_hist_subplots_no_text'
+filename =  'coupling_rij_hist_subplots'
 if not os.path.exists(folder):
     os.makedirs(folder)
-# plt.savefig(os.path.join(folder, filename + '.pdf'), bbox_inches="tight")
-# plt.savefig(os.path.join(folder, filename + '.svg'), bbox_inches="tight")
+plt.savefig(os.path.join(folder, filename + '.pdf'), bbox_inches="tight")
+plt.savefig(os.path.join(folder, filename + '.svg'), bbox_inches="tight")
 
 plt.show()

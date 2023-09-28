@@ -92,7 +92,7 @@ ax.legend(loc="lower right", frameon=False)
 folder = os.path.abspath('../plots/for_figures/pt')
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
+plt.savefig(os.path.join(folder, filename + ".png"), bbox_inches="tight")
 
 # plt.show()
 

@@ -13,19 +13,19 @@ noise = "0.20"
 K_arr = [1.0, 1.5, 2.0]
 # K_avg_range = np.concatenate((np.round(np.arange(-1.0,0.0,0.1),1), np.round(np.arange(0.0, 0.6, 0.1), 1),K_arr))
 # K_avg_range = np.delete(K_avg_range, 9)
-K_avg_range = np.concatenate((np.round(np.arange(-1.0,0.0,0.2),1), np.round(np.arange(0.0, 0.6, 0.2), 1),K_arr))
+# K_avg_range = np.concatenate((np.round(np.arange(-1.0,0.0,0.2),1), np.round(np.arange(0.0, 0.6, 0.2), 1),K_arr))
 # K_avg_range = [-0.5,-0.4,-0.3,-0.2,-0.1,0.0,0.1,0.2,0.3,0.4,0.5,1.0]
-# K_avg_range = [-0.5,0.0]
+K_avg_range = [0.0]
 K_std_range = [8.0]
 Rp = 1.0
 xTy = 1.0
-seed_range = np.arange(1,21,1)
+seed_range = np.arange(1,3,1)
 r_scale = "log"
 y_scale = "log"
 timestep_range = [0,1,2,3,4,5]
 
 d_type = "dv_par"
-min_r = 2
+min_r = 5
 max_r = 10
 
 small = 18
@@ -48,8 +48,9 @@ for nPart in nPart_range:
         exponents = []
         for K_avg in K_avg_range:
             K = str(K_avg) + "_" + str(K_std)
-            exponents.append(-1/get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
+            exponents.append(get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
         ax.plot(K_avg_range, exponents, '-o')
+        print(exponents)
 
 ax.set_xlabel(r"$K_{AVG}$")
 ax.set_ylabel(r"$\lambda$")
@@ -62,4 +63,4 @@ if not os.path.exists(folder):
     os.makedirs(folder)
 # plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
-plt.show()
+# plt.show()

@@ -371,9 +371,13 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     Lx = xTy*L;
     Ly =     L;
 
+    if (eqT>simulT)
+    {cerr << "eqT is larger than simulT!" << endl; ::exit(1);}
+
+
     // Timing
     Neq = (int) ceil(eqT/dT);
-    Nsimul = (int) ceil(simulT/dT);
+    Nsimul = (int) ceil((simulT-eqT)/dT);
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);
     logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
@@ -448,15 +452,22 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
         posExactFile >> x[i] >> y[i] >> p[i];
     }
 
+    posExactFile.close();
+
     if (startT>simulT)
     {cerr << "Already simulated up to simulT! Exact position file time is " << startT << endl; ::exit(1);}
 
-    posExactFile.close();
-
+    if (eqT<startT)
+    {cerr << "eqT is less than startT!" << endl; ::exit(1);}
 
     // Timing
-    Neq = (int) ceil(eqT/dT);
-    Nsimul = (int) ceil((simulT-startT-eqT)/dT);
+    if (eqT>0)
+        {
+        Neq = (int) ceil((eqT-startT)/dT);
+        Nsimul = (int) ceil((simulT-eqT)/dT);}
+    else
+        {Neq = (int) 0;
+        Nsimul = (int) ceil((simulT-startT)/dT);}
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);
     logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;

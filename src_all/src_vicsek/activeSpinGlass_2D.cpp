@@ -264,6 +264,17 @@ for (sig=1; sig<=32; sig++)
     for(int ne=0 ; ne<Neq ; ne++) {
         // full equilibration
         activeBrownianDynamics(x,y,p,fx,fy,fp,t);
+
+        if ((ne+1)%Nskipexact == 0 ){
+            if (savePos) {
+                posExactFile.open("pos_exact", ios::out);
+                if(posExactFile.fail())
+                {cerr<<"Failed to open exact positions file!"<<endl; exit(1);}
+                posExactFile.precision(17);
+                saveFrame(x,y,p,t,posExactFile);
+                posExactFile.close();
+            }     
+        }
     }
 
     // t0 = t;

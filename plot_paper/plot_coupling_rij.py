@@ -32,7 +32,7 @@ r_max=2
 
 K_std = 8.0
 
-for K_std in np.arange(4.0, 7.1, 1.0):
+for K_std in [3.0, 8.0]:
     filename = 'G_N10000_phi1.0_n0.20_K0.0_' + str(K_std) + '_Rp1.0_xTy1.0_hist'
     file = os.path.abspath('../plot_data/dist_coupling/' + filename + '.txt')
 

@@ -80,13 +80,14 @@ ax.legend(frameon=False)
 
 ax.set_xlim([0,25])
 ax.set_ylim([0,0.20])
+ax.text(-0.12, 1.0, "(c)", transform=ax.transAxes, va='top', ha='right')
 
 # yticks = ax.yaxis.get_major_ticks()
 # for i in range(1,8,2):
 #     yticks[i].set_visible(False)
 
 folder = os.path.abspath('../plots/for_figures/neighbour_hist')
-filename =  'superimposed.svg'
+filename =  'superimposed.png'
 if not os.path.exists(folder):
     os.makedirs(folder)
 plt.savefig(os.path.join(folder, filename), bbox_inches="tight")
