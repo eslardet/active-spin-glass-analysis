@@ -53,7 +53,7 @@ static std::vector<double> Y,Fy;
 static std::vector<double> P,Fp;
 
 // Define the coupling constant array
-static std::vector< std::vector<double> > K;
+static std::vector<double> K;
 
 // Neighbor list variables
 static double rl,rc; // radius of the neighbor list
@@ -164,25 +164,23 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
 // saveCouplings //
 ///////////////////
 // Saves to file the coupling constants
-inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& File) 
+inline void saveCouplings(std::vector<double> k, std::fstream& File) 
 {
-    if(couplingMode == 'A') {
-        for(int i=0 ; i<nPart ; i++)
-        {
-            for(int j=0 ; j<nPart ; j++){
-                File << k[i][j] << std::endl; 
-            }
-        }
-    }
+    for (const auto &e : k) File << e << std::endl;
+}
 
-    else{
-        for(int i=0 ; i<nPart ; i++)
-        {
-            for(int j=i+1 ; j<nPart ; j++){
-                File << k[i][j] << std::endl; 
-            }
-        }
+inline unsigned long long getIndex(int i, int j)
+{
+    unsigned long long i_long = i, j_long = j, N_long = nPart;
+    if (i>j)
+    {
+        return j_long*(N_long-1) - j_long*(j_long-1)/2 + i_long - j_long - 1;
+    }
+    else
+    {
+        return i_long*(N_long-1) - i_long*(i_long-1)/2 + j_long - i_long - 1;
     }
 }
+
 
 #endif

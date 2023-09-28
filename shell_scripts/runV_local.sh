@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=1000
+nPart=10000
 phi=1.0
 noise=0.20
 
@@ -28,7 +28,7 @@ vp=1.0
 Rp=1.0
 xTy=1.0
 
-initMode='S'
+initMode='R'
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
@@ -53,10 +53,10 @@ KAVG=0.0
 STDK=8.0
 
 dT=0.005
-DT=10.0
-DTex=100.0
+DT=10
+DTex=10.0
 eqT=0.0
-simulT=400.0
+simulT=10
 
 savePos=1
 saveInitPos=0
@@ -189,6 +189,6 @@ else
     echo ${intMethod} >> 'inpar'
 fi
 
-time ${bin_dir}/vicsek_2D inpar
+time ${bin_dir}/vicsek_2D_small_K inpar
 
 echo "2D Vicsek run done."

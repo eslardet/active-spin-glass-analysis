@@ -5,7 +5,7 @@
 //		-overdamped langevin dynamics for both position and orientations
 //      -Purely repulsive Lennard-Jones interactions between particles
 //      -Vicsek interactions with generalized coupling constants
-//      -self-propelled particles via a constant peclet Pe (constant velocity)
+//      -self-propelled particles via a constant velocity vp
 //      -Hybrid cell-linked list and Verlet neighbor lists
 //
 //  Created by Thibault Bertrand on 2022-04-19
@@ -95,14 +95,11 @@ for (sig=1; sig<=32; sig++)
     inputFile >> seed;
     logFile << " --> Seed = " << seed << endl;
 
-    inputFile >> gx;
-    logFile << " --> Gamma_x = " << gx << endl;  
+    inputFile >> noise;
+    logFile << " --> Noise = " << noise << endl;  
 
-    inputFile >> Pe;
-    logFile << " --> Peclet number = " << Pe << endl;
-
-    inputFile >> Rr;
-    logFile << " --> Ratio of LJ interaction radius to particle size = " << Rr << endl;    
+    inputFile >> vp;
+    logFile << " --> Particle velocity = " << vp << endl;  
 
     inputFile >> Rp;
     logFile << " --> Ratio of Vicsek interaction radius to particle size = " << Rp << endl;    
@@ -141,13 +138,13 @@ for (sig=1; sig<=32; sig++)
             logFile << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
             break;
 
-        case 'F' : // Normally distributed ferromagnetic couplings
+        case 'F' : // Fraction of ferro and anti-ferro magnetic couplings
             inputFile >> KAVG; 
             inputFile >> STDK;            
-            logFile << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
+            cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
             break;
 
-        case 'A' : // Normally distributed antiferromagnetic couplings
+        case 'A' : // Normally distributed non-reciprocal couplings
             inputFile >> KAVG; 
             inputFile >> STDK;            
             logFile << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
@@ -181,6 +178,9 @@ for (sig=1; sig<=32; sig++)
     inputFile >> savePos; 
     logFile << " --> savePos = " << savePos << endl;
 
+    inputFile >> saveInitPos;
+    logFile << " --> saveInitPos = " << saveInitPos << endl;
+
     inputFile >> saveForce; 
     logFile << " --> saveForce = " << saveForce << endl;
 
@@ -192,27 +192,10 @@ for (sig=1; sig<=32; sig++)
     inputFile >> intMethod;
     logFile << " --> SDE solving method = " << intMethod << endl; 
 
-    inputFile >> potMode; 
-    logFile << " --> Repulsion Potential Mode = " << potMode << endl; 
-
-    logFile << "------------------------------------------------------------" << endl;
     logFile << '\n';
     
     inputFile.close();
 
-    // Tape Files
-    if (savePos) {
-        posFile.open("pos",ios::out);
-        if(posFile.fail())
-        {cerr<<"Failed to open positions file!"<<endl; exit(1);}
-        posFile.precision(8);
-    }
-    if (saveForce) {
-        forceFile.open("force",ios::out);
-        if(forceFile.fail())
-        {cerr<<"Failed to open forces file!"<<endl; exit(1);}
-        forceFile.precision(8);
-    }
 
 	///////////////////////
     // Declare Variables //
@@ -240,10 +223,35 @@ for (sig=1; sig<=32; sig++)
     logFile << "Check on the simulation after initialization: " << endl;
     logFile << " --> Volume fraction = " << tphi << endl;
 
+    // Tape Files
+    bool append_pos = false;
     if (savePos) {
-        saveHeader(posFile);
+        ifstream ifile;
+        ifile.open("pos");
+        if(ifile && initMode == 'S' && eqT == 0) {
+            append_pos = true;
+        }
+
+        if (append_pos == true) {
+            posFile.open("pos",ios::app);
+            if(posFile.fail())
+            {cerr<<"Failed to open positions file!"<<endl; exit(1);}
+            posFile.precision(8);
+        }
+        else {
+            posFile.open("pos",ios::out);
+            if(posFile.fail())
+            {cerr<<"Failed to open positions file!"<<endl; exit(1);}
+            posFile.precision(8);
+            saveHeader(posFile);
+        }
+        
     }
     if (saveForce) {
+        forceFile.open("force",ios::out);
+        if(forceFile.fail())
+        {cerr<<"Failed to open forces file!"<<endl; exit(1);}
+        forceFile.precision(8);
         saveHeader(forceFile);
     }
 
@@ -256,10 +264,21 @@ for (sig=1; sig<=32; sig++)
     for(int ne=0 ; ne<Neq ; ne++) {
         // full equilibration
         activeBrownianDynamics(x,y,p,fx,fy,fp,t);
+
+        if ((ne+1)%Nskipexact == 0 ){
+            if (savePos) {
+                posExactFile.open("pos_exact", ios::out);
+                if(posExactFile.fail())
+                {cerr<<"Failed to open exact positions file!"<<endl; exit(1);}
+                posExactFile.precision(17);
+                saveFrame(x,y,p,t,posExactFile);
+                posExactFile.close();
+            }     
+        }
     }
 
     // t0 = t;
-    if (savePos) {
+    if (savePos && append_pos==0) {
 		saveFrame(x,y,p,t,posFile);
         saveFrame(x,y,p,t,posExactFile);
     }
@@ -297,6 +316,10 @@ for (sig=1; sig<=32; sig++)
         }           
     }     
 
+
+    // Save coupling file if required
+    finalize();
+
 	///////////////////
     // Closing Files //
     ///////////////////
@@ -304,7 +327,7 @@ for (sig=1; sig<=32; sig++)
     if (savePos) { posFile.close(); }
     if (saveForce) { forceFile.close(); }
     
-    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", Pe = " << Pe << ", couplingMode = " << couplingMode << endl;
+    cout << endl << "Simulation successful, with nPart = " << nPart << ", phi = " << phi << ", seed = " << seed << ", noise = " << noise << ", vp = " << vp << ", Rp = " << Rp << ", couplingMode = " << couplingMode << endl;
     switch(couplingMode)
     {
         case 'C' : // Constant coupling
@@ -325,7 +348,7 @@ for (sig=1; sig<=32; sig++)
             cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 
             break;
 
-        case 'F' : // Normally distributed ferromagnetic couplings
+        case 'F' : // Fraction mode
             inputFile >> KAVG; 
             inputFile >> STDK;            
             cout << " ----> Average Coupling Constants, KAVG = " << KAVG << " and standard deviation, STDK = " << STDK << endl; 

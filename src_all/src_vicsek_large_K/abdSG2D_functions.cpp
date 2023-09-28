@@ -139,7 +139,7 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
 
     // Seed the random engines
     rnd_gen.seed (seed);
-    
+
     beta = 1.0;
     betasq = beta*beta;
 
@@ -152,40 +152,37 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     rl = rc+0.5;
     rlsq = rl*rl;
 
-    // // initialize particles positions & polarities
-    // switch(initMode)
-    // {
-    //     case 'R' : // Particles placed randomly in the box
+    // initialize particles positions & polarities
     initialConditionsRandom(x,y,p);
-
-    // Allocation of memory
-    allocateSRKmem();
-    cout << K.max_size();
 
     // Initialize the coupling array
     switch(couplingMode)
     {
         case 'C' : // Constant coupling
             for(int i=0 ; i<nPart ; i++){
-                // K[i][i] = 0.0;
-                for(int j=0 ; j<i ; j++){
-                    K[i*(i-1)/2+j] = K0; 
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
+                    K[i][j] = K0; 
+                    K[j][i] = K0; 
                 }
             }
             break;
 
         case 'T' : // Two-populations
             for(int i=0 ; i<nPart ; i++){
-                // K[i][i] = 0.0;
-                for(int j=0 ; j<i ; j++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
                     if(i<nPart/2.0){
                         if(j<nPart/2.0){
-                            K[i*(i-1)/2+j] = KAA;
+                            K[i][j] = KAA;
+                            K[j][i] = KAA;
                         }else{
-                            K[i*(i-1)/2+j] = KAB;
+                            K[i][j] = KAB;
+                            K[j][i] = KAB;
                         }
                     }else{
-                        K[i*(i-1)/2+j] = KBB;
+                        K[i][j] = KBB;
+                        K[j][i] = KBB;
                     }
                 }
             }
@@ -193,10 +190,11 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
 
         case 'G' : // Gaussian distributed couplings
             for(int i=0 ; i<nPart ; i++){
-                // K[i][i] = 0.0;
-                for(int j=0 ; j<i ; j++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
                     KK = KAVG + STDK*normDist(rnd_gen);
-                    K[i*(i-1)/2+j] = KK;
+                    K[i][j] = KK;
+                    K[j][i] = KK;
                 }
             }
             break;
@@ -216,94 +214,54 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             }
             cout << " ----> alpha = " << alpha << "; K+ = " << Kp << "; K- = " << Kn << endl;
             for(int i=0 ; i<nPart ; i++){
-                // K[i][i] = 0.0;
-                for(int j=0 ; j<i ; j++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
                     if(uniDist(rnd_gen) < alpha) {
                         KK = Kp; // Kp is alpha proportion (positive one K+)
                         }
                     else{
                         KK = Kn; // Kn is negative one K-
                     }
-                    K[i*(i-1)/2+j] = KK;
+                    K[i][j] = KK;
+                    K[j][i] = KK;
                 }
             }
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings
-            {cerr<<"Need to use full coupling store version of code!"<<endl; ::exit(1);}
+            // for(int i=0 ; i<nPart ; i++){
+            //     K[i][i] = 0.0;
+            //     for(int j=i+1 ; j<nPart ; j++){
+            //         do{
+            //             KK = KAVG + STDK*normDist(rnd_gen);    
+            //         }while (KK>0.0);
+            //         K[i][j] = KK;
+            //         K[j][i] = KK;
+            //     }
+            // }
+            for(int i=0 ; i<nPart ; i++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
+                    KK = KAVG + STDK*normDist(rnd_gen);
+                    KK2 = KAVG + STDK*normDist(rnd_gen);
+                    K[i][j] = KK;
+                    K[j][i] = KK2;
+                }
+            }
             break;
     }
-
-            // if (saveCoupling) {
-            //     couplingFile.open("coupling",ios::out);
-            //     if(couplingFile.fail())
-            //     {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-            //     couplingFile.precision(4);
-            //     saveCouplings(K,couplingFile);
-            //     couplingFile.close();
-            // }
-            // break;
 
     if (initMode == 'S') 
     {
         initialConditionsSim(x,y,p);
-        allocateSRKmem();
     }
-    //     case 'S' : // Particles configured starting from previous simulation
-    //         // initial condition stuff (inc reading pos_exact file and coupling file)
 
-    //         initialConditionsSim(x,y,p);
-
-    //         allocateSRKmem();
-
-    //         // read coupling file (not necessary for constant mode)
-    //         switch(couplingMode)
-    //         {
-    //             case 'C' : // Constant coupling
-    //                 for(int i=0 ; i<nPart ; i++){
-    //                     K[i][i] = 0.0;
-    //                     for(int j=i+1 ; j<nPart ; j++){
-    //                         K[i][j] = K0; 
-    //                         K[j][i] = K0; 
-    //                     }
-    //                 }
-    //                 break;
-
-    //             case 'T' : // Two-populations
-    //                 for(int i=0 ; i<nPart ; i++){
-    //                     K[i][i] = 0.0;
-    //                     for(int j=i+1 ; j<nPart ; j++){
-    //                         if(i<nPart/2.0){
-    //                             if(j<nPart/2.0){
-    //                                 K[i][j] = KAA;
-    //                                 K[j][i] = KAA;
-    //                             }else{
-    //                                 K[i][j] = KAB;
-    //                                 K[j][i] = KAB;
-    //                             }
-    //                         }else{
-    //                             K[i][j] = KBB;
-    //                             K[j][i] = KBB;
-    //                         }
-    //                     }
-    //                 }
-    //                 break;
-
-    //             default : // Other random coupling modes
-    //                 couplingFile.open("coupling", ios::in);
-    //                 if(couplingFile.fail())
-    //                 {cerr<<"Failed to open couplings file!"<<endl; ::exit(1);}
-    //                 for(int i=0 ; i<nPart ; i++)
-    //                 {
-    //                     for(int j=i+1 ; j<nPart ; j++){
-    //                         couplingFile >> K[i][j];        
-    //                     }
-    //                 }
-    //                 couplingFile.close();
-    //                 break;
-
-    //         }
-    // }
+    // Save seed used for rest of simulation
+    seedFile.open("seed_p",ios::out);
+    if(seedFile.fail())
+    {cerr<<"Failed to open seed file!"<<endl; ::exit(1);}
+    seedFile << seed << std::endl;
+    seedFile.close();
 }
 
 void finalize(void)
@@ -348,9 +306,13 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
     Lx = xTy*L;
     Ly =     L;
 
+    if (eqT>simulT)
+    {cerr << "eqT is larger than simulT!" << endl; ::exit(1);}
+
+
     // Timing
     Neq = (int) ceil(eqT/dT);
-    Nsimul = (int) ceil(simulT/dT);
+    Nsimul = (int) ceil((simulT-eqT)/dT);
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);
     logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
@@ -401,6 +363,17 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
 // Initialize positions of particles from exact positions file of previous simulation
 void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& p)
 {
+    unsigned int seed_p;
+    // Find seed
+    seedFile.open("seed_p",ios::in);
+    if (seedFile.fail())
+    {cerr << "Can't open seed file!" << endl; ::exit(1);}
+    seedFile >> seed_p;
+    seedFile.close();
+
+    // Change seed
+    seed = seed_p+1000;
+    rnd_gen.seed (seed);
 
     // Calculate size of the box
     L = sqrt(double(nPart)/(phi*xTy));
@@ -425,15 +398,20 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
         posExactFile >> x[i] >> y[i] >> p[i];
     }
 
+    posExactFile.close();
+
     if (startT>simulT)
     {cerr << "Already simulated up to simulT! Exact position file time is " << startT << endl; ::exit(1);}
 
-    posExactFile.close();
-
-
     // Timing
-    Neq = (int) ceil(eqT/dT);
-    Nsimul = (int) ceil((simulT-startT-eqT)/dT);
+    if (eqT==0)
+        {Neq = (int) 0;
+        Nsimul = (int) ceil((simulT-startT)/dT);}
+    else
+        {if (eqT<startT)
+        {cerr << "eqT is less than startT!" << endl; ::exit(1);}
+        Neq = (int) ceil((eqT-startT)/dT);
+        Nsimul = (int) ceil((simulT-eqT)/dT);}
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);
     logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
@@ -483,8 +461,7 @@ void allocateSRKmem(void)
     lscl.resize(nPart);
     mp.resize(nCell, vector<int>(nNeighbor));
 
-    // K.resize(nPart, vector<double>(nPart));
-    K.resize(nPart*(nPart-1)/2);
+    K.resize(nPart, vector<double>(nPart));
 
     return;
 }
@@ -779,16 +756,7 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
                 // Vicsek alignment
                 if (rijsq <= rpsq){
                     pj = pp[nl[j]];
-                    if (i > nl[j]){
-                        Kij = K[i*(i-1)/2+nl[j]];
-                    }
-                    else if (i < nl[j]){
-                        Kij = K[nl[j]*(nl[j]-1)/2+i];
-                    }
-                    else {
-                        Kij = 0.0;
-                    }
-                    // Kij = K[i][nl[j]];
+                    Kij = K[i][nl[j]];
                     pij = pi-pj;
                     ff = -Kij*sin(pij);
 

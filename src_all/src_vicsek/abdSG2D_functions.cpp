@@ -136,10 +136,11 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
 {
     double KK, KK2;
     double alpha, Kp, Kn;
+    unsigned long long index;
 
     // Seed the random engines
     rnd_gen.seed (seed);
-
+    
     beta = 1.0;
     betasq = beta*beta;
 
@@ -160,29 +161,27 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     {
         case 'C' : // Constant coupling
             for(int i=0 ; i<nPart ; i++){
-                K[i][i] = 0.0;
+                // K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
-                    K[i][j] = K0; 
-                    K[j][i] = K0; 
+                    index = getIndex(i,j);
+                    K[index] = K0; 
                 }
             }
             break;
 
         case 'T' : // Two-populations
             for(int i=0 ; i<nPart ; i++){
-                K[i][i] = 0.0;
+                // K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
+                    index = getIndex(i,j);
                     if(i<nPart/2.0){
                         if(j<nPart/2.0){
-                            K[i][j] = KAA;
-                            K[j][i] = KAA;
+                            K[index] = KAA;
                         }else{
-                            K[i][j] = KAB;
-                            K[j][i] = KAB;
+                            K[index] = KAB;
                         }
                     }else{
-                        K[i][j] = KBB;
-                        K[j][i] = KBB;
+                        K[index] = KBB;
                     }
                 }
             }
@@ -190,11 +189,11 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
 
         case 'G' : // Gaussian distributed couplings
             for(int i=0 ; i<nPart ; i++){
-                K[i][i] = 0.0;
+                // K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
+                    index = getIndex(i,j);
                     KK = KAVG + STDK*normDist(rnd_gen);
-                    K[i][j] = KK;
-                    K[j][i] = KK;
+                    K[index] = KK;
                 }
             }
             break;
@@ -214,40 +213,22 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             }
             cout << " ----> alpha = " << alpha << "; K+ = " << Kp << "; K- = " << Kn << endl;
             for(int i=0 ; i<nPart ; i++){
-                K[i][i] = 0.0;
+                // K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
+                    index = getIndex(i,j);
                     if(uniDist(rnd_gen) < alpha) {
                         KK = Kp; // Kp is alpha proportion (positive one K+)
                         }
                     else{
                         KK = Kn; // Kn is negative one K-
                     }
-                    K[i][j] = KK;
-                    K[j][i] = KK;
+                    K[index] = KK;
                 }
             }
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings
-            // for(int i=0 ; i<nPart ; i++){
-            //     K[i][i] = 0.0;
-            //     for(int j=i+1 ; j<nPart ; j++){
-            //         do{
-            //             KK = KAVG + STDK*normDist(rnd_gen);    
-            //         }while (KK>0.0);
-            //         K[i][j] = KK;
-            //         K[j][i] = KK;
-            //     }
-            // }
-            for(int i=0 ; i<nPart ; i++){
-                K[i][i] = 0.0;
-                for(int j=i+1 ; j<nPart ; j++){
-                    KK = KAVG + STDK*normDist(rnd_gen);
-                    KK2 = KAVG + STDK*normDist(rnd_gen);
-                    K[i][j] = KK;
-                    K[j][i] = KK2;
-                }
-            }
+            {cerr<<"Need to use full coupling store version of code!"<<endl; ::exit(1);}
             break;
     }
 
@@ -461,7 +442,8 @@ void allocateSRKmem(void)
     lscl.resize(nPart);
     mp.resize(nCell, vector<int>(nNeighbor));
 
-    K.resize(nPart, vector<double>(nPart));
+    // K.resize(nPart, vector<double>(nPart));
+    K.resize(nPart*(nPart-1)/2);
 
     return;
 }
@@ -756,7 +738,13 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
                 // Vicsek alignment
                 if (rijsq <= rpsq){
                     pj = pp[nl[j]];
-                    Kij = K[i][nl[j]];
+                    if (i == nl[j]){
+                        Kij = 0.0;
+                    }
+                    else {
+                        Kij = K[getIndex(i,nl[j])];
+                    }
+                    // Kij = K[i][nl[j]];
                     pij = pi-pj;
                     ff = -Kij*sin(pij);
 

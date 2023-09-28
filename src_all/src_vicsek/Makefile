@@ -1,4 +1,4 @@
-app = vicsek_2D
+app = vicsek_2D_small_K
 
 srcExt = cpp
 srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_all/src_vicsek
