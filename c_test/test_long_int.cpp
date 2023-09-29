@@ -16,9 +16,12 @@ unsigned long long getIndex(int i, int j, int nPart) {
 int main()
 {
     unsigned long long m;
+    std::vector<double> k;
+    std::cout << m.max_size() << std::endl;
+    std::cout << k.max_size() << std::endl;
 
     m = getIndex(2,4,6);
-    std::cout << m << std::endl;
+    // std::cout << m << std::endl;
 
     // m = getIndex(3,0);
     // std::cout << m << std::endl;

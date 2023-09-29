@@ -21,6 +21,8 @@ corr_r_max = float(sys.argv[11])
 r_bin_num = int(sys.argv[12])
 r_scale = str(sys.argv[13])
 corr_r_min = float(sys.argv[14])
+rho_r_max = float(sys.argv[15])
+
 
 log_y = True
 bin_ratio = 1
@@ -31,7 +33,7 @@ bin_ratio = 1
 
 t0 = time.time()
 #plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=linlin, loglin=loglin, loglog=loglog)
-write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range, corr_r_max=corr_r_max, r_bin_num=r_bin_num, r_scale=r_scale, corr_r_min=corr_r_min)
+write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range, rho_r_max=rho_r_max, corr_r_max=corr_r_max, r_bin_num=r_bin_num, r_scale=r_scale, corr_r_min=corr_r_min)
 
 print("Time taken: " + str(time.time() - t0))
 

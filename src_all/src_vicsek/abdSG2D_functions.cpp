@@ -443,7 +443,8 @@ void allocateSRKmem(void)
     mp.resize(nCell, vector<int>(nNeighbor));
 
     // K.resize(nPart, vector<double>(nPart));
-    K.resize(nPart*(nPart-1)/2);
+    unsigned long long n_long = nPart;
+    K.resize(n_long*(n_long-1)/2);
 
     return;
 }
