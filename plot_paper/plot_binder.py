@@ -27,13 +27,15 @@ plt.rcParams['text.usetex'] = True
 
 num_Kstd = 1
 
-filename = "binder_pt"
+# filename = "binder_pt"
+filename = "binder_pt_K8"
 file = os.path.abspath("plot_paper/data/" + filename + ".txt")
 with open(file) as f:
     reader = csv.reader(f, delimiter="\n")
     r_pt = list(reader)
 
-filename = "binder_Kstd1_all"
+# filename = "binder_Kstd1_all"
+filename = "binder_Kstd8"
 file = os.path.abspath("plot_paper/data/" + filename + ".txt")
 with open(file) as f:
     reader = csv.reader(f, delimiter="\n")
@@ -61,21 +63,21 @@ for k in range(num_Kstd):
 ax.set_xlabel(r"$\overline{K}$", labelpad=10)
 ax.set_ylabel(r"$\Psi$", labelpad=10)
 ax.set_ylim([0,1])
-ax.set_xlim(0.3, 0.7)
+# ax.set_xlim(0.3, 0.7)
 
 
 ax_in.set_xlabel(r"$\overline{K}$", labelpad=8, fontsize=22)
 ax_in.set_ylabel(r"$G$", labelpad=0, fontsize=22)
-ax_in.set_xlim(0.3, 0.7)
-ax_in.set_ylim(-1.0, 0.8)
+# ax_in.set_xlim(0.3, 0.7)
+# ax_in.set_ylim(-1.0, 0.8)
 ax_in.set_yticks([-1.0, -0.5, 0.0, 0.5], fontsize=18)
-ax_in.set_xticks(np.arange(0.3, 0.71, 0.1), fontsize=18)
+# ax_in.set_xticks(np.arange(0.3, 0.71, 0.1), fontsize=18)
 
 
 folder = os.path.abspath('../plots/for_figures/binder')
 if not os.path.exists(folder):
     os.makedirs(folder)
-plt.savefig(os.path.join(folder, "binder_Kstd1.pdf"), bbox_inches="tight")
+plt.savefig(os.path.join(folder, "binder_Kstd8.png"), bbox_inches="tight")
 
 # plt.show()
 

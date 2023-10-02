@@ -186,7 +186,7 @@ def get_pos_ex_snapshot(file):
     return x, y, theta, view_time
 
 
-def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=True, show_color=True, save_in_folder=False, timestep=None, neigh_col=False, r_max=None):
+def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=True, show_color=True, show_plot=False, save_plot=True, save_in_folder=False, timestep=None, neigh_col=False, r_max=None):
     """
     Get static snapshot at specified time from the positions file
     """
@@ -253,16 +253,19 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=T
     ax.set_ylim(0,Ly)
     ax.set_aspect('equal')
 
-
-    if save_in_folder == True:
-        folder = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
-        filename = 'snapshot.png'
-    else:
-        folder = os.path.abspath('../snapshots_vicsek')
-        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    plt.savefig(os.path.join(folder, filename))
+    if save_plot == True:
+        if save_in_folder == True:
+            folder = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
+            filename = 'snapshot.png'
+        else:
+            folder = os.path.abspath('../snapshots_vicsek')
+            filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        plt.savefig(os.path.join(folder, filename))
+    if show_plot == True:
+        plt.show()
+    plt.close()
 
 
 def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
@@ -2084,14 +2087,6 @@ def plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_s
     plt.savefig(os.path.join(folder, filename))
 
 
-## TO DO: 
-# Bin r according to scale used - y
-# Check C-> 1 as r-> when r bin small enough (only for vel corr not fluctuations)
-# Make function with different modes - y
-# Normalize! - y
-# Add multiple seeds - y
-# Add time average - y
-# Create pipeline
 def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, linlin=True, loglin=True, loglog=True, d_type='v', r_max=10, r_bin_num=20):
     """
     Plot correlation function for the velocity fluctations perpendicular to the mean heading angle with line from scatterplot
@@ -2222,7 +2217,7 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
 
 
 
-def plot_corr_density_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=True, loglin=True, loglog=True, rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=20):
+def plot_corr_density_freud_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=True, loglin=True, loglog=True, rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=20):
     """
     Plot correlation function for the density fluctuations
     """
@@ -2338,11 +2333,8 @@ def plot_corr_density_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, li
             os.makedirs(folder)
         plt.savefig(os.path.join(folder, filename))
 
-## Add time average - y
-## Figure out what to save to text file - binned data?
-## Make function to read and plot binned data
-## Make pipeline
-def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=[0], linlin=True, loglin=True, loglog=True, rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=40):
+
+def plot_corr_density_freud(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=[0], linlin=True, loglin=True, loglog=True, rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=40):
     """
     Plot correlation function for the density fluctuations
     """
