@@ -2215,244 +2215,9 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
         plt.savefig(os.path.join(folder, filename))
 
 
+### Density correlations ###
 
-
-def plot_corr_density_freud_pos_ex(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=True, loglin=True, loglog=True, rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=20):
-    """
-    Plot correlation function for the density fluctuations
-    """
-    import freud
-    rij_all = []
-    corr_all = []
-    corr_r_max_sq = corr_r_max**2
-
-    for seed in seed_range:
-        posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
-        x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
-        
-        L = np.sqrt(nPart / (phi*xTy))
-        Ly = L
-        Lx = L*xTy
-        box = freud.Box.from_box([Lx, Ly])
-        ld = freud.density.LocalDensity(r_max=rho_r_max, diameter=0)
-
-        rng = np.random.default_rng(seed=1)
-        if samples == None:
-            samples = nPart
-        rand_points = np.zeros((samples, 3))
-        rand_points[:,0] = rng.uniform(-Lx/2,Lx/2,samples)
-        rand_points[:,1] = rng.uniform(-Ly/2,Ly/2,samples)
-
-        points = np.zeros((nPart, 3))
-        points[:,0] = x
-        points[:,1] = y
-        points = box.wrap(points)
-
-        # get local densities
-        rho_all = ld.compute(system=(box, points), query_points=rand_points).density
-
-        rho_mean = np.mean(rho_all)
-        d_fluc = [rho - rho_mean for rho in rho_all]
-
-        corr_dot = d_fluc
-
-        # normalization
-        c0 = 0
-        for i in range(samples):
-            c0 += corr_dot[i] * corr_dot[i]
-        c0 = c0/samples
-
-        for i in range(samples):
-            for j in range(i+1, samples):
-                xij = rand_points[i,0] - rand_points[j,0]
-                xij = xij - Lx*round(xij/Lx)
-                if xij < corr_r_max:
-                    yij = rand_points[i,1] - rand_points[j,1]
-                    yij = yij - Ly*round(yij/Ly)
-                    rij_sq = xij**2 + yij**2
-                    if rij_sq < corr_r_max_sq:
-                        rij = np.sqrt(rij_sq)
-                        rij_all.append(rij)
-                        corr_all.append(corr_dot[i]*corr_dot[j]/c0)
-
-    corr_all = np.array(corr_all)
-    rij_all = np.array(rij_all)
-    corr_bin_av = []
-    bin_size = corr_r_max / r_bin_num
-
-    xscale_all = []
-    yscale_all = []
-    if linlin == True:
-        xscale_all.append("lin")
-        yscale_all.append("lin")
-    if loglin == True:
-        xscale_all.append("lin")
-        yscale_all.append("log")
-    if loglog == True:
-        xscale_all.append("log")
-        yscale_all.append("log")
-
-    for xscale, yscale in zip(xscale_all, yscale_all):
-        if xscale == 'lin':
-            r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
-        elif xscale == 'log':
-            r_plot = np.logspace(np.log10(np.min(rij_all)), np.log10(corr_r_max), num=r_bin_num, endpoint=True)
-        else:
-            raise Exception("xscale type not valid")
-        
-        corr_bin_av = []
-        r_plot_new = []
-        for i in range(r_bin_num):
-            lower = r_plot[i]
-            try:
-                upper = r_plot[i+1]
-            except:
-                upper = corr_r_max+1
-            idx = np.where((rij_all>lower)&(rij_all<upper))[0]
-            if len(idx) != 0:
-                corr = np.mean(corr_all[idx])
-                corr_bin_av.append(corr)
-                r_plot_new.append(r_plot[i])
-
-        fig, ax = plt.subplots()
-        ax.plot(r_plot_new, np.abs(corr_bin_av), '-')
-
-        if xscale == 'log':
-            ax.set_xscale('log')
-        if yscale == 'log':
-            ax.set_yscale('log')
-        else:
-            ax.set_ylim(bottom=0)
-
-        ax.set_xlabel(r"$r$")
-        ax.set_ylabel(r"$C(r)$")
-
-        folder = os.path.abspath('../plots/correlation_density/')
-        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        plt.savefig(os.path.join(folder, filename))
-
-
-def plot_corr_density_freud(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=[0], linlin=True, loglin=True, loglog=True, rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=40):
-    """
-    Plot correlation function for the density fluctuations
-    """
-    import freud
-    rij_all = []
-    corr_all = []
-    corr_r_max_sq = corr_r_max**2
-
-    L = np.sqrt(nPart / (phi*xTy))
-    Ly = L
-    Lx = L*xTy
-    box = freud.Box.from_box([Lx, Ly])
-    ld = freud.density.LocalDensity(r_max=rho_r_max, diameter=0)
-
-    rng = np.random.default_rng(seed=1)
-    if samples == None:
-        samples = nPart
-    rand_points = np.zeros((samples, 3))
-    rand_points[:,0] = rng.uniform(-Lx/2,Lx/2,samples)
-    rand_points[:,1] = rng.uniform(-Ly/2,Ly/2,samples)
-
-    for seed in seed_range:
-        for timestep in timestep_range:
-            inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
-            x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
-        
-
-            points = np.zeros((nPart, 3))
-            points[:,0] = x
-            points[:,1] = y
-            points = box.wrap(points)
-
-            # get local densities
-            rho_all = ld.compute(system=(box, points), query_points=rand_points).density
-
-            rho_mean = np.mean(rho_all)
-            d_fluc = [rho - rho_mean for rho in rho_all]
-
-            corr_dot = d_fluc
-
-            # normalization
-            c0 = 0
-            for i in range(samples):
-                c0 += corr_dot[i] * corr_dot[i]
-            c0 = c0/samples
-
-            for i in range(samples):
-                for j in range(i+1, samples):
-                    xij = rand_points[i,0] - rand_points[j,0]
-                    xij = xij - Lx*round(xij/Lx)
-                    if xij < corr_r_max:
-                        yij = rand_points[i,1] - rand_points[j,1]
-                        yij = yij - Ly*round(yij/Ly)
-                        rij_sq = xij**2 + yij**2
-                        if rij_sq < corr_r_max_sq:
-                            rij = np.sqrt(rij_sq)
-                            rij_all.append(rij)
-                            corr_all.append(corr_dot[i]*corr_dot[j]/c0)
-
-    corr_all = np.array(corr_all)
-    rij_all = np.array(rij_all)
-    corr_bin_av = []
-    bin_size = corr_r_max / r_bin_num
-
-    xscale_all = []
-    yscale_all = []
-    if linlin == True:
-        xscale_all.append("lin")
-        yscale_all.append("lin")
-    if loglin == True:
-        xscale_all.append("lin")
-        yscale_all.append("log")
-    if loglog == True:
-        xscale_all.append("log")
-        yscale_all.append("log")
-
-    for xscale, yscale in zip(xscale_all, yscale_all):
-        if xscale == 'lin':
-            r_plot = np.linspace(0, corr_r_max, num=r_bin_num, endpoint=False) + bin_size/2
-        elif xscale == 'log':
-            r_plot = np.logspace(np.log10(np.min(rij_all)), np.log10(corr_r_max), num=r_bin_num, endpoint=True)
-        else:
-            raise Exception("xscale type not valid")
-        
-        corr_bin_av = []
-        r_plot_new = []
-        for i in range(r_bin_num):
-            lower = r_plot[i]
-            try:
-                upper = r_plot[i+1]
-            except:
-                upper = corr_r_max+1
-            idx = np.where((rij_all>lower)&(rij_all<upper))[0]
-            if len(idx) != 0:
-                corr = np.mean(corr_all[idx])
-                corr_bin_av.append(corr)
-                r_plot_new.append(r_plot[i])
-
-        fig, ax = plt.subplots()
-        ax.plot(r_plot_new, np.abs(corr_bin_av), '-')
-
-        if xscale == 'log':
-            ax.set_xscale('log')
-        if yscale == 'log':
-            ax.set_yscale('log')
-        else:
-            ax.set_ylim(bottom=0)
-
-        ax.set_xlabel(r"$r$")
-        ax.set_ylabel(r"$C(r)$")
-
-        folder = os.path.abspath('../plots/correlation_density/')
-        filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_' + yscale + xscale + '.png'
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        plt.savefig(os.path.join(folder, filename))
-
-def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=[0], rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=120, r_scale='lin', corr_r_min=0):
+def write_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range=[0], rho_r_max=1, samples=None, corr_r_max=10, r_bin_num=120, r_scale='lin', corr_r_min=0):
     """
     Write to file correlation function for the density fluctuations
     """
@@ -2555,7 +2320,7 @@ def write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep
 
     corrFile.close()
 
-def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio=1):
+def read_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio=1):
     r_plot = []
     corr_bin_av = []
 
@@ -2591,11 +2356,127 @@ def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, 
 
     return r_plot, corr_bin_av
 
-def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, log_y=True, bin_ratio=1):
-    r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio)
+
+def get_distance_matrix(ngridx, ngridy):
+    """
+    Output matrix is distance shift matrix in terms of x, y distance wrapped by number of grid points
+    """
+    x = pbc_wrap_calc(np.tile(np.arange(0,ngridy), (ngridx,1)),ngridy)
+    y = pbc_wrap_calc(np.tile(np.arange(0,ngridx), (ngridy,1)),ngridx).T
+    dist = np.sqrt(x**2+y**2)
+    return dist
+
+def get_r_corr(x,y,inparFile, min_grid_size=1):
+
+    params = get_params(inparFile)
+    nPart = params['nPart']
+    phi = params['phi']
+    xTy = params['xTy']
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+
+    ngridx = int(Lx // min_grid_size)
+    ngridy = int(Ly // min_grid_size)
+
+    grid_size_x = Lx / ngridx
+    grid_size_y = Ly / ngridy
+
+    count_arr = np.zeros((ngridx, ngridy))
+    for i in range(nPart):
+        ix = int(pbc_wrap(x[i],Lx) // grid_size_x)
+        iy = int(pbc_wrap(y[i],Ly) // grid_size_y)
+        count_arr[ix, iy] += 1
+
+    density_arr = count_arr / (grid_size_x * grid_size_y)
+    density_fluc_arr = density_arr - np.mean(density_arr) # for fluctuations
+
+    a=np.fft.fft2(density_fluc_arr)
+    b=np.fft.fft2(density_fluc_arr[::-1,::-1])
+    corr=np.round(np.real(np.fft.ifft2(a*b))[::-1,::-1],0)
+    corr = np.abs(corr/corr[0,0]) # normalization
+    dist = get_distance_matrix(ngridx, ngridy)
+    return dist.flatten(), corr.flatten()
+
+def get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=False, timestep_range=[0], min_grid_size=1):
+    r_all = []
+    corr_all = []
+    for seed in seed_range:
+        for timestep in timestep_range:
+            inparFile, posFile = get_files(mode, nPart, phi, noise, K, Rp, xTy, seed)
+            if pos_ex:
+                posFileExact = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name="pos_exact")
+                x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+            else:
+                x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+            dist, corr = get_r_corr(x,y,inparFile, min_grid_size)
+            r_all += list(dist)
+            corr_all += list(corr)
+    return np.array(r_all), np.array(corr_all)
+
+def write_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0], min_grid_size=1):
+    folder = os.path.abspath('../plot_data/correlation_density_grid/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_g' + str(min_grid_size) + ".txt"
+    
+    corrFile = open(os.path.join(folder, filename), "w")
+
+    corrFile.write(str(min_grid_size) + "\n")
+    corrFile.write(str(timestep_range[0]) + "\t" + str(timestep_range[-1]) + "\n")
+
+    r_all, corr_all = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size)
+
+    for i in range(len(r_all)):
+        corrFile.write(str(r_all[i]) + "\t" + str(corr_all[i]) + "\n")
+    corrFile.close()
+
+
+def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size=1):
+    r_all = []
+    corr_all = []
+
+    folder = os.path.abspath('../plot_data/correlation_density_grid/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_g' + str(min_grid_size) + ".txt"
+    corrFile = os.path.join(folder, filename)
+    with open(corrFile) as f:
+        line_count = 1
+        for line in f:
+            if line_count > 2:
+                r_all.append(float(line.split('\t')[0]))
+                corr_all.append(float(line.split('\t')[1]))
+            line_count += 1
+
+    return r_all, corr_all
+
+def get_corr_binned(dist, corr, bin_size=1, min_r=0, max_r=10):
+    corr = np.array(corr)
+    r_plot = np.linspace(min_r, max_r, num=int(np.max(dist)/bin_size))
+    corr_plot = []
+    r_plot_2 = []
+    for i in range(len(r_plot)):
+        lower = r_plot[i]
+        try:
+            upper = r_plot[i+1]
+        except:
+            upper = np.max(dist)
+        idx = np.where((dist>=lower) & (dist<upper))[0].astype(int)
+        if len(idx)>0:
+            c = np.mean(corr[idx])
+            corr_plot.append(c)
+            r_plot_2.append(r_plot[i]+bin_size/2)
+    # r_plot += bin_size/2
+    return r_plot_2, corr_plot
+
+def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, min_grid_size=1):
+    # r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio)
+    dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size)
+
+    r_plot, corr_plot = get_corr_binned(dist, corr, bin_size=1)
 
     fig, ax = plt.subplots()
-    ax.plot(r_plot, np.abs(corr_bin_av), '-')
+    ax.plot(r_plot, np.abs(corr_plot), '-')
 
     if log_y == True:
         ax.set_yscale('log')
@@ -2611,28 +2492,28 @@ def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_sc
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
     if log_y == True:
         filename += "_log"
-    filename += r_scale
+    else:
+        filename += "_lin"
+    filename += "lin"
     filename += '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, r_scale, log_y=True, bin_ratio=1):
+def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, log_y=True, min_grid_size=1):
     
     fig, ax = plt.subplots()
 
     for K_avg in K_avg_range:
         for K_std in K_std_range:
             K = str(K_avg) + "_" + str(K_std)
-            r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio)
-            ax.plot(r_plot, np.abs(corr_bin_av), '-', label=r"$K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std))
+            dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size)
+            r_plot, corr_plot = get_corr_binned(dist, corr, bin_size=1)
+            ax.plot(r_plot, np.abs(corr_plot), '-', label=r"$K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std))
     if log_y == True:
         ax.set_yscale('log')
     else:
         ax.set_ylim(bottom=0)
-    if r_scale == "log":
-        ax.set_xscale('log')
-        ax.set_xlim(left=1)
 
     ax.set_xlabel(r"$r$", fontsize=12)
     ax.set_ylabel(r"$C(r)$", fontsize=12)
@@ -2644,7 +2525,9 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
     if log_y == True:
         filename += "_log"
-    filename += r_scale
+    else:
+        filename += "_lin"
+    filename += "lin"
     filename += '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -2652,7 +2535,7 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
 
 
 def get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r):
-    r_plot, corr_bin_av = read_corr_density(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed_range=seed_range, r_scale="log", bin_ratio=1)
+    r_plot, corr_bin_av = read_corr_density(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed_range=seed_range, min_grid_size=1)
     r_plot = np.array(r_plot)
     corr_bin_av = np.array(corr_bin_av)
     idx1 = np.where(r_plot<max_r)[0]

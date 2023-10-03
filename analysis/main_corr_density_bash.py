@@ -33,11 +33,11 @@ bin_ratio = 1
 
 t0 = time.time()
 #plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, linlin=linlin, loglin=loglin, loglog=loglog)
-write_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range, rho_r_max=rho_r_max, corr_r_max=corr_r_max, r_bin_num=r_bin_num, r_scale=r_scale, corr_r_min=corr_r_min)
+write_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=False, timestep_range=np.arange(0,6,1), min_grid_size=1)
 
 print("Time taken: " + str(time.time() - t0))
 
-plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale=r_scale, log_y=log_y, bin_ratio=bin_ratio)
+# plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale=r_scale, log_y=log_y, bin_ratio=bin_ratio)
 
 #for seed in seed_range:
 #    del_pos(mode, nPart, phi, noise, K, Rp, xTy, seed)
