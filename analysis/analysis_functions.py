@@ -2357,12 +2357,12 @@ def read_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_
     return r_plot, corr_bin_av
 
 
-def get_distance_matrix(ngridx, ngridy):
+def get_distance_matrix(ngridx, ngridy, min_grid_size):
     """
     Output matrix is distance shift matrix in terms of x, y distance wrapped by number of grid points
     """
-    x = pbc_wrap_calc(np.tile(np.arange(0,ngridy), (ngridx,1)),ngridy)
-    y = pbc_wrap_calc(np.tile(np.arange(0,ngridx), (ngridy,1)),ngridx).T
+    x = pbc_wrap_calc(np.tile(np.arange(0,ngridy), (ngridx,1)),ngridy)*min_grid_size
+    y = pbc_wrap_calc(np.tile(np.arange(0,ngridx), (ngridy,1)),ngridx).T*min_grid_size
     dist = np.sqrt(x**2+y**2)
     return dist
 
@@ -2396,7 +2396,7 @@ def get_r_corr(x,y,inparFile, min_grid_size=1):
     b=np.fft.fft2(density_fluc_arr[::-1,::-1])
     corr=np.round(np.real(np.fft.ifft2(a*b))[::-1,::-1],0)
     corr = np.abs(corr/corr[0,0]) # normalization
-    dist = get_distance_matrix(ngridx, ngridy)
+    dist = get_distance_matrix(ngridx, ngridy, min_grid_size)
     return dist.flatten(), corr.flatten()
 
 def get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=False, timestep_range=[0], min_grid_size=1):
@@ -2404,15 +2404,19 @@ def get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=False
     corr_all = []
     for seed in seed_range:
         for timestep in timestep_range:
-            inparFile, posFile = get_files(mode, nPart, phi, noise, K, Rp, xTy, seed)
-            if pos_ex:
-                posFileExact = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name="pos_exact")
-                x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
-            else:
-                x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
-            dist, corr = get_r_corr(x,y,inparFile, min_grid_size)
-            r_all += list(dist)
-            corr_all += list(corr)
+            try:
+                inparFile, posFile = get_files(mode, nPart, phi, noise, K, Rp, xTy, seed)
+                if pos_ex:
+                    posFileExact = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name="pos_exact")
+                    x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+                else:
+                    x, y, theta = get_pos_snapshot(posFile, nPart, timestep)
+                dist, corr = get_r_corr(x,y,inparFile, min_grid_size)
+                r_all += list(dist)
+                corr_all += list(corr)
+            except:
+                print(str(mode), str(nPart), str(phi), str(noise), str(K), str(Rp), str(xTy), str(seed))
+                print("Error in seed " + str(seed) + " timestep " + str(timestep))
     return np.array(r_all), np.array(corr_all)
 
 def write_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0], min_grid_size=1):
@@ -2450,9 +2454,9 @@ def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_
 
     return r_all, corr_all
 
-def get_corr_binned(dist, corr, bin_size=1, min_r=0, max_r=10):
+def get_corr_binned_bins(dist, corr, bin_size=1, min_r=0, max_r=10):
     corr = np.array(corr)
-    r_plot = np.linspace(min_r, max_r, num=int(np.max(dist)/bin_size))
+    r_plot = np.linspace(min_r, max_r, num=int(max_r/bin_size))
     corr_plot = []
     r_plot_2 = []
     for i in range(len(r_plot)):
@@ -2466,14 +2470,51 @@ def get_corr_binned(dist, corr, bin_size=1, min_r=0, max_r=10):
             c = np.mean(corr[idx])
             corr_plot.append(c)
             r_plot_2.append(r_plot[i]+bin_size/2)
-    # r_plot += bin_size/2
     return r_plot_2, corr_plot
 
-def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, min_grid_size=1):
+def get_corr_binned(dist, corr, min_r=0, max_r=10):
+    r_plot = np.unique(dist)
+    r_plot2 = r_plot[np.where((r_plot>=min_r) & (r_plot<=max_r))[0]]
+    corr = np.array(corr)
+    corr_plot = []
+    for i in range(len(r_plot2)):
+        idx = np.where(dist == r_plot2[i])[0]
+        if len(idx)>0:
+            c = np.mean(corr[idx])
+            corr_plot.append(c)
+    return r_plot2, corr_plot
+
+def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0], log_y=True, min_grid_size=1, min_r=0, max_r=10):
+    dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size)
+    r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
+    fig, ax = plt.subplots()
+    ax.plot(r_plot, np.abs(corr_plot), '-')
+    if log_y == True:
+        ax.set_yscale('log')
+    else:
+        ax.set_ylim(bottom=0)
+
+    ax.set_xlabel(r"$r$")
+    ax.set_ylabel(r"$C(r)$")
+
+    folder = os.path.abspath('../plots/correlation_density_grid/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_g' + str(min_grid_size)
+    if log_y == True:
+        filename += "_log"
+    else:
+        filename += "_lin"
+    filename += "lin"
+    filename += '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+    plt.close()
+
+def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, min_grid_size=1, min_r=0, max_r=10):
     # r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio)
     dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size)
 
-    r_plot, corr_plot = get_corr_binned(dist, corr, bin_size=1)
+    r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
 
     fig, ax = plt.subplots()
     ax.plot(r_plot, np.abs(corr_plot), '-')
@@ -2486,10 +2527,8 @@ def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_
     ax.set_xlabel(r"$r$")
     ax.set_ylabel(r"$C(r)$")
 
-    # plt.show()
-
-    folder = os.path.abspath('../plots/correlation_density/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    folder = os.path.abspath('../plots/correlation_density_grid/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_g' + str(min_grid_size)
     if log_y == True:
         filename += "_log"
     else:
@@ -2499,17 +2538,64 @@ def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+    plt.close()
 
-def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, log_y=True, min_grid_size=1):
+def plot_corr_density_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, 
+                                  pos_ex=True, timestep_range=[0], log_x=False, log_y=True, min_grid_size=1, min_r=0, max_r=10):
     
+    colors = plt.cm.GnBu(np.linspace(0.2, 1, len(K_avg_range)*len(K_std_range)))
+
     fig, ax = plt.subplots()
 
+    i = 0
+    for K_avg in K_avg_range:
+        for K_std in K_std_range:
+            K = str(K_avg) + "_" + str(K_std)
+            dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size)
+            r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
+            ax.plot(r_plot, np.abs(corr_plot), '-', label=r"$\overline{K}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std), color=colors[i])
+            i += 1
+    if log_y == True:
+        ax.set_yscale('log')
+    if log_x == True:
+        ax.set_xscale('log')
+
+
+    ax.set_xlabel(r"$r$", fontsize=12)
+    ax.set_ylabel(r"$C(r)$", fontsize=12)
+    ax.set_title(r"Density fluctions correlation; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+    ax.legend()
+
+    folder = os.path.abspath('../plots/correlation_density_grid/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_g' + str(min_grid_size)
+    if log_y == True:
+        filename += "_log"
+    else:
+        filename += "_lin"
+    if log_x == True:
+        filename += "log"
+    else:
+        filename += "lin"
+    filename += '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+    plt.close()
+
+def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, log_y=True, min_grid_size=1, min_r=0, max_r=10):
+    
+    colors = plt.cm.GnBu(np.linspace(0.2, 1, len(K_avg_range)*len(K_std_range)))
+
+    fig, ax = plt.subplots()
+
+    i = 0
     for K_avg in K_avg_range:
         for K_std in K_std_range:
             K = str(K_avg) + "_" + str(K_std)
             dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size)
-            r_plot, corr_plot = get_corr_binned(dist, corr, bin_size=1)
-            ax.plot(r_plot, np.abs(corr_plot), '-', label=r"$K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std))
+            r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
+            ax.plot(r_plot, np.abs(corr_plot), '-', label=r"$\overline{K}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std), color=colors[i])
+            i += 1
     if log_y == True:
         ax.set_yscale('log')
     else:
@@ -2521,8 +2607,8 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
     ax.legend()
     # plt.show()
 
-    folder = os.path.abspath('../plots/correlation_density/')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    folder = os.path.abspath('../plots/correlation_density_grid/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_g' + str(min_grid_size)
     if log_y == True:
         filename += "_log"
     else:
@@ -2532,6 +2618,7 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+    plt.close()
 
 
 def get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r):

@@ -228,7 +228,7 @@ for (sig=1; sig<=32; sig++)
     if (savePos) {
         ifstream ifile;
         ifile.open("pos");
-        if(ifile && initMode == 'S' && eqT == 0) {
+        if(ifile && initMode == 'S' && eqT==0) {
             append_pos = true;
         }
 

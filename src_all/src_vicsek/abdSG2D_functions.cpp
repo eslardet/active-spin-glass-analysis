@@ -381,17 +381,19 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
 
     posExactFile.close();
 
-    if (startT>simulT)
+    if (ceil(startT)>=simulT)
     {cerr << "Already simulated up to simulT! Exact position file time is " << startT << endl; ::exit(1);}
 
     // Timing
     if (eqT==0)
         {Neq = (int) 0;
         Nsimul = (int) ceil((simulT-startT)/dT);}
+    else if (eqT<startT)
+        {cerr << "eqT is smaller than startT so running longer!" << endl;
+        Neq = (int) 0;
+        Nsimul = (int) ceil((simulT-eqT)/dT);}
     else
-        {if (eqT<startT)
-        {cerr << "eqT is less than startT!" << endl; ::exit(1);}
-        Neq = (int) ceil((eqT-startT)/dT);
+        {Neq = (int) ceil((eqT-startT)/dT);
         Nsimul = (int) ceil((simulT-eqT)/dT);}
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);

@@ -52,8 +52,8 @@ print(np.sqrt(np.diag(pcov))[0])
 fig, ax = plt.subplots(figsize=(10,7))
 
 ## Plot L vs Psi with fitted curve
-ax.plot(l_list, psi_list, 'o')
-# ax.errorbar(l_list, psi_list, yerr=psi_sd_list, fmt='o')
+# ax.plot(l_list, psi_list, 'o')
+ax.errorbar(l_list, psi_list, yerr=psi_sd_list, fmt='o')
 x_plot = np.linspace(l_list[0],10**3,100)
 ax.plot(x_plot, func(x_plot, alpha, coeff, p_inf))
 ax.set_xscale('log')
@@ -88,10 +88,18 @@ ax_in.set_ybound([5*10**-4, 10**-2])
 # ax.set_ylabel(r"$\Psi$")
 # plt.show()
 
-folder = os.path.abspath('../plots/for_figures/p_order_vs_logL')
+
+folder = os.path.abspath('../plots/p_order_vs_N')
 if not os.path.exists(folder):
     os.makedirs(folder)
-filename = 'psi_logL_K1.0_1.0'
-plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
+# filename = 'psi_logL_K1.0_1.0'
+plt.savefig(os.path.join(folder, filename + ".png"), bbox_inches="tight")
 
-# plt.show()
+# folder = os.path.abspath('../plots/for_figures/p_order_vs_logL')
+# if not os.path.exists(folder):
+#     os.makedirs(folder)
+# filename = 'psi_logL_K1.0_1.0'
+# plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
+
+
+plt.show()

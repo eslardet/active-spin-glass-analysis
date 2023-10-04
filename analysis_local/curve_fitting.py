@@ -15,8 +15,9 @@ plt.rc('xtick', labelsize=small)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=small)    # fontsize of the tick labels
 plt.rc('legend', fontsize=small)    # legend fontsize
 
-filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0'
+# filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0'
 # filename = 'G_noise0.20_phi1.0_K-0.1_8.0_Rp1.0_xTy1.0'
+filename = 'G_noise0.20_phi1.0_K0.1_8.0_Rp1.0_xTy1.0'
 # filename = 'C_noise0.20_phi1.0_K1.0_Rp1.0_xTy1.0'
 
 file = os.path.abspath('../plots/p_order_vs_N/' + filename + '.txt')
@@ -50,9 +51,9 @@ def func_2(L, coeff, p_inf):
 fig, ax = plt.subplots(figsize=(7,5))
 
 # # alpha, coeff, p_inf = curve_fit(func, l_list, psi_list, p0=[0.8654663306632585, -2.0327707413968774, 0.9597420767562417], maxfev=5000)[0]
-alpha, coeff, p_inf = curve_fit(func, l_list, psi_list, sigma=psi_sd_list)[0]
+# alpha, coeff, p_inf = curve_fit(func, l_list, psi_list, sigma=psi_sd_list)[0]
 # alpha, coeff, p_inf = curve_fit(func, l_list, psi_list)[0]
-print(alpha, coeff, p_inf)
+# print(alpha, coeff, p_inf)
 
 # coeff2, p_inf2 = curve_fit(func_2, l_list, psi_list, sigma=psi_sd_list)[0]
 # print(coeff2, p_inf2)

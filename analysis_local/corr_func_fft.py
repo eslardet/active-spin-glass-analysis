@@ -116,20 +116,40 @@ from scipy.signal import fftconvolve, correlate2d
 #     # r_plot += bin_size/2
 #     return r_plot_2, corr_plot
 
+# def get_corr_binned_unique(dist, corr, min_r=0, max_r=10):
+#     r_plot = np.unique(dist)
+#     r_plot2 = r_plot[np.where((r_plot>=min_r) & (r_plot<=max_r))[0]]
+#     corr = np.array(corr)
+#     corr_plot = []
+#     for i in range(len(r_plot2)):
+#         idx = np.where(dist == r_plot[i])[0]
+#         if len(idx)>0:
+#             c = np.mean(corr[idx])
+#             corr_plot.append(c)
+#     return r_plot2, corr_plot
+
 mode = 'G'
 nPart = 10000
 phi = 1.0
 noise = "0.20"
-K = "0.0_1.0"
+K = "0.0_8.0"
 # K = "1.0_0.0"
 Rp = 1.0
 xTy = 1.0
 seed = 1
 seed_range = np.arange(1,21,1)
+min_grid_size=1
 
 # plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, min_grid_size=1)
-dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size=1)
-r_plot, corr_plot = get_corr_binned(dist, corr, bin_size=1, min_r=0, max_r=10)
+dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size)
+r_plot, corr_plot = get_corr_binned(dist, corr)
+# print(r_plot)
+# dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size=0.5)
+# dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=False, timestep_range=[0], min_grid_size=1)
+# r_plot2, corr_plot2 = get_corr_binned(dist, corr)
+print(r_plot)
+
+# plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, min_grid_size=1)
 
 # inparFile = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name="inpar")
 # posFileExact = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name="pos_exact")
@@ -141,17 +161,25 @@ r_plot, corr_plot = get_corr_binned(dist, corr, bin_size=1, min_r=0, max_r=10)
 # # plot_corr_scatter(posFileExact)
 
 fig, ax = plt.subplots()
-# # dist, corr = get_r_corr(inparFile, posFileExact)
-# # dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0])
-# ax.scatter(dist, corr)
+# # # dist, corr = get_r_corr(inparFile, posFileExact)
+# # # dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0])
+# # ax.scatter(dist, corr)
 
-# # r_plot, corr_plot = get_corr_binned(dist, corr, bin_size=1)
-ax.plot(r_plot, corr_plot, 'r-')
+# # # r_plot, corr_plot = get_corr_binned(dist, corr, bin_size=1)
+ax.plot(r_plot, corr_plot)
+# ax.plot(r_plot2, corr_plot2)
 
-# ax.set_xscale('log')
+# # ax.set_xscale('log')
 ax.set_yscale('log')
-# # ax.set_xlabel("Distance")
-# # ax.set_ylabel("Correlation")
-# ax.set_xlim(0,10)
-# # ax.set_ylim(1e-3,1)
+# # # ax.set_xlabel("Distance")
+# # # ax.set_ylabel("Correlation")
+# # ax.set_xlim(0,10)
+# # # ax.set_ylim(1e-3,1)
+
+
+# filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed_range[-1]) + '_g' + str(min_grid_size) + ".png"
+# folder = os.path.abspath('../plots/correlation_density_grid/')
+# if not os.path.exists(folder):
+#     os.makedirs(folder)
+# plt.savefig(os.path.join(folder, filename), bbox_inches="tight")
 plt.show()
