@@ -3,6 +3,7 @@
 // Declaration of all global variables necessary to run activeSpinGlass_2D.cpp
 // Created by Thibault Bertrand on 2022-04-19
 // Last update by TB 2022-04-19
+// Last update by EL 2023-10-09
 
 #ifndef activeSpinGlass_2D_h
 #define activeSpinGlass_2D_h

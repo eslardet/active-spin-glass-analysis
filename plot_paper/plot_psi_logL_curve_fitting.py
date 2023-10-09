@@ -27,9 +27,9 @@ with open(file) as f:
 params = r[0][0].split('\t')[:-1]
 rho = float(params[2])
 
-n_list = [float(n) for n in r[1][0].split('\t')[:-1]]
-psi_list = [float(p) for p in r[2][0].split('\t')[:-1]]
-psi_sd_list = [float(p) for p in r[3][0].split('\t')[:-1]]
+n_list = [float(n) for n in r[1][0].split('\t')[:-1]][:-1]
+psi_list = [float(p) for p in r[2][0].split('\t')[:-1]][:-1]
+psi_sd_list = [float(p) for p in r[3][0].split('\t')[:-1]][:-1]
 l_list = np.array([np.sqrt(n/rho) for n in n_list])
 
 

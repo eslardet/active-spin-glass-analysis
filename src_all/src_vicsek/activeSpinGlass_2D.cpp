@@ -3,13 +3,12 @@
 //  Code performing 2D active brownian dynamics 
 //	This code includes: 
 //		-overdamped langevin dynamics for both position and orientations
-//      -Purely repulsive Lennard-Jones interactions between particles
 //      -Vicsek interactions with generalized coupling constants
 //      -self-propelled particles via a constant velocity vp
 //      -Hybrid cell-linked list and Verlet neighbor lists
 //
 //  Created by Thibault Bertrand on 2022-04-19
-//  Last update by TB 2022-04-19
+//  Last update by EL 2023-10-09
 
 #include <iostream>
 #include <fstream>

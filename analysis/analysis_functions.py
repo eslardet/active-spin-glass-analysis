@@ -66,14 +66,17 @@ def get_params(inparFile):
     inpar_dict["mode"] = r[8][0]
     
     if inpar_dict["mode"] == 'C':
+        inpar_dict["dt"] = float(r[10][0])
         inpar_dict["DT"] = float(r[11][0])
         inpar_dict["eqT"] = float(r[13][0])
         inpar_dict["simulT"] = float(r[14][0])
     elif inpar_dict["mode"] == 'T':
+        inpar_dict["dt"] = float(r[12][0])
         inpar_dict["DT"] = float(r[13][0])
         inpar_dict["eqT"] = float(r[15][0])
         inpar_dict["simulT"] = float(r[16][0])
     else:
+        inpar_dict["dt"] = float(r[11][0])
         inpar_dict["DT"] = float(r[12][0])
         inpar_dict["eqT"] = float(r[14][0])
         inpar_dict["simulT"] = float(r[15][0])
@@ -1235,6 +1238,71 @@ def plot_porder_RI(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std
         save_file.close()
         os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
     plt.savefig(os.path.join(folder, filename + '.png'))
+
+
+def plot_psus_Kavg(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, save_data=False):
+    """
+    Plot susceptibility (std of polar order parameter) against Kavg, for each fixed K_std value and noise value
+    Averaged over a number of realizations
+    """
+    folder = os.path.abspath('../plots/p_sus_vs_Kavg/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for phi in phi_range:
+            for Rp in Rp_range:
+                for noise in noise_range:
+                    for K_std in K_std_range:
+                        p_ss = []
+                        for K_avg in K_avg_range:
+                            K = str(K_avg) + "_" + str(K_std)
+                            p_ss_sum = 0
+                            error_count = 0
+                            for seed in seed_range:
+                                sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+                                if not os.path.exists(os.path.join(sim_dir, 'stats')):
+                                    print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                    error_count += 1
+                                    # write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
+                                else:
+                                    p_mean = read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_sus"]
+                                    if np.isnan(p_mean):
+                                        print("Nan")
+                                        print(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed)
+                                        error_count += 1
+                                    else:
+                                        p_ss_sum += p_mean
+                            p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+
+                        ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise))
+                        if save_data == True:
+                            save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
+                            for K_avg in K_avg_range:
+                                save_file.write(str(K_avg) + "\t")
+                            save_file.write("\n")
+                            for p in p_ss:
+                                save_file.write(str(p) + "\t")
+                            save_file.write("\n")
+
+    ax.set_xlabel(r"$K_{AVG}$")
+    ax.set_ylabel(r"Susceptibility of $\Psi$")
+    # ax.set_ylim([0,1])
+    # ax.set_xlim([-1,2])
+    ax.legend()
+
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
+    if save_data == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
+    plt.savefig(os.path.join(folder, filename + '.png'))
+
+##########################
+#### Banding analysis ####
+##########################
 
 def plot_density_profile(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size=2):
     """
@@ -3609,7 +3677,8 @@ def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, 
                 com_arr.append(np.mean(com))
                 com_arr_sd.append(np.std(com))
             
-            ax.plot(Rp_range, com_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+            ax.plot(Rp_range, com_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise))
+            ax.errorbar(Rp_range, com_arr, yerr=com_arr_sd, fmt='none', capsize=3)
             if save_data == True:
                 save_file.write(str(nPart) + "\t" + str(noise) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
                 for r in Rp_range:
@@ -3617,6 +3686,7 @@ def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, 
                 save_file.write("\n")
                 for p in com_arr:
                     save_file.write(str(p) + "\t")
+                save_file.write("\n")
                 for p in com_arr_sd:
                     save_file.write(str(p) + "\t")
                 save_file.write("\n")
@@ -3674,6 +3744,7 @@ def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_
                             noise_range_plot.append(float(noise))
                         # noise_range_plot = [float(n) for n in noise_range]
                         ax.plot(noise_range_plot, com_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
+                        ax.errorbar(noise_range_plot, com_arr, yerr=com_arr_sd, fmt='none', capsize=3)
                         if save_data == True:
                             save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
                             for noise in noise_range_plot:
@@ -3681,6 +3752,7 @@ def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_
                             save_file.write("\n")
                             for p in com_arr:
                                 save_file.write(str(p) + "\t")
+                            save_file.write("\n")
                             for p in com_arr_sd:
                                 save_file.write(str(p) + "\t")
                         
@@ -3697,10 +3769,9 @@ def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_
     if save_data == True:
         save_file.close()
 
-## But av_n wthin RI will increase with RI
 def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, xTy, seed_range, from_stats=True, save_data=False):
     """
-    Plot mean number of neighbours in RI against the radius of interaction
+    Plot mean number of neighbours per unit area in RI (basically local number density) against the radius of interaction
     """
     
     L = np.sqrt(nPart / (phi*xTy))
@@ -3712,6 +3783,7 @@ def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range,
         for K_std in K_std_range:
             K = str(K_avg) + "_" + str(K_std)
             for Rp in Rp_range:
+                # area = np.pi*Rp**2
                 av_n = []
                 for seed in seed_range:
                     if from_stats == True:
@@ -3725,6 +3797,7 @@ def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range,
                         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name="pos_exact")
                         if os.path.exists(posFileExact):
                             av_n.append(np.mean(neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=Rp)))
+                # av_n_arr.append(np.mean(av_n)/area)
                 av_n_arr.append(np.mean(av_n))
             
             ax.plot(Rp_range, av_n_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
@@ -3738,6 +3811,8 @@ def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range,
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+
+    plt.close()
     
 
 def mean_dist_nn(file, L):
@@ -3776,7 +3851,7 @@ def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, x
     if not os.path.exists(folder):
         os.makedirs(folder)
     if save_data == True:
-        filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg_range[-1])+ '_Kstd' + str(K_std_range[-1]) + '_xTy' + str(xTy)
+        filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg_range[-1])+ '_Kstd' + str(K_std_range[-1]) + '_xTy' + str(xTy) + '_vp' + str(vp) + '_dt' + str(dt)
         save_file = open(os.path.join(folder, filename + '.txt'), "w")
     L = np.sqrt(nPart / (phi*xTy))
 
@@ -3808,14 +3883,20 @@ def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, x
                 except:
                     print('N=' + str(nPart) + '; phi=' + str(phi) + '; K=' + str(K) + '; noise=' + str(noise))
             
-            ax.plot(Rp_range, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise))
+            inparFile = get_files(mode, nPart, phi, noise, K, Rp, xTy, seed)[0]
+            params = get_params(inparFile)
+            vp = params["vp"]
+            dt = params["dt"]
+
+            ax.plot(Rp_range, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; v_p=$" + str(vp) + r"; $\Delta t=$" + str(dt))
             if save_data == True:
-                save_file.write(str(nPart) + "\t" + str(noise) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
+                save_file.write(str(nPart) + "\t" + str(noise) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\t" + str(vp) + "\t" + str(dt) + "\n")
                 for r in Rp_range:
                     save_file.write(str(r) + "\t")
                 save_file.write("\n")
                 for n in nn_arr:
                     save_file.write(str(n) + "\t")
+                save_file.write("\n")
                 for n_sd in nn_arr_sd:
                     save_file.write(str(n_sd) + "\t")
                 save_file.write("\n")
@@ -3825,7 +3906,7 @@ def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, x
     ax.legend()
 
     folder = os.path.abspath('../plots/nn_vs_RI')
-    filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_xTy' + str(xTy) + '.png'
+    filename = mode + '_N' + str(nPart) + '_noise' + str(noise) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_xTy' + str(xTy) + '_vp' + str(vp) + '_dt' + str(dt) + '.png'
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
