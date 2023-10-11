@@ -2036,7 +2036,7 @@ def plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, 
     fig, ax = plt.subplots()
     
     r_plot, corr_bin_av = read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, x_scale, d_type, bin_ratio)
-    ax.plot(r_plot, np.abs(corr_bin_av), '-', label="K=" + str(K))
+    ax.plot(r_plot, corr_bin_av, '-', label="K=" + str(K))
 
     if x_scale == 'log':
         ax.set_xscale('log')
@@ -2063,7 +2063,7 @@ def plot_corr_vel_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_r
         for K_std in K_std_range:
             K = str(K_avg) + "_" + str(K_std)
             r_plot, corr_bin_av = read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, x_scale, d_type, bin_ratio)
-            ax.plot(r_plot, np.abs(corr_bin_av), '-', label="K=" + str(K))
+            ax.plot(r_plot, corr_bin_av, '-', label="K=" + str(K))
 
     if x_scale == 'log':
         ax.set_xscale('log')
@@ -2095,7 +2095,7 @@ def plot_corr_vel_file_superimpose_N(mode, nPart_range, phi, noise, K_avg_range,
             for K_std in K_std_range:
                 K = str(K_avg) + "_" + str(K_std)
                 r_plot, corr_bin_av = read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, x_scale, d_type, bin_ratio)
-                ax.plot(r_plot, np.abs(corr_bin_av), '-', label= "N=" + str(nPart) + ", K=" + str(K))
+                ax.plot(r_plot, corr_bin_av, '-', label= "N=" + str(nPart) + ", K=" + str(K))
 
     if x_scale == 'log':
         ax.set_xscale('log')
@@ -2129,7 +2129,7 @@ def get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_typ
     idx = list(set(idx1) & set(idx2))
     # print(corr_bin_av[idx])
 
-    exponent = np.polyfit(x=np.log10(r_plot[idx]), y=np.log10(np.abs(corr_bin_av[idx])), deg=1)[0]
+    exponent = np.polyfit(x=np.log10(r_plot[idx]), y=np.log10(corr_bin_av[idx]), deg=1)[0]
 
     return exponent
 
@@ -2262,7 +2262,7 @@ def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, 
                 r_plot_new.append(r_plot[i])
 
         fig, ax = plt.subplots()
-        ax.plot(r_plot_new, np.abs(corr_bin_av), '-')
+        ax.plot(r_plot_new, corr_bin_av, '-')
 
         if xscale == 'log':
             ax.set_xscale('log')
@@ -2463,7 +2463,7 @@ def get_r_corr(x,y,inparFile, min_grid_size=1):
     a=np.fft.fft2(density_fluc_arr)
     b=np.fft.fft2(density_fluc_arr[::-1,::-1])
     corr=np.round(np.real(np.fft.ifft2(a*b))[::-1,::-1],0)
-    corr = np.abs(corr/corr[0,0]) # normalization
+    corr = corr/corr[0,0]
     dist = get_distance_matrix(ngridx, ngridy, min_grid_size)
     return dist.flatten(), corr.flatten()
 
@@ -2550,6 +2550,9 @@ def get_corr_binned(dist, corr, min_r=0, max_r=10):
         if len(idx)>0:
             c = np.mean(corr[idx])
             corr_plot.append(c)
+
+    r_plot2 = np.array(r_plot2)
+    corr_plot = np.array(corr_plot)
     return r_plot2, corr_plot
 
 def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0], log_y=True, min_grid_size=1, min_r=0, max_r=10):
@@ -2573,6 +2576,7 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=Tr
         filename += "_lin"
     filename += "lin"
     filename += '.png'
+
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
@@ -2689,7 +2693,7 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
     plt.close()
 
 
-def get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r):
+def get_exponent_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r):
     r_plot, corr_bin_av = read_corr_density(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed_range=seed_range, min_grid_size=1)
     r_plot = np.array(r_plot)
     corr_bin_av = np.array(corr_bin_av)
@@ -2702,14 +2706,30 @@ def get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, m
 
     return exponent
 
-def plot_exponents_Kavg_corr_density(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, min_r, max_r):
+
+def get_exponent_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size, min_r, max_r):
+    dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size)
+    r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
+    r_plot = np.array(r_plot)
+    corr_plot= np.array(corr_plot)
+    idx1 = np.where(r_plot<=max_r)[0]
+    idx2 = np.where(r_plot>=min_r)[0]
+    idx = list(set(idx1) & set(idx2))
+    # print(corr_bin_av[idx])
+
+    # Exponential fit
+    exponent = np.polyfit(x=r_plot[idx], y=np.log(np.abs(corr_plot[idx])), deg=1)[0]
+
+    return exponent
+
+def plot_exponents_Kavg_corr_density_points(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, min_r, max_r):
     fig, ax = plt.subplots()
     for nPart in nPart_range:
         for K_std in K_std_range:
             exponents = []
             for K_avg in K_avg_range:
                 K = str(K_avg) + "_" + str(K_std)
-                exponents.append(get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
+                exponents.append(get_exponent_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
             ax.plot(K_avg_range, exponents, '-o', label="N=" + str(nPart) + r"; $K_{STD}=$" + str(K_std))
 
     ax.set_title(r"Density correlation exponents; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
@@ -2722,6 +2742,26 @@ def plot_exponents_Kavg_corr_density(mode, nPart_range, phi, noise, K_avg_range,
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+
+def plot_exponents_Kstd_corr_density_grid(mode, nPart, phi, noise, K_avg, K_std_range, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size, min_r, max_r):
+    fig, ax = plt.subplots()
+    exponents = []
+    for K_std in K_std_range:
+        K = str(K_avg) + "_" + str(K_std)
+        exponents.append(get_exponent_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size, min_r, max_r))
+    ax.plot(K_std_range, exponents, '-o')
+
+    ax.set_title(r"Density correlation exponents; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+    ax.set_xlabel(r"$\sigma_K$")
+    ax.set_ylabel(r"$\alpha$")
+    # ax.legend()
+
+    folder = os.path.abspath('../plots/correlation_density_exp/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kavg' + str(K_avg) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+    plt.close()
 
 ###############################
 ## Average neighbour numbers ##
