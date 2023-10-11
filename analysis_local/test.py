@@ -35,5 +35,14 @@ from scipy.signal import fftconvolve, correlate2d, convolve2d
 
 # # correlate2d 
 
-A = np.array([[1,2,3],[4,5,6],[7,8,9]]).T*2
-print(A)
+a = []
+
+b = [1,2,3]
+c = [1,5,6]
+
+a.append(b)
+print(a)
+a.append(c)
+print(a)
+
+print(np.mean(a, axis=0))

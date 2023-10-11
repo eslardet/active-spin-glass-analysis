@@ -16,7 +16,8 @@ plt.rc('ytick', labelsize=small)    # fontsize of the tick labels
 plt.rc('legend', fontsize=small)    # legend fontsize
 
 # filename = 'C_noise0.20_phi1.0_K1.0_Rp1.0_xTy1.0'
-filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0'
+# filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0'
+filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0_extra'
 
 file = os.path.abspath('../plots/p_order_vs_N/' + filename + '.txt')
 
@@ -27,9 +28,12 @@ with open(file) as f:
 params = r[0][0].split('\t')[:-1]
 rho = float(params[2])
 
-n_list = [float(n) for n in r[1][0].split('\t')[:-1]][:-1]
-psi_list = [float(p) for p in r[2][0].split('\t')[:-1]][:-1]
-psi_sd_list = [float(p) for p in r[3][0].split('\t')[:-1]][:-1]
+n_list = [float(n) for n in r[1][0].split('\t')[:-1]]
+psi_list = [float(p) for p in r[2][0].split('\t')[:-1]]
+psi_sd_list = [float(p) for p in r[3][0].split('\t')[:-1]]
+# n_list = [float(n) for n in r[1][0].split('\t')[:-1]][:-1]
+# psi_list = [float(p) for p in r[2][0].split('\t')[:-1]][:-1]
+# psi_sd_list = [float(p) for p in r[3][0].split('\t')[:-1]][:-1]
 l_list = np.array([np.sqrt(n/rho) for n in n_list])
 
 
