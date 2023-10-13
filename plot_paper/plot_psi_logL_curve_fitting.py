@@ -17,7 +17,7 @@ plt.rc('legend', fontsize=small)    # legend fontsize
 
 # filename = 'C_noise0.20_phi1.0_K1.0_Rp1.0_xTy1.0'
 # filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0'
-filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0_extra'
+filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0_L500'
 
 file = os.path.abspath('../plots/p_order_vs_N/' + filename + '.txt')
 
@@ -56,15 +56,15 @@ print(np.sqrt(np.diag(pcov))[0])
 fig, ax = plt.subplots(figsize=(10,7))
 
 ## Plot L vs Psi with fitted curve
-# ax.plot(l_list, psi_list, 'o')
-ax.errorbar(l_list, psi_list, yerr=psi_sd_list, fmt='o')
+ax.plot(l_list, psi_list, 'o')
+# ax.errorbar(l_list, psi_list, yerr=psi_sd_list, fmt='o', capsize=3)
 x_plot = np.linspace(l_list[0],10**3,100)
 ax.plot(x_plot, func(x_plot, alpha, coeff, p_inf))
 ax.set_xscale('log')
 ax.set_xlabel(r"$L$")
 ax.set_ylabel(r"$\Psi$")
 ax.set_xbound(upper=10**3)
-ax.set_ybound([0.95867, 0.967])
+# ax.set_ybound([0.95867, 0.967])
 
 # Plot L vs Psi - Psi_inf with fitted line
 psi_2_list = np.array([p-p_inf for p in psi_list])
@@ -93,17 +93,17 @@ ax_in.set_ybound([5*10**-4, 10**-2])
 # plt.show()
 
 
-folder = os.path.abspath('../plots/p_order_vs_N')
-if not os.path.exists(folder):
-    os.makedirs(folder)
-# filename = 'psi_logL_K1.0_1.0'
-plt.savefig(os.path.join(folder, filename + ".png"), bbox_inches="tight")
-
-# folder = os.path.abspath('../plots/for_figures/p_order_vs_logL')
+# folder = os.path.abspath('../plots/p_order_vs_N')
 # if not os.path.exists(folder):
 #     os.makedirs(folder)
-# filename = 'psi_logL_K1.0_1.0'
+# # filename = 'psi_logL_K1.0_1.0'
 # plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
+folder = os.path.abspath('../plots/for_figures/p_order_vs_logL')
+if not os.path.exists(folder):
+    os.makedirs(folder)
+filename = 'psi_logL_K1.0_1.0'
+plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
 
-plt.show()
+
+# plt.show()

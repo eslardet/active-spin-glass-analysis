@@ -119,7 +119,7 @@ def get_pos_arr(inparFile, posFile, min_T=None, max_T=None):
     y_all = []
     theta_all = []
 
-    for i in range(max(int((min_T-startT+eqT)/DT),0), int((max_T-startT+eqT)/DT)+1):
+    for i in range(max(int((min_T-startT+eqT)/DT),0), int((max_T-startT)/DT)+1):
         x_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0])
         y_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1])
         theta_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2])
@@ -2487,7 +2487,7 @@ def get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=False
                 print("Error in seed " + str(seed) + " timestep " + str(timestep))
     return np.array(r_all), np.array(corr_all)
 
-def write_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0], min_grid_size=1):
+def write_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, max_r=100, pos_ex=True, timestep_range=[0], min_grid_size=1):
     folder = os.path.abspath('../plot_data/correlation_density_grid/')
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -2501,7 +2501,8 @@ def write_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos
     r_all, corr_all = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size)
 
     for i in range(len(r_all)):
-        corrFile.write(str(r_all[i]) + "\t" + str(corr_all[i]) + "\n")
+        if r_all[i] < max_r:
+            corrFile.write(str(r_all[i]) + "\t" + str(corr_all[i]) + "\n")
     corrFile.close()
 
 
@@ -3141,7 +3142,7 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
 
                     ax.plot([float(k) for k in K_avg_range], binder, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
                     if save_data == True:
-                        save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
+                        save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_std) + "\n")
                         for k in K_avg_range:
                             save_file.write(str(k) + "\t")
                         save_file.write("\n")

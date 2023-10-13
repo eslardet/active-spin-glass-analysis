@@ -52,14 +52,16 @@ t0 = time.time()
 # plot_exponents_Kstd_corr_density_grid(mode, nPart, phi, noise, K_avg, K_std_range, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size, min_r, max_r)
 
 expo = []
-for K_std in K_std_range:
+for K_std in [1.0, 8.0]:
     K = str(K_avg) + "_" + str(K_std)
     dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0], min_grid_size=1, take_abs=False)
+    # dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range)
     r, corr = get_corr_binned(dist, corr, min_r=0, max_r=50)
     corr = np.array(corr)
     idx = np.where(corr<0)[0]
     r = np.array(r)
-    expo.append(r[idx[0]])
+    # expo.append(r[idx[0]])
+    print(r[idx[0]])
 
 plt.plot(K_std_range, expo, '-o')
 plt.xlabel(r"$\sigma_K$")
