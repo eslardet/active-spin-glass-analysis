@@ -51,8 +51,10 @@ def local_order_param_grid(x, y, theta, nPart, phi, xTy, min_grid_size=1):
         count_arr[ix, iy] += 1
         sin_sum[ix, iy] += np.sin(theta[i])
         cos_sum[ix, iy] += np.cos(theta[i])
-    order_param = np.divide(np.sqrt(sin_sum**2 + cos_sum**2),count_arr, out=np.zeros_like(sin_sum), where=count_arr!=0)
-
+    sum = np.sqrt(sin_sum**2 + cos_sum**2).flatten()
+    counts = count_arr.flatten()
+    order_param = sum[counts!=0]/counts[counts!=0]
+    # order_param = np.divide(np.sqrt(sin_sum**2 + cos_sum**2),count_arr, where=count_arr!=0)
     return order_param
 
 @numba.jit(nopython=True)

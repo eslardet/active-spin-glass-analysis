@@ -37,10 +37,13 @@ from scipy.signal import fftconvolve, correlate2d, convolve2d
 
 a = []
 
-b = np.array([1,2,3])
-c = np.array([2,3,4])
+b = np.array(([1,2,3,4],[1,2,3,4])).flatten()
+c = np.array(([2,3,4,0],[1,2,3,0])).flatten()
 
-print(b/c)
+print(b[np.where(c!=0)]/c[np.where(c!=0)])
+
+
+# print(np.divide(b,c, where=c!=0))
 
 
 # print(np.mean(a, axis=0))

@@ -13,14 +13,14 @@ import matplotlib.pyplot as plt
 
 mode = "G"
 nPart = 10000
-phi = 2.0
+phi = 1.0
 noise = "0.05"
 K_std = 8.0
 # K_avg_range = np.round(np.arange(-0.6,1.1,0.2),1)
-K_avg_range = np.round(np.arange(0.0, 0.8, 0.1),1)
-K = "0.8_8.0"
+# K_avg_range = np.round(np.arange(0.0, 0.8, 0.1),1)
+K = "0.6_8.0"
 Rp = 1.0
-xTy = 1.0
+xTy = 5.0
 seed = 1
 
 
@@ -29,6 +29,6 @@ seed = 1
 # plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed)
 # snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, show_color=True)
 
-for K_avg in K_avg_range:
-    K = str(K_avg) + "_" + str(K_std)
-    animate(mode, nPart, phi, noise, K, Rp, xTy, seed)
+# for K_avg in K_avg_range:
+# K = str(K_avg) + "_" + str(K_std)
+animate(mode, nPart, phi, noise, K, Rp, xTy, seed)
