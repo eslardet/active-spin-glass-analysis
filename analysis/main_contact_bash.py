@@ -1,9 +1,6 @@
-import numpy as np
-from analysis_functions import *
-import os
-import matplotlib.pyplot as plt
 import sys
-import time
+sys.path.insert(1, './analysis/analysis_functions')
+from neighbours_density import *
 
 
 mode = str(sys.argv[1])

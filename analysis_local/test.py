@@ -1,8 +1,16 @@
+import sys
+# sys.path.insert(1, '././analysis_functions')
+sys.path.insert(1, './analysis/analysis_functions')
+# from analysis.analysis_functions.import_files import *
+from pt import *
+
 import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 import time
 from scipy.signal import fftconvolve, correlate2d, convolve2d
+
+print(get_sim_dir(mode="G", nPart=1000, phi=1.0, noise="0.20", K="1.0_1.0", Rp=1.0, xTy=1.0, seed=1))
 
 # n = 50
 # x = np.arange(1, n+1, 1)

@@ -1,9 +1,9 @@
-import numpy as np
-from analysis_functions import *
-import os
-import matplotlib.pyplot as plt
 import sys
+sys.path.insert(1, './analysis/analysis_functions')
+from stats import *
+
 import time
+
 
 
 mode = str(sys.argv[1])
@@ -17,11 +17,4 @@ seed = int(sys.argv[10])
 simulT = float(sys.argv[11])
 
 
-# snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed, pos_ex=True)
-# animate(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed)
-
-# write_stats(mode, nPart, phi, Pe, K, xTy, seed, remove_pos=True)
-# snapshot(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, save_in_folder=True)
-
-##plot_porder_time(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, xTy=xTy, seed=seed)
 write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, remove_pos=True, moments=False)

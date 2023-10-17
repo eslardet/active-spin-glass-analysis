@@ -21,7 +21,7 @@ r_max = 1
 
 #stats_list = []
 
-neighbour_hist_overlay(mode, nPart, phi, noise, K_avg, K_std_range, xTy, seed, r_max)
+# neighbour_hist_overlay(mode, nPart, phi, noise, K_avg, K_std_range, xTy, seed, r_max)
 
 #for K_std in K_std_range:
     #K = str(K_avg) + "_" + str(K_std)

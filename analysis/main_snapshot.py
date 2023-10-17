@@ -1,6 +1,8 @@
-import numpy as np
-from analysis_functions import *
-import matplotlib.pyplot as plt
+import sys
+sys.path.insert(1, './analysis/analysis_functions')
+from visuals import *
+
+import time
 
 
 

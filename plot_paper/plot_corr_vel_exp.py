@@ -2,8 +2,8 @@ import numpy as np
 import os, sys, csv
 import matplotlib.pyplot as plt
 import matplotlib
-sys.path.insert(1, '/Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis')
-from analysis_functions import * 
+sys.path.insert(1, './analysis/analysis_functions')
+from correlation import *
 import itertools
 
 
@@ -64,7 +64,7 @@ for K_std in K_std_range:
     exponents = []
     for K_avg in K_avg_range:
         K = str(K_avg) + "_" + str(K_std)
-        exponents.append(get_exponent_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
+        exponents.append(get_exponent_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
 ax.plot(K_avg_range, exponents, linestyle="-", marker=next(marker), label=r"$C_\rho(r)$")
 
 ax.set_xlabel(r"$\overline{K}$")

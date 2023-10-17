@@ -1,9 +1,11 @@
-import numpy as np
-sys.path.insert(1, '/Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis')
-from analysis_functions import *
+import sys
+sys.path.insert(1, './analysis/analysis_functions')
+from pt import *
+from bands_analysis import *
+
 import os
 import matplotlib.pyplot as plt
-import sys
+import numpy as np
 
 mode = 'G'
 nPart = 10000

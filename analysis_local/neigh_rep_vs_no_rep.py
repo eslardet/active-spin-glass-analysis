@@ -1,5 +1,4 @@
 import numpy as np
-import analysis_functions_vicsek_rep as fun
 import matplotlib.pyplot as plt
 
 K_std_range = np.arange(1.0,8.1,1.0)

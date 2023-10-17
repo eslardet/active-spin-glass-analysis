@@ -1,7 +1,8 @@
-import numpy as np
 import sys
-sys.path.insert(1, '/Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis')
-from analysis_functions import *
+sys.path.insert(1, './analysis/analysis_functions')
+from import_files import *
+
+import numpy as np
 import os
 import matplotlib.pyplot as plt
 import time

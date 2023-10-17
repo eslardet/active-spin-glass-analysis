@@ -74,7 +74,8 @@
     },
     "C_Cpp.errorSquiggles": "disabled",
     "python.analysis.extraPaths": [
-        "./analysis"
+        "./analysis",
+        "./analysis/analysis_functions"
     ],
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#a9b3ee",

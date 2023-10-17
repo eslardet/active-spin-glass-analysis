@@ -1,9 +1,8 @@
-import numpy as np
-from analysis_functions import *
-import matplotlib.pyplot as plt
+import sys
+sys.path.insert(1, './analysis/analysis_functions')
+from cohesion import *
+
 import time
-import scipy.stats as sps
-import os
 import freud
 
 mode = "G"

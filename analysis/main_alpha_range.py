@@ -1,10 +1,7 @@
 
-import numpy as np
-from analysis_functions import *
-import os
-import matplotlib.pyplot as plt
 import sys
-import time
+sys.path.insert(1, './analysis/analysis_functions')
+from pt import *
 
 mode = 'F'
 #nPart=10000

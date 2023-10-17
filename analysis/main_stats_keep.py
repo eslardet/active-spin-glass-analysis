@@ -1,9 +1,10 @@
-import numpy as np
-from analysis_functions import *
-import os
-import matplotlib.pyplot as plt
 import sys
+sys.path.insert(1, './analysis/analysis_functions')
+from stats import *
+from visuals import *
+
 import time
+
 
 
 mode = str(sys.argv[1])

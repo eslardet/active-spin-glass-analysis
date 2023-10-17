@@ -1,8 +1,8 @@
-import numpy as np
-from analysis_functions import *
-import matplotlib.pyplot as plt
-import time
+import sys
+sys.path.insert(1, './analysis/analysis_functions')
+from neighbours_density import *
 
+import time
 
 mode = "G"
 nPart = 10000
