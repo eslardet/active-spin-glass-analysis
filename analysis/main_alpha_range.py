@@ -1,6 +1,6 @@
 
 import sys
-sys.path.insert(1, './analysis/analysis_functions')
+sys.path.insert(1, './analysis_functions')
 from pt import *
 
 mode = 'F'

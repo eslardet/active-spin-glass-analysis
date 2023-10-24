@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, './analysis/analysis_functions')
+sys.path.insert(1, './analysis_functions')
 from local_order_grid import *
 
 import numpy as np
