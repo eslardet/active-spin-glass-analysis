@@ -79,6 +79,22 @@ def local_order_param_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_max
 
     return o_list
 
+def local_order_param_all_time(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range, r_max):
+    o_all = []
+    for seed in seed_range:
+        posFile = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name='pos')
+        for t in timestep_range:
+            try:
+                x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=t)
+                x = np.array(x)
+                y = np.array(y)
+                theta = np.array(theta)
+                D = get_particle_distances(nPart, phi, xTy, x, y)
+                o_all += local_order_param(D, theta, r_max).tolist()
+            except:
+                print("s= " + str(seed) + ", t=" + str(t))
+    return o_all
+
 def plot_local_order_vs_l(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, r_max_range, show_g=False):
     fig, ax = plt.subplots()
 
@@ -137,13 +153,16 @@ def plot_local_order_vs_l_decay(mode, nPart, phi, noise, K_avg_range, K_std_rang
     plt.savefig(os.path.join(folder, filename))
     plt.show()
 
-def plot_local_order_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, r_max_range):
+def plot_local_order_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, r_max_range, pos_ex=True, timestep_range=[0]):
     fig, ax = plt.subplots()
     for r_max in r_max_range:
         K = str(K_avg) + "_" + str(K_std)
-        o_list = local_order_param_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_max)
+        if pos_ex == True:
+            o_list = local_order_param_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_max)
+        else:
+            o_list = local_order_param_all_time(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range, r_max)
         # ax.hist(o_list, bins=100, range=(0,1), density=True, label = r"$\overline{K}=$" + str(K_avg) + r", $\sigma_K=$" + str(K_std) + r", $\ell=$" + str(r_max), alpha=0.5)
-        sns.histplot(o_list, bins=100, binrange=(0,1), stat='probability', kde=False, label = r"$\overline{K}=$" + str(K_avg) + r", $\sigma_K=$" + str(K_std) + r", $\ell=$" + str(r_max), alpha=0.5)
+        sns.histplot(o_list, bins=100, binrange=(0,1), stat='probability', kde=True, label = r"$\overline{K}=$" + str(K_avg) + r", $\sigma_K=$" + str(K_std) + r", $\ell=$" + str(r_max), alpha=0.5)
     ax.legend()
     ax.set_xlabel(r'$\Psi(\ell)$')
     ax.set_ylabel(r'$P(\Psi(\ell))$')

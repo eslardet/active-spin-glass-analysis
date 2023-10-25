@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=10000
+nPart=1000
 phi=1.0
 noise=0.20
 
@@ -28,7 +28,7 @@ vp=1.0
 Rp=1.0
 xTy=1.0
 
-initMode='S'
+initMode='R'
 # can be:
 #    'R' random, 
 #    'S' restart from previous simulation
@@ -55,7 +55,7 @@ STDK=8.0
 dT=0.005
 DT=1.0
 DTex=1000.0
-eqT=0.0
+eqT=3000.0
 simulT=3300.0
 
 savePos=1

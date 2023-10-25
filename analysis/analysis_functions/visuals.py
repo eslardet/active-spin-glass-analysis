@@ -123,7 +123,7 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
     Ly = L
     Lx = L*xTy
     
-    fig, ax = plt.subplots(figsize=(5*xTy,5))
+    fig, ax = plt.subplots(figsize=(10*xTy,10))
 
     norm = colors.Normalize(vmin=0.0, vmax=2*np.pi, clip=True)
     plt.set_cmap('hsv')
@@ -153,7 +153,7 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
         
         return arrows,
 
-    ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=10, blit=True)
+    ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=50, blit=True)
 
     folder = os.path.abspath('../animations_vicsek')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'

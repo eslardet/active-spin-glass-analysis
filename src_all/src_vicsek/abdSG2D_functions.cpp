@@ -348,7 +348,8 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
     // Find seed
     seedFile.open("seed_p",ios::in);
     if (seedFile.fail())
-    {cerr << "Can't open seed file!" << endl; ::exit(1);}
+    // {cerr << "Can't open seed file!" << endl; ::exit(1);}
+    {seed_p = seed;}
     seedFile >> seed_p;
     seedFile.close();
 

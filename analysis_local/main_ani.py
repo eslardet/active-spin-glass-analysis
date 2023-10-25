@@ -15,13 +15,13 @@ import matplotlib.pyplot as plt
 mode = "G"
 nPart = 10000
 phi = 1.0
-noise = "0.05"
+noise = "0.20"
 K_std = 8.0
 # K_avg_range = np.round(np.arange(-0.6,1.1,0.2),1)
 # K_avg_range = np.round(np.arange(0.0, 0.8, 0.1),1)
-K = "0.6_8.0"
+K = "0.0_8.0"
 Rp = 1.0
-xTy = 5.0
+xTy = 1.0
 seed = 1
 
 

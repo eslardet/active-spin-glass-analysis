@@ -10,7 +10,20 @@ import matplotlib.pyplot as plt
 import time
 from scipy.signal import fftconvolve, correlate2d, convolve2d
 
-print(get_sim_dir(mode="G", nPart=1000, phi=1.0, noise="0.20", K="1.0_1.0", Rp=1.0, xTy=1.0, seed=1))
+# print(get_sim_dir(mode="G", nPart=1000, phi=1.0, noise="0.20", K="1.0_1.0", Rp=1.0, xTy=1.0, seed=1))
+
+fig, ax = plt.subplots(figsize=(10,10), dpi=72)
+
+ax.plot([0,1], [0,1])
+
+# plt.subplots_adjust(left=0.1, right=0.1)
+# plt.Layout(left: 100, right: 50, bottom: 10, top: 10)
+plt.tight_layout(pad=10)
+
+# plt.subplots_adjust(left=0.1, right=0.1)
+
+
+plt.show()
 
 # n = 50
 # x = np.arange(1, n+1, 1)
