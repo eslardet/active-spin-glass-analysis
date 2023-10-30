@@ -15,6 +15,6 @@ noise = "0.20"
 K = "1.0_1.0"
 Rp = 1.0
 xTy = 1.0
-seed = 1
+seed = 50
 
 plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed)

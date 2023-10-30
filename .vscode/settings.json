@@ -70,7 +70,9 @@
         "list": "cpp",
         "optional": "cpp",
         "sstream": "cpp",
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "charconv": "cpp",
+        "source_location": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled",
     "python.analysis.extraPaths": [

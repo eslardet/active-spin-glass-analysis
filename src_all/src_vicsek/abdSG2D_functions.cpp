@@ -66,6 +66,10 @@ void checkParameters()
             logFile << "Initializing in mode 'S', starting off from previous simulation" << endl;
             break;
 
+        case 'A' : // Aligned configuration
+            logFile << "Initializing in mode 'A', particles placed uniformly in the box fully aligned" << endl;
+            break;
+
         default :
             cerr << "Invalid Initialization Mode!" << endl;
             cerr << " --> Valid modes are : 'R' ... " << endl;
@@ -154,7 +158,12 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     rlsq = rl*rl;
 
     // initialize particles positions & polarities
-    initialConditionsRandom(x,y,p);
+    if (initMode == 'A') {
+        initialConditionsAligned(x,y,p);
+    }
+    else {
+        initialConditionsRandom(x,y,p);
+    }
 
     // Initialize the coupling array
     switch(couplingMode)
@@ -304,6 +313,87 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
         x[i] = Lx*uniDist(rnd_gen);
         y[i] = Ly*uniDist(rnd_gen);
         p[i] = 2.0*PI*uniDist(rnd_gen); 
+    }
+
+    // // Save initial conditions
+    // if (saveInitPos) {
+    //     saveInitFrame(x,y,p,initposFile);
+    // }
+
+    // Initialize lengthscales related to the cell list
+    lx = rl; 
+    ly = rl;
+    mx = (int)floor(Lx/lx);
+    my = (int)floor(Ly/ly);
+    lx = Lx/double(mx);
+    ly = Ly/double(my);
+    nCell = mx*my;
+
+    // Allocation of memory
+    allocateSRKmem();   
+
+    // Build map of cells
+    buildMap();
+
+    // // Proceed to one-step energy minimization via FIRE
+    // U = -1.0;
+    // fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
+
+    // Save initial conditions
+    if (saveInitPos) {
+        saveInitFrame(x,y,p,initposFile);
+        initposFile.close();
+    }
+    return; 
+}
+
+/////////////////////////////
+// initialConditionsRandom //
+/////////////////////////////
+// Initialize positions of particles at random location using FIRE
+void initialConditionsAligned(vector<double>& x, vector<double>& y, vector<double>& p)
+{
+    double U;
+    double dTF = 0.1;
+
+    startT = 0.0;
+
+    // Open file to write initial conditions
+    if (saveInitPos) {
+        initposFile.open("initpos",ios::out);
+        if (initposFile.fail()) 
+        {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
+        initposFile.precision(8);
+    }
+
+    // Calculate size of the box
+    L = sqrt(double(nPart)/(phi*xTy));
+    
+    xmin = 0.0;
+    xmax = xTy*L;
+    ymin = 0.0;
+    ymax = L;
+
+    Lx = xTy*L;
+    Ly =     L;
+
+    if (eqT>simulT)
+    {cerr << "eqT is larger than simulT!" << endl; ::exit(1);}
+
+
+    // Timing
+    Neq = (int) ceil(eqT/dT);
+    Nsimul = (int) ceil((simulT-eqT)/dT);
+    Nskip = (int) ceil(DT/dT);
+    Nskipexact = (int) ceil(DTex/dT);
+    logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
+    logFile << "Volume fraction is phi = " << phi << endl;
+
+    // Initialize particles at random positions
+    for (int i=0 ; i<nPart ; i++) {
+        x[i] = Lx*uniDist(rnd_gen);
+        y[i] = Ly*uniDist(rnd_gen);
+        p[i] = 0; // Not random orientations
     }
 
     // // Save initial conditions

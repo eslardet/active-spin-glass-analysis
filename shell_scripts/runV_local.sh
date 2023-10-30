@@ -28,9 +28,10 @@ vp=1.0
 Rp=1.0
 xTy=1.0
 
-initMode='R'
+initMode='A'
 # can be:
-#    'R' random, 
+#    'R' random,
+#    'A' aligned,
 #    'S' restart from previous simulation
 
 couplingMode='G'
