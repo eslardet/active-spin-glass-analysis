@@ -799,7 +799,7 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=Tr
     dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size)
     r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
     fig, ax = plt.subplots()
-    ax.plot(r_plot, np.abs(corr_plot), '-')
+    ax.plot(r_plot, corr_plot, '-')
     if log_y == True:
         ax.set_yscale('log')
     else:
@@ -829,7 +829,7 @@ def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_
     r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
 
     fig, ax = plt.subplots()
-    ax.plot(r_plot, np.abs(corr_plot), '-')
+    ax.plot(r_plot, corr_plot, '-')
 
     if log_y == True:
         ax.set_yscale('log')
@@ -865,7 +865,7 @@ def plot_corr_density_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_ra
             K = str(K_avg) + "_" + str(K_std)
             dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size)
             r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
-            ax.plot(r_plot, np.abs(corr_plot), '-', label=r"$\overline{K}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std), color=colors[i])
+            ax.plot(r_plot, corr_plot, '-', label=r"$\overline{K}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std), color=colors[i])
             i += 1
     if log_y == True:
         ax.set_yscale('log')
@@ -906,7 +906,7 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
             K = str(K_avg) + "_" + str(K_std)
             dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size)
             r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
-            ax.plot(r_plot, np.abs(corr_plot), '-', label=r"$\overline{K}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std), color=colors[i])
+            ax.plot(r_plot, corr_plot, '-', label=r"$\overline{K}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std), color=colors[i])
             i += 1
     if log_y == True:
         ax.set_yscale('log')
@@ -941,7 +941,7 @@ def get_exponent_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_r
     idx = list(set(idx1) & set(idx2))
     # print(corr_bin_av[idx])
 
-    exponent = np.polyfit(x=np.log10(r_plot[idx]), y=np.log10(np.abs(corr_bin_av[idx])), deg=1)[0]
+    exponent = np.polyfit(x=np.log10(r_plot[idx]), y=np.log10(corr_bin_av[idx]), deg=1)[0]
 
     return exponent
 
@@ -956,7 +956,7 @@ def get_exponent_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_ran
     # print(corr_bin_av[idx])
 
     # Exponential fit
-    exponent = np.polyfit(x=r_plot[idx], y=np.log(np.abs(corr_plot[idx])), deg=1)[0]
+    exponent = np.polyfit(x=r_plot[idx], y=np.log(corr_plot[idx]), deg=1)[0]
 
     return exponent
 
