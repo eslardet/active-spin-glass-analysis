@@ -15,6 +15,10 @@ xTy = float(sys.argv[8])
 seed = int(sys.argv[9])
 simulT = float(sys.argv[10])
 
+initMode = str(sys.argv[11])
+
+if initMode == 'A':
+    seed = str(seed) + "_a"
 
 # snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed, pos_ex=True)
 # animate(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed)

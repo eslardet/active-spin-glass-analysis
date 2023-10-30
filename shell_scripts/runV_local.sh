@@ -21,7 +21,7 @@ nPart=1000
 phi=1.0
 noise=0.20
 
-seed=1
+seed=50
 
 vp=1.0
 
@@ -56,8 +56,8 @@ STDK=8.0
 dT=0.005
 DT=1.0
 DTex=1000.0
-eqT=3000.0
-simulT=3300.0
+eqT=0.0
+simulT=100.0
 
 savePos=1
 saveInitPos=0
@@ -77,6 +77,10 @@ elif [ "${couplingMode}" == "F" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Fraction/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "A" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Asymmetric/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
+fi
+
+if [ "${initMode}" == 'A' ]; then
+    run_dir+="_a"
 fi
 
 # # Cluster

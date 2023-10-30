@@ -47,7 +47,7 @@ def get_params(inparFile):
     inpar_dict = {}
     inpar_dict["nPart"] = int(r[0][0])
     inpar_dict["phi"] = float(r[1][0])
-    inpar_dict["seed"] = int(r[2][0])
+    inpar_dict["seed"] = str(r[2][0])
     inpar_dict["noise"] = r[3][0]
     inpar_dict["vp"] = float(r[4][0])
     try:
