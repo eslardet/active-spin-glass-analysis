@@ -66,7 +66,7 @@ def plot_binder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
 
                         binder.append(1 - p_4_av/(3*(p_2_av**2)))
 
-                    ax.plot([float(k) for k in K_avg_range], binder, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                    ax.plot([float(k) for k in K_avg_range], binder, '-o', label=r"$N=$" + str(nPart) + r"; $\sigma_K=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
                     if save_data == True:
                         save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_std) + "\n")
                         for k in K_avg_range:

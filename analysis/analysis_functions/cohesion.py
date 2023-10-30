@@ -137,7 +137,7 @@ def plot_com_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, 
                 com_arr.append(np.mean(com))
                 com_arr_sd.append(np.std(com))
             
-            ax.plot(Rp_range, com_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise))
+            ax.plot(Rp_range, com_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise))
             ax.errorbar(Rp_range, com_arr, yerr=com_arr_sd, fmt='none', capsize=3)
             if save_data == True:
                 save_file.write(str(nPart) + "\t" + str(noise) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
@@ -203,7 +203,7 @@ def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_
                             com_arr_sd.append(np.std(com))
                             noise_range_plot.append(float(noise))
                         # noise_range_plot = [float(n) for n in noise_range]
-                        ax.plot(noise_range_plot, com_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
+                        ax.plot(noise_range_plot, com_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
                         ax.errorbar(noise_range_plot, com_arr, yerr=com_arr_sd, fmt='none', capsize=3)
                         if save_data == True:
                             save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
@@ -219,7 +219,7 @@ def plot_com_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_
                             save_file.write("\n")
     ax.set_xlabel(r"$\eta$")
     ax.set_ylabel(r"Mean distance to centre of mass")
-    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $K_{AVG}=$' + str(K_avg)+ r'; $K_{STD}=$' + str(K_std) + r'; $R_I=$' + str(Rp))
+    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $K_{AVG}=$' + str(K_avg)+ r'; $\sigma_K=$' + str(K_std) + r'; $R_I=$' + str(Rp))
     ax.legend()
 
 
@@ -260,7 +260,7 @@ def plot_av_n_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range,
                 # av_n_arr.append(np.mean(av_n)/area)
                 av_n_arr.append(np.mean(av_n))
             
-            ax.plot(Rp_range, av_n_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
+            ax.plot(Rp_range, av_n_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
 
     ax.set_xlabel(r"$R_I$")
     ax.set_ylabel(r"Mean number of neighbours")
@@ -321,7 +321,7 @@ def plot_nn_vs_RI(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp_range, x
             vp = params["vp"]
             dt = params["dt"]
 
-            ax.plot(Rp_range, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; v_p=$" + str(vp) + r"; $\Delta t=$" + str(dt))
+            ax.plot(Rp_range, nn_arr, '-o', label=r"$N=$" + str(nPart) + r"; $K_{AVG}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; v_p=$" + str(vp) + r"; $\Delta t=$" + str(dt))
             if save_data == True:
                 save_file.write(str(nPart) + "\t" + str(noise) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\t" + str(vp) + "\t" + str(dt) + "\n")
                 for r in Rp_range:
@@ -394,7 +394,7 @@ def plot_nn_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_s
                             except:
                                 print('N=' + str(nPart) + '; phi=' + str(phi) + '; K=' + str(K) + '; noise=' + str(noise))
                         # noise_range_plot = [float(n) for n in noise_range]
-                        ax.plot(noise_range_plot, nn_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
+                        ax.plot(noise_range_plot, nn_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{AVG}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
                         if save_data == True:
                             save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
                             for noise in noise_range_plot:
@@ -407,7 +407,7 @@ def plot_nn_vs_noise(mode, nPart_range, phi_range, noise_range, K_avg_range, K_s
                             save_file.write("\n")
     ax.set_xlabel(r"$\eta$")
     ax.set_ylabel(r"Mean distance to nearest neighbor")
-    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $K_{AVG}=$' + str(K_avg)+ r'; $K_{STD}=$' + str(K_std) + r'; $R_I=$' + str(Rp))
+    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $K_{AVG}=$' + str(K_avg)+ r'; $\sigma_K=$' + str(K_std) + r'; $R_I=$' + str(Rp))
     ax.legend()
 
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
@@ -462,7 +462,7 @@ def plot_nn_vs_Kavg(mode, nPart_range, phi_range, noise_range, K_avg_range, K_st
                             except:
                                 print('N=' + str(nPart) + '; phi=' + str(phi) + '; K=' + str(K) + '; noise=' + str(noise))
                         # noise_range_plot = [float(n) for n in noise_range]
-                        ax.plot(Kavg_range_plot, nn_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
+                        ax.plot(Kavg_range_plot, nn_arr, '-o', label=r"$N=$" + str(nPart)+ r"; $\sigma_K=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $\rho=$" + str(phi) + r"; $R_I=$" + str(Rp))
                         if save_data == True:
                             save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
                             for k in Kavg_range_plot:
@@ -475,7 +475,7 @@ def plot_nn_vs_Kavg(mode, nPart_range, phi_range, noise_range, K_avg_range, K_st
                             save_file.write("\n")
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Mean distance to nearest neighbor")
-    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $K_{AVG}=$' + str(K_avg)+ r'; $K_{STD}=$' + str(K_std) + r'; $R_I=$' + str(Rp))
+    # ax.set_title(r'$N=$' + str(nPart) + r'; $\rho=$' + str(phi) + r'; $K_{AVG}=$' + str(K_avg)+ r'; $\sigma_K=$' + str(K_std) + r'; $R_I=$' + str(Rp))
     ax.legend()
 
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_noise' + str(noise)+ '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)

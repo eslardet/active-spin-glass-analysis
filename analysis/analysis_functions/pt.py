@@ -2,6 +2,7 @@ import sys
 sys.path.insert(1, '././analysis_functions')
 from import_files import *
 from stats import *
+from local_order_exclude import *
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -45,7 +46,7 @@ def plot_porder_Kavg(mode, nPart_range, phi_range, noise_range, K_avg_range, K_s
                                         p_ss_sum += p_mean
                             p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-                        ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                        ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $\sigma_K=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
                         if save_data == True:
                             save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
                             for K_avg in K_avg_range:
@@ -222,7 +223,7 @@ def plot_porder_Kavg_t(mode, nPart_range, phi, noise_range, K_avg_range, K_std_r
                                     p_ss_sum += p_mean
                         p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-                    ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                    ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $\sigma_K=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
                     if save_data == True:
                         save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
                         for K_avg in K_avg_range:
@@ -267,7 +268,7 @@ def plot_porder_Kavg_ax(mode, nPart, phi, noise_range, K_avg_range, K_std_range,
                     p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
                 p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-            ax.plot(K_avg_range, p_ss, '-o', label=r"$K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise))
+            ax.plot(K_avg_range, p_ss, '-o', label=r"$\sigma_K=$" + str(K_std) + r"; $\eta=$" + str(noise))
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
@@ -466,7 +467,7 @@ def plot_porder_Kstd(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy,
             p_ss.append(p_ss_sum/len(seed_range))
 
         ax.plot(K_std_range, p_ss, '-o', label=r"$K_{AVG}=$" + str(K_avg))
-    ax.set_xlabel(r"$K_{STD}$")
+    ax.set_xlabel(r"$\sigma_K$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
     ax.legend()
@@ -495,8 +496,8 @@ def plot_porder_Kratio(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xT
                 p_ss_sum += read_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)["p_mean"]
             p_ss.append(p_ss_sum/len(seed_range))
 
-        ax.plot([i/K_std for i in K_avg_range], p_ss, '-o', label=r"$K_{STD}=$" + str(K_std))
-    ax.set_xlabel(r"$K_{AVG}/K_{STD}$")
+        ax.plot([i/K_std for i in K_avg_range], p_ss, '-o', label=r"$\sigma_K=$" + str(K_std))
+    ax.set_xlabel(r"$K_{AVG}/\sigma_K$")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
     ax.set_ylim([0,1])
     ax.legend()
@@ -545,7 +546,7 @@ def plot_porder_RI(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std
                                         p_ss_sum += p_mean
                             p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-                        ax.plot([float(k) for k in Rp_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise))
+                        ax.plot([float(k) for k in Rp_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{AVG}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise))
                         if save_data == True:
                             save_file.write(str(nPart) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_avg) + "\t" + str(K_std) + "\n")
                             for r in Rp_range:
@@ -562,6 +563,69 @@ def plot_porder_RI(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std
     ax.legend()
 
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kavg' + str(K_avg)+ '_Kstd' + str(K_std) + '_xTy' + str(xTy)
+    if save_data == True:
+        save_file.close()
+        os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
+    plt.savefig(os.path.join(folder, filename + '.png'))
+
+
+## Local polar order ##
+def plot_local_porder_Kavg(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, r_max_range, save_data=False):
+    """
+    Plot steady state polar order parameter against Kavg, for each fixed K_std value and noise value
+    Averaged over a number of realizations
+    """
+    folder = os.path.abspath('../plots/p_order_local_vs_Kavg/')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    if save_data == True:
+        save_file = open(os.path.join(folder, "data.txt"), "w")
+
+    fig, ax = plt.subplots()
+    for nPart in nPart_range:
+        for phi in phi_range:
+            for Rp in Rp_range:
+                for noise in noise_range:
+                    for K_std in K_std_range:
+                        for r_max in r_max_range:
+                            p_ss = []
+                            g_ss = []
+                            for K_avg in K_avg_range:
+                                K = str(K_avg) + "_" + str(K_std)
+                                p_ss_sum = 0
+                                g_ss_sum = 0
+                                error_count = 0
+                                for seed in seed_range:
+                                    try:
+                                        o_params = local_order_param_mean(mode, nPart, phi, noise, K, Rp, xTy, seed, [r_max])
+                                        p_mean = o_params[0][0]
+                                        g_mean = o_params[1]
+                                        p_ss_sum += p_mean
+                                        g_ss_sum += g_mean
+                                    except:
+                                        error_count += 1
+
+                                p_ss.append(p_ss_sum/(len(seed_range)-error_count))
+                                g_ss.append(g_ss_sum/(len(seed_range)-error_count))
+
+                            ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $\sigma_K=$" + str(K_std) + r"; $\ell=$" + str(r_max))
+                            ax.plot([float(k) for k in K_avg_range], g_ss, '--o', color="k")
+                            if save_data == True:
+                                save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) +  "\t" + str(r_max) + "\n")
+                                for K_avg in K_avg_range:
+                                    save_file.write(str(K_avg) + "\t")
+                                save_file.write("\n")
+                                for p in p_ss:
+                                    save_file.write(str(p) + "\t")
+                                save_file.write("\n")
+
+    ax.set_xlabel(r"$K_{AVG}$")
+    ax.set_ylabel(r"Polar order parameter, $\Psi$")
+    ax.set_ylim([0,1])
+    # ax.set_xlim([-1,2])
+    ax.legend()
+    
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Kstd' + str(K_std) + '_Rp' + str(Rp) + '_xTy' + str(xTy)
     if save_data == True:
         save_file.close()
         os.rename(os.path.join(folder, "data.txt"), os.path.join(folder, filename + '.txt'))
@@ -675,7 +739,7 @@ def plot_norder_Kavg(mode, nPart_range, phi, noise_range, K_avg_range, K_std_ran
                                     p_ss_sum += p_mean
                         p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-                    ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
+                    ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $\sigma_K=$" + str(K_std) + r"; $\eta=$" + str(noise) + r"; $R_p=$" + str(Rp))
                     if save_data == True:
                         save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
                         for K_avg in K_avg_range:
@@ -737,7 +801,7 @@ def plot_psus_Kavg(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std
                                         p_ss_sum += p_mean
                             p_ss.append(p_ss_sum/(len(seed_range)-error_count))
 
-                        ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $K_{STD}=$" + str(K_std) + r"; $\eta=$" + str(noise))
+                        ax.plot([float(k) for k in K_avg_range], p_ss, '-o', label=r"$N=$" + str(nPart) + r"; $\sigma_K=$" + str(K_std) + r"; $\eta=$" + str(noise))
                         if save_data == True:
                             save_file.write(str(nPart) + "\t" + str(Rp) + "\t" + str(phi) + "\t" + str(noise) + "\t" + str(K_std) + "\n")
                             for K_avg in K_avg_range:
@@ -777,7 +841,7 @@ def plot_kcrit_kstd(mode, nPart, phi, noise_range, K_avg_range, K_std_range, Rp,
 
         ax.plot(K_std_range, K_crit_list, '-o', label=r"$\eta = $" + str(noise))
     
-    ax.set_xlabel(r"$K_{STD}$")
+    ax.set_xlabel(r"$\sigma_K$")
     ax.set_ylabel(r"$K_{AVG}^C$")
     ax.legend()
 

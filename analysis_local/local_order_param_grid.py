@@ -18,6 +18,7 @@ seed = 1
 seed_range = np.arange(1,21,1)
 # r_max_range = np.arange(1,21,1)
 r_max_range = [1.0, 2.0, 3.0, 4.0, 5.0, 10.0]
+# r_max_range = [1.0, 3.0, 5.0]
 pos_ex = False
 timestep_range = np.arange(0,6,1)
 

@@ -49,7 +49,7 @@ def plot_correlation(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy,
 
                     cf.compute(system=(box, points), values=values, query_points=points, query_values=values, reset=False)
 
-            ax.plot(cf.bin_centers, cf.correlation, label=r"$K_{AVG}=$" + str(K_avg) + r"$; K_{STD}=$" + str(K_std))
+            ax.plot(cf.bin_centers, cf.correlation, label=r"$K_{AVG}=$" + str(K_avg) + r"$; \sigma_K=$" + str(K_std))
 
     ax.set_xlabel(r"$r$")
     ax.set_ylabel(r"$C(r)$")
@@ -383,7 +383,7 @@ def plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_s
             for K_avg in K_avg_range:
                 K = str(K_avg) + "_" + str(K_std)
                 exponents.append(get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r, max_r))
-            ax.plot(K_avg_range, exponents, '-o', label="N=" + str(nPart) + r"; $K_{STD}=$" + str(K_std))
+            ax.plot(K_avg_range, exponents, '-o', label="N=" + str(nPart) + r"; $\sigma_K=$" + str(K_std))
 
     ax.set_title(str(d_type) + r"; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
     ax.set_xlabel(r"$K_{AVG}$")
@@ -968,7 +968,7 @@ def plot_exponents_Kavg_corr_density_points(mode, nPart_range, phi, noise, K_avg
             for K_avg in K_avg_range:
                 K = str(K_avg) + "_" + str(K_std)
                 exponents.append(get_exponent_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r))
-            ax.plot(K_avg_range, exponents, '-o', label="N=" + str(nPart) + r"; $K_{STD}=$" + str(K_std))
+            ax.plot(K_avg_range, exponents, '-o', label="N=" + str(nPart) + r"; $\sigma_K=$" + str(K_std))
 
     ax.set_title(r"Density correlation exponents; $N=$" + str(nPart) + r"; $\rho=$" + str(phi) + r"; $\eta=$" + str(noise) + r"; $R_I=$" + str(Rp))
     ax.set_xlabel(r"$K_{AVG}$")

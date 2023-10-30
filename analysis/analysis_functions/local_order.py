@@ -168,7 +168,7 @@ def plot_local_order_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_r
     ax.set_ylabel(r'$P(\Psi(\ell))$')
     ax.set_ylim(0, 0.2)
 
-    folder = os.path.abspath('../plots/p_order_local_hist/')
+    folder = os.path.abspath('../plots/p_order_local_points_hist/')
     filename = "N" + str(nPart) + "_K" + str(K) + ".png"
     if not os.path.exists(folder):
         os.makedirs(folder)

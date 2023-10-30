@@ -280,7 +280,7 @@ def plot_average_band_profile(mode, nPart, phi, noise, K_avg_range, K_std_range,
                     d_plot_av += d_plot/band_number
             d_plot_av = d_plot_av/(len(seed_range)*len(timestep_range)-no_band)
 
-            ax.plot(x_plot, d_plot_av, label=r"$K_{AVG}=$" + str(K_avg) + r"; $K_{STD}=$" + str(K_std))
+            ax.plot(x_plot, d_plot_av, label=r"$K_{AVG}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std))
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"Average local density")
     ax.set_title(r"Average band: $\rho=$" + str(phi) + r"$, \eta=$" + str(noise))
@@ -344,7 +344,7 @@ def plot_var_density_Kavg(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp,
                         error_count += 1
             vars.append(var_sum/(len(seed_range)-error_count))
 
-        ax.plot(K_avg_range, vars, 'o-', label=r"$K_{STD}=$" + str(K_std))
+        ax.plot(K_avg_range, vars, 'o-', label=r"$\sigma_K=$" + str(K_std))
     ax.set_xlabel(r"$K_{AVG}$")
     ax.set_ylabel(r"Local density variance $\langle(\rho-\bar{\rho})^2\rangle$")
     ax.legend()

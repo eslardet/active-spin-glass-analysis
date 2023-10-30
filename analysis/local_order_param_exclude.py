@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, './analysis/analysis_functions')
+sys.path.insert(1, './analysis_functions')
 # from local_order import *
 from local_order_exclude import *
 from pt import *
@@ -16,33 +16,34 @@ Rp = 1.0
 xTy = 1.0
 seed = 1
 
-# K_avg_range = [-1.0, 0.0, 1.0]
-# K_std_range = [0.0, 1.0, 4.0, 8.0]
+K_avg_range = [-1.0, 0.0, 1.0]
+K_std_range = [0.0, 1.0, 4.0, 8.0]
 seed_range = np.arange(1,21,1)
 # r_max_range = np.arange(0,21,1)
 r_max_range = [1.0, 2.0, 3.0, 4.0, 5.0, 10.0]
 
-pos_ex = True
-timestep_range = np.arange(0,1,1)
+pos_ex = False
+timestep_range = np.arange(0,6,1)
 
 # t0 = time.time()
 # plot_local_order_vs_l(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, r_max_range, show_g=True)
 # plot_local_order_vs_l_decay(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, r_max_range)
 # print(time.time()-t0)
 
-K_avg_range = [0.0]
-K_std_range = [4.0]
-
-t0 = time.time()
-for K_avg in K_avg_range:
-    for K_std in K_std_range:
-        plot_local_order_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, r_max_range, pos_ex, timestep_range)
-
 nPart_range = [10000]
 phi_range = [1.0]
 noise_range = ["0.20"]
 Rp_range = [1.0]
+# K_avg_range = [0.0]
+K_avg_range = np.round(np.concatenate((np.arange(-1.0,0.0,0.2), np.arange(0.0,1.1,0.2))),1)
+K_std_range = [8.0]
+r_max_range = [1.0, 2.0, 5.0]
 
-# plot_local_porder_Kavg(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, r_max_range)
+t0 = time.time()
+# for K_avg in K_avg_range:
+#     for K_std in K_std_range:
+#         plot_local_order_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, r_max_range, pos_ex, timestep_range)
+
+plot_local_porder_Kavg(mode, nPart_range, phi_range, noise_range, K_avg_range, K_std_range, Rp_range, xTy, seed_range, r_max_range)
 
 print(time.time()-t0)

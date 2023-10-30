@@ -10,20 +10,13 @@ import matplotlib.pyplot as plt
 import time
 from scipy.signal import fftconvolve, correlate2d, convolve2d
 
-# print(get_sim_dir(mode="G", nPart=1000, phi=1.0, noise="0.20", K="1.0_1.0", Rp=1.0, xTy=1.0, seed=1))
+D = np.arange(16).reshape(4,4)
+r_max = 2
+i=0
+idx = np.where(D[0,:] <= r_max)[0]
+print(np.delete(idx, i))
 
-fig, ax = plt.subplots(figsize=(10,10), dpi=72)
-
-ax.plot([0,1], [0,1])
-
-# plt.subplots_adjust(left=0.1, right=0.1)
-# plt.Layout(left: 100, right: 50, bottom: 10, top: 10)
-plt.tight_layout(pad=10)
-
-# plt.subplots_adjust(left=0.1, right=0.1)
-
-
-plt.show()
+# print(D[0,:0], D[0,1:])
 
 # n = 50
 # x = np.arange(1, n+1, 1)
@@ -61,7 +54,7 @@ a = []
 b = np.array(([1,2,3,4],[1,2,3,4])).flatten()
 c = np.array(([2,3,4,0],[1,2,3,0])).flatten()
 
-print(b[np.where(c!=0)]/c[np.where(c!=0)])
+# print(b[np.where(c!=0)]/c[np.where(c!=0)])
 
 
 # print(np.divide(b,c, where=c!=0))
