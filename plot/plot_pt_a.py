@@ -13,8 +13,9 @@ import csv, os
 
 
 # filename = "G_N10000_phi1.0_n0.20_Kstd8.0_Rp1.0_xTy1.0_amode"
-filename = "G_N10000_phi1.0_n0.20_Kstd8.0_Rp1.0_xTy1.0_hr_a"
+# filename = "G_N10000_phi1.0_n0.20_Kstd8.0_Rp1.0_xTy1.0_hr_a"
 # filename = "G_N10000_phi1.0_n0.20_Kstd8.0_Rp1.0_xTy1.0_amode_highres"
+filename = "G_N60000_phi1.0_n0.20_Kstd8.0_Rp1.0_xTy1.0_amode"
 file = os.path.abspath('../plots/p_order_vs_Kavg/' + filename + '.txt')
 with open(file) as f:
     reader = csv.reader(f, delimiter="\n")
