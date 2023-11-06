@@ -12,15 +12,16 @@ import csv, os
 
 
 
-# filename = "G_N22500_phi1.0_n0.40_Kstd8.0_Rp1.0_xTy1.0"
-filename = "G_N10000_phi1.0_n0.05_Kstd8.0_Rp1.0_xTy1.0"
-# file = os.path.abspath("plot/data/" + filename + ".txt")
+# filename = "G_N10000_phi1.0_n0.20_Kstd8.0_Rp1.0_xTy1.0_amode"
+filename = "G_N10000_phi1.0_n0.20_Kstd8.0_Rp1.0_xTy1.0_hr_a"
+# filename = "G_N10000_phi1.0_n0.20_Kstd8.0_Rp1.0_xTy1.0_amode_highres"
 file = os.path.abspath('../plots/p_order_vs_Kavg/' + filename + '.txt')
 with open(file) as f:
     reader = csv.reader(f, delimiter="\n")
     r = list(reader)
 
-num_Kstd = int(len(r)/3)
+# num_Kstd = int(len(r)/3)
+
 
 small = 18
 medium = 22
@@ -36,40 +37,20 @@ matplotlib.rcParams["font.family"] = "serif"
 plt.rcParams['text.usetex'] = True
 plt.rcParams['axes.labelpad']=10
 
-# font = {'family' : 'normal',
-#         'weight' : 'normal',
-#         'size'   : 14}
-
-# matplotlib.rc('font', **font)
-
-
-colors = plt.cm.BuPu(np.linspace(0.2, 1, num_Kstd))
-# colors = plt.cm.PuRd(np.linspace(0.2, 1, num_Kstd))
-# colors = plt.cm.OrRd(np.linspace(0.2, 1, num_Kstd))
-# colors = plt.cm.binary(np.linspace(0.2, 1, num_Kstd))
-
 fig, ax = plt.subplots(figsize=(10,7))
-ax.vlines(0, 0, 1, linestyle="dashed", color="black")
+# ax.vlines(0, 0, 1, linestyle="dashed", color="black")
 
-for k in range(0,num_Kstd):
-    params = r[3*k][0].split('\t')
-    # print(params)
-    K_std = float(params[4])
-    nPart = params[0]
-    Rp = params[1]
+labels = ["Ordered initial state", "Disordered initial state"]
+
+for k in range(0,2):
+    # params = r[2*k][0].split('\t')
 
     K_avg = r[3*k+1][0].split('\t')[:-1]
     K_avg_plot = [float(i) for i in K_avg]
     
     p_ss = r[3*k+2][0].split('\t')[:-1]
     p_ss_plot = [float(i) for i in p_ss]
-    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp))
-    # if str(Rp) == "I":
-    #     ax.plot(K_avg_plot, p_ss_plot, "--", label=r"$R_I=\infty$", color="black")
-    # else:
-    #     ax.plot(K_avg_plot, p_ss_plot, "-o", label=r"$R_I=$" + str(Rp), color=cm.tab20(k))
-    # ax.plot(K_avg_plot, p_ss_plot, "-o", label=str(Rp))
-    ax.plot(K_avg_plot, p_ss_plot, "-o", color=colors[k], label=r"$\sigma_K=$" + str(int(K_std)))
+    ax.plot(K_avg_plot, p_ss_plot, "-o", label = labels[k])
     # ax.plot(K_avg_plot, p_ss_plot, "-o")
 
 params = r[3*k][0].split('\t')
@@ -87,10 +68,11 @@ ax.set_ylabel(r"$\Psi$")
 # ax.set_xlabel(r"$K_{AVG}$", fontsize=16)
 # ax.set_ylabel(r"Polar order parameter, $\Psi$", fontsize=16)
 ax.set_ylim([0,1])
-ax.set_xlim([-2.0,1.0])
-ax.legend(loc="lower right", frameon=False)
+# ax.set_xlim([-1.0,1.0])
+ax.legend(frameon=False)
 
 
+# folder = os.path.abspath('../plots/for_figures/pt')
 folder = os.path.abspath('../plots/p_order_vs_Kavg')
 if not os.path.exists(folder):
     os.makedirs(folder)

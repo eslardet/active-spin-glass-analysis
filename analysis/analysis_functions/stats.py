@@ -149,6 +149,7 @@ def plot_porder_time(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_
     t_plot = np.arange(startT, max_T+DT/4, DT)
     ax.plot(t_plot, p_order)
     ax.set_ylim([0,1])
+    ax.set_xlim(left=startT)
     ax.set_xlabel("time")
     ax.set_ylabel(r"Polar order parameter, $\Psi$")
 

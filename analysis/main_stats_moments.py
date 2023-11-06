@@ -15,6 +15,10 @@ xTy = float(sys.argv[8])
 seed = int(sys.argv[9])
 simulT = float(sys.argv[10])
 
+initMode = str(sys.argv[11])
+
+if initMode == 'A':
+    seed = str(seed) + "_a"
 
 # snapshot(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed, pos_ex=True)
 # animate(mode=mode, nPart=nPart, phi=phi, Pe=Pe, K=K, xTy=xTy, seed=seed)
@@ -22,6 +26,6 @@ simulT = float(sys.argv[10])
 # write_stats(mode, nPart, phi, Pe, K, xTy, seed, remove_pos=True)
 # snapshot(mode, nPart, phi, noise, K, xTy, seed, pos_ex=True, save_in_folder=True)
 
-if seed < 3:
-    plot_porder_time(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+# if seed < 3:
+#     plot_porder_time(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
 write_stats(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, remove_pos=True, moments=True)

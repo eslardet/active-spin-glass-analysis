@@ -18,6 +18,7 @@ plt.rc('legend', fontsize=small)    # legend fontsize
 # filename = 'C_noise0.20_phi1.0_K1.0_Rp1.0_xTy1.0'
 # filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0'
 filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0_L500'
+# filename = "G_noise0.20_phi1.0_K-0.1_8.0_Rp1.0_xTy1.0"
 
 file = os.path.abspath('../plots/p_order_vs_N/' + filename + '.txt')
 
@@ -103,7 +104,7 @@ folder = os.path.abspath('../plots/for_figures/p_order_vs_logL')
 if not os.path.exists(folder):
     os.makedirs(folder)
 filename = 'psi_logL_K1.0_1.0'
-plt.savefig(os.path.join(folder, filename + ".pdf"), bbox_inches="tight")
+plt.savefig(os.path.join(folder, filename + ".png"), bbox_inches="tight")
 
 
 # plt.show()

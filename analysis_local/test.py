@@ -10,11 +10,16 @@ import matplotlib.pyplot as plt
 import time
 from scipy.signal import fftconvolve, correlate2d, convolve2d
 
-D = np.arange(16).reshape(4,4)
-r_max = 2
-i=0
-idx = np.where(D[0,:] <= r_max)[0]
-print(np.delete(idx, i))
+# D = np.arange(16).reshape(4,4)
+# r_max = 2
+# i=0
+# idx = np.where(D[0,:] <= r_max)[0]
+# print(np.delete(idx, i))
+
+fig, ax = plt.subplots()
+ax.plot([0,1],[0,1])
+ax.set_xlim(left=0)
+plt.show()
 
 # print(D[0,:0], D[0,1:])
 

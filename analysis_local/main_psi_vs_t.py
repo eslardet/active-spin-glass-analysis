@@ -9,10 +9,10 @@ import time
 import csv
 
 mode = "G"
-nPart = 1000
+nPart = 10000
 phi = 1.0
 noise = "0.20"
-K = "0.0_8.0"
+K = "0.2_0.0"
 Rp = 1.0
 xTy = 1.0
 seed = 50

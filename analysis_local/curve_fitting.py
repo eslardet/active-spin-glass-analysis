@@ -16,8 +16,8 @@ plt.rc('ytick', labelsize=small)    # fontsize of the tick labels
 plt.rc('legend', fontsize=small)    # legend fontsize
 
 # filename = 'G_noise0.20_phi1.0_K1.0_1.0_Rp1.0_xTy1.0'
-# filename = 'G_noise0.20_phi1.0_K-0.1_8.0_Rp1.0_xTy1.0'
-filename = 'G_noise0.20_phi1.0_K0.1_8.0_Rp1.0_xTy1.0'
+filename = 'G_noise0.20_phi1.0_K-0.1_8.0_Rp1.0_xTy1.0'
+# filename = 'G_noise0.20_phi1.0_K0.1_8.0_Rp1.0_xTy1.0'
 # filename = 'C_noise0.20_phi1.0_K1.0_Rp1.0_xTy1.0'
 
 file = os.path.abspath('../plots/p_order_vs_N/' + filename + '.txt')
@@ -67,8 +67,8 @@ fig, ax = plt.subplots(figsize=(7,5))
 # p_inf = 0.9586729401024823
 
 ## Plot L vs Psi with fitted curve
-# ax.plot(l_list, psi_list, 'o-')
-ax.errorbar(l_list, psi_list, yerr=psi_sd_list, fmt='o-')
+ax.plot(l_list, psi_list, 'o-')
+# ax.errorbar(l_list, psi_list, yerr=psi_sd_list, fmt='o-')
 x_plot = np.linspace(l_list[0],l_list[-1],100)
 # ax.plot(x_plot, func(x_plot, alpha, coeff, p_inf), label=r"$\alpha=$" + str(round(alpha,2)))
 # ax.plot(x_plot, func_2(x_plot, coeff2, p_inf2), label=r"$\alpha=2/3$")
