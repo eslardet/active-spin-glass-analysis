@@ -9,6 +9,19 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 import time
 from scipy.signal import fftconvolve, correlate2d, convolve2d
+from matplotlib import colors
+
+a = np.array([0,1,2])
+
+cols = np.repeat(a,3)
+
+print(cols)
+
+norm = colors.Normalize(vmin=0, vmax=9, clip=True)
+plt.set_cmap('gist_rainbow')
+
+print(norm(cols))
+
 
 # D = np.arange(16).reshape(4,4)
 # r_max = 2
@@ -16,10 +29,10 @@ from scipy.signal import fftconvolve, correlate2d, convolve2d
 # idx = np.where(D[0,:] <= r_max)[0]
 # print(np.delete(idx, i))
 
-fig, ax = plt.subplots()
-ax.plot([0,1],[0,1])
-ax.set_xlim(left=0)
-plt.show()
+# fig, ax = plt.subplots()
+# ax.plot([0,1],[0,1])
+# ax.set_xlim(left=0)
+# plt.show()
 
 # print(D[0,:0], D[0,1:])
 
@@ -54,10 +67,10 @@ plt.show()
 
 # # correlate2d 
 
-a = []
+# a = []
 
-b = np.array(([1,2,3,4],[1,2,3,4])).flatten()
-c = np.array(([2,3,4,0],[1,2,3,0])).flatten()
+# b = np.array(([1,2,3,4],[1,2,3,4])).flatten()
+# c = np.array(([2,3,4,0],[1,2,3,0])).flatten()
 
 # print(b[np.where(c!=0)]/c[np.where(c!=0)])
 

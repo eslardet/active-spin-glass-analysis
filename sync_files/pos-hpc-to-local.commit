@@ -1,0 +1,23 @@
+#!/bin/sh
+
+nPart=40000
+phi=1.0
+noise=0.20
+KAVG=-0.1
+STDK=8.0
+Rp=1.0
+xTy=1.0
+seed=1
+
+for KAVG in -0.1 0.1
+do
+    run_dir=simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}/
+    run_dir_local=/Users/el2021/Code/2D_ActiveSpinGlass_EL/$run_dir
+
+    if [ ! -d "$run_dir_local" ]; then
+        mkdir -p $run_dir_local
+        echo "Creating directory : $run_dir_local"
+    fi
+
+    rsync -rvltoD el2021@login.hpc.ic.ac.uk:/rds/general/user/el2021/home/Vicsek_2D/$run_dir $run_dir_local
+done
