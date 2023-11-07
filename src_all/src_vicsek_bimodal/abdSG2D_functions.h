@@ -2,7 +2,7 @@
 // ====================
 // Declaration of all functions necessary to run activeSpinGlass_2D.cpp
 // Created by Thibault Bertrand on 2022-04-19
-// Last update by EL 2023-10-09
+// Last update by TB 2022-04-19
 
 #ifndef abdSG2Dfunctions_h
 #define abdSG2Dfunctions_h
@@ -14,7 +14,7 @@
 ///////////////////////////////
 // Define external variables //
 ///////////////////////////////
-extern std::fstream initposFile,logFile,couplingFile,posExactFile,seedFile;
+extern std::fstream initposFile,logFile,couplingFile, posExactFile;
 
 extern int nPart;
 extern unsigned int seed;
@@ -27,13 +27,16 @@ extern double Lx,xmin,xmax;
 extern double Ly,ymin,ymax;
 extern double xTy;
 
-extern double K0; // mode 'C': K0: Coupling constant
+extern double K0,K1; // mode 'C': K0: Coupling constant
+extern double Kp,Kn; // mode 'F'
 extern double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
                            //           KAB: Coupling constant for A-B interactions 
                            //           KBB: Coupling constant for B-B interactions
 extern double KAVG,STDK; // mode 'G', 'A': KAVG: Average coupling constant
                          //                STDK: Standard deviation of coupling constant
-// extern double alpha; // Fraction of particles with +K0 coupling for mode F
+extern double alpha; // Fraction of particles with +Kp coupling for mode F
+
+extern unsigned long long threshold; // Threshold for number of K+
 
 /////////////////////////////
 // Define global variables //
@@ -53,7 +56,7 @@ static std::vector<double> Y,Fy;
 static std::vector<double> P,Fp;
 
 // Define the coupling constant array
-static std::vector<double> K;
+static std::vector< std::vector<double> > K;
 
 // Neighbor list variables
 static double rl,rc; // radius of the neighbor list
@@ -120,7 +123,6 @@ std::string currentDateTime(void);
 void checkParameters(void);
 void initialize(std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void initialConditionsRandom(std::vector<double>&,std::vector<double>&,std::vector<double>&);
-void initialConditionsAligned(std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void initialConditionsSim(std::vector<double>&,std::vector<double>&,std::vector<double>&);
 void allocateSRKmem(void);
 bool checkOverlap(std::vector<double>,std::vector<double>);
@@ -137,7 +139,7 @@ void dfHarmonic(std::vector<double>&,std::vector<double>&,std::vector<double>&,s
 void fire(std::vector<double> &px, std::vector<double> &py, const double dT0, const double ftol, 
 		  double &fret, double func(std::vector<double> &,std::vector<double> &), 
 		  void dfunc(std::vector<double> &, std::vector<double> &, std::vector<double> &, std::vector<double> &));
-void finalize(void);
+// void finalize(void);
 
 ///////////////////
 // saveInitFrame //
@@ -165,9 +167,25 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
 // saveCouplings //
 ///////////////////
 // Saves to file the coupling constants
-inline void saveCouplings(std::vector<double> k, std::fstream& File) 
+inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& File) 
 {
-    for (const auto &e : k) File << e << std::endl;
+    if(couplingMode == 'A') {
+        for(int i=0 ; i<nPart ; i++)
+        {
+            for(int j=0 ; j<nPart ; j++){
+                File << k[i][j] << std::endl; 
+            }
+        }
+    }
+
+    else{
+        for(int i=0 ; i<nPart ; i++)
+        {
+            for(int j=i+1 ; j<nPart ; j++){
+                File << k[i][j] << std::endl; 
+            }
+        }
+    }
 }
 
 //////////////
@@ -187,6 +205,5 @@ inline unsigned long long getIndex(int i, int j)
         return i_long*(N_long-1) - i_long*(i_long-1)/2 + j_long - i_long - 1;
     }
 }
-
 
 #endif

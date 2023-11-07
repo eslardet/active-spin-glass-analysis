@@ -1,0 +1,87 @@
+#!/bin/bash
+#PBS -lwalltime=08:00:00
+#PBS -lselect=1:ncpus=1:mem=8gb
+#PBS -N V2D_N1k_Rp_rho0.4
+#PBS -J 0-199
+
+#PBS -o output/
+#PBS -e output/
+
+num_s=20
+num_Kstd=1
+num_Rp=10
+
+mode="G"
+intMethod="E"
+initMode="R"
+
+N=1000
+
+##phi_arr=($(seq 0.1 0.1 2.0))
+##phi=${phi_arr[$(($PBS_ARRAY_INDEX / $num_s))]}
+phi=0.4
+
+##Rp_arr=(10.0 15.0 20.0 30.0 40.0)
+Rp_arr=($(seq 1.0 1.0 10.0))
+Rp=${Rp_arr[$((($PBS_ARRAY_INDEX / $num_s) % $num_Rp))]}
+##Rp=1.0
+
+vp=1.0
+
+##noise_arr=($(seq 0.79 0.01 0.84))
+##noise=${noise_arr[$(($PBS_ARRAY_INDEX / $num_s))]}
+noise=0.20
+
+seed_arr=($(seq 1 1 20))
+seed=${seed_arr[$(($PBS_ARRAY_INDEX % $num_s))]}
+##seed=1
+
+K_arr=($(seq -1.0 0.1 1.0))
+##K_arr=(0.0 1.0)
+##K_arr=(1.0 1.5 2.0)
+##K_AVG=${K_arr[$(($PBS_ARRAY_INDEX / $num_s / $num_Kstd))]}
+K_AVG=1.0
+
+K_std_arr=($(seq 1.0 1.0 8.0))
+##K_std_arr=(0.0 2.0)
+##K_STD=${K_std_arr[$((($PBS_ARRAY_INDEX / $num_s) % $num_Kstd))]}
+K_STD=0.0
+
+# dummy if not in F mode
+K1=-8.0
+
+xTy=1.0
+
+dt=0.005
+DT=100.0
+DTex=1000.0
+eqT=1000.0
+simulT=1000.0
+
+savePos=1
+saveInitPos=0
+saveCoupling=0
+
+module load anaconda3/personal
+source activate asg
+
+##cd $PBS_O_WORKDIR/analysis
+##python3 main_del.py $mode $N $phi $noise $K_AVG $K_STD $Rp $xTy $seed $simulT
+
+cd $PBS_O_WORKDIR
+bash runV.sh $N $phi $noise $seed $vp $Rp $xTy $initMode $mode $K_AVG $K_STD $K1 $dt $DT $DTex $eqT $simulT $savePos $saveInitPos $saveCoupling $intMethod
+
+cd $PBS_O_WORKDIR/analysis
+
+##module load anaconda3/personal
+##source activate asg
+
+#r_max=1
+#tape_time=500
+
+##python3 main_stats_moments.py $mode $N $phi $noise $K_AVG $K_STD $Rp $xTy $seed $simulT
+python3 main_stats.py $mode $N $phi $noise $K_AVG $K_STD $Rp $xTy $seed $simulT
+##python3 main_f_stats.py $mode $N $phi $noise $K_AVG $K_STD $K1 $Rp $xTy $seed $simulT
+##python3 main_psi_t.py $mode $N $phi $noise $K_AVG $K_STD $Rp $xTy $seed $simulT
+##python3 main_contact_bash.py $mode $N $phi $noise $K_AVG $K_STD $Rp $xTy $seed $r_max $tape_time
+##python3 main_del.py $mode $N $phi $noise $K_AVG $K_STD $Rp $xTy $seed $simulT
