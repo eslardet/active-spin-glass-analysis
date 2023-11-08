@@ -17,11 +17,11 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=10
+nPart=10000
 phi=1.0
 noise=0.20
 
-seed=1
+seed=1000
 
 vp=1.0
 
@@ -34,7 +34,7 @@ initMode='R'
 #    'A' aligned,
 #    'S' restart from previous simulation
 
-couplingMode='F'
+couplingMode='C'
 # can be:
 #    'C' constant, 
 #    'T' for two populations, 
@@ -42,7 +42,7 @@ couplingMode='F'
 #    'F' for fraction, 
 #    'A' for asymmetric
 
-# K0=2.0
+K0=-1.0
 # K1=-1.0
 # alpha=0.2
 
@@ -57,9 +57,9 @@ dT=0.005
 DT=1.0
 DTex=1000.0
 eqT=0.0
-simulT=1.0
+simulT=100.0
 
-savePos=1
+savePos=0
 saveInitPos=0
 saveForce=0
 saveCoupling=0
@@ -194,6 +194,6 @@ else
     echo ${intMethod} >> 'inpar'
 fi
 
-time ${bin_dir}/vicsek_2D_bimodal inpar
+time ${bin_dir}/vicsek_2D_const inpar
 
 echo "2D Vicsek run done."
