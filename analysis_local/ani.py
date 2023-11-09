@@ -14,19 +14,20 @@ import time
 
 
 mode = "T"
-nPart = 1000
+nPart = 400
 phi = 1.0
 noise = "0.20"
 # K_std = 8.0
 # K_avg_range = [0.1]
 # K_avg_range = np.round(np.arange(0.0, 0.8, 0.1),1)
-K = "1.0_1.0_1.0"
+K = "5.0_5.0_1.0"
 Rp = 1.0
 xTy = 1.0
-seed = 1 
+seed = 1
 
 
 animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed)
+# animate_multi_blue(mode, nPart, phi, noise, K, Rp, xTy, seed)
 
 # t0 = time.time()
 # for K_avg in K_avg_range:

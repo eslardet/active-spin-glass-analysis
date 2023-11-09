@@ -720,8 +720,8 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
                         vector<double>& ffx, vector<double>& ffy, vector<double>& ffp)
 {
     double xij,yij,rij,rijsq;
-    double pi,pj,pij,Kij;
-    double ff;
+    double pi,pj,pij,Kij,Kji;
+    double ffij,ffji;
 
     std::vector<float> nei(nPart); // number of neighbours
 
@@ -757,11 +757,13 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
                 if (rijsq <= rpsq){
                     pj = pp[nl[j]];
                     Kij = K[i][nl[j]];
+                    Kji = K[nl[j]][i];
                     pij = pi-pj;
-                    ff = -Kij*sin(pij);
+                    ffij = -Kij*sin(pij);
+                    ffji = Kji*sin(pij);
 
-                    ffp[i]     += ff;
-                    ffp[nl[j]] -= ff;
+                    ffp[i]     += ffij;
+                    ffp[nl[j]] += ffji;
 
                     nei[i] += 1.0;
                     nei[nl[j]] += 1.0;

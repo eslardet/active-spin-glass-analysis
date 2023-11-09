@@ -303,6 +303,77 @@ def animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=N
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))
 
+def animate_multi_blue(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
+    """
+    Make animation from positions file
+    """
+    inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
+
+    x_all, y_all, theta_all = get_pos_arr(inparFile=inparFile, posFile=posFile, min_T=min_T, max_T=max_T)
+    
+    inpar_dict = get_params(inparFile)
+    
+    nPart = inpar_dict["nPart"]
+    phi = inpar_dict["phi"]
+    noise = inpar_dict["noise"]
+    mode = inpar_dict["mode"]
+    DT = inpar_dict["DT"]
+    seed = inpar_dict["seed"]
+    xTy = inpar_dict["xTy"]
+
+    if min_T == None:
+        min_T = 0
+
+    with open(posFile) as f:
+        reader = csv.reader(f, delimiter="\t")
+        startT = float(list(reader)[6][0])
+
+    plt.rcParams["animation.html"] = "jshtml"
+    plt.ioff()
+    plt.rcParams['animation.embed_limit'] = 2**128
+
+    L = np.sqrt(nPart / (phi*xTy))
+    Ly = L
+    Lx = L*xTy
+    
+    fig, ax = plt.subplots(figsize=(10*xTy,10))
+
+    # norm = colors.Normalize(vmin=0, vmax=2, clip=True)
+    # plt.set_cmap('rainbow')
+
+    # mapper = cm.ScalarMappable(norm=norm, cmap=cm.jet)
+    # plt.colorbar(mappable=mapper, ax=ax)
+
+    x = pbc_wrap(x_all[0][:int(nPart/3)],Lx)
+    y = pbc_wrap(y_all[0][:int(nPart/3)],Ly)
+    theta = theta_all[0][:int(nPart/3)]
+    # cols = np.mod(theta, 2*np.pi)
+    cols = np.repeat(np.array(['blue', 'green', 'red']), np.ceil(nPart/3))[:nPart]
+    arrows = ax.quiver(x, y, np.cos(theta), np.sin(theta), color=cols)
+
+    def init():
+        ax.set_xlim(0, Lx)
+        ax.set_ylim(0, Ly)
+        return arrows,
+
+    def update(n):
+        x = pbc_wrap(x_all[n][:int(nPart/3)],Lx)
+        y = pbc_wrap(y_all[n][:int(nPart/3)],Ly)
+        theta = theta_all[n][:int(nPart/3)]
+        arrows.set_offsets(np.c_[x, y])
+        arrows.set_UVC(np.cos(theta), np.sin(theta))
+        ax.set_title("t = " + str(round(n*DT+startT, 1)), fontsize=10, loc='left')
+        
+        return arrows,
+
+    ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=50, blit=True)
+
+    folder = os.path.abspath('../animations_multi_pop')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    ani.save(os.path.join(folder, filename))
+
 def plot_polar_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, bins=100):
     pos_ex_file = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name='pos_exact')
     x, y, theta, view_time = get_pos_ex_snapshot(pos_ex_file)

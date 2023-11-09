@@ -8,7 +8,7 @@ def get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed):
     if mode == "C":
         mode_name = "Constant"
     elif mode == "T":
-        mode_name = "ThreePopulations"
+        mode_name = "ThreePopulations_NR"
     elif mode == "G":
         mode_name = "Gaussian"
     elif mode == "A":

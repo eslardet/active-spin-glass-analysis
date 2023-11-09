@@ -2,7 +2,7 @@
 // =====================
 // Definition of all functions necessary to run activeSpinGlassL_2D.cpp
 // Created by Thibault Bertrand on 2022-04-19
-// Last update by EL 2023-10-09
+// Last update by TB 2022-04-19
 
 #include <iostream>
 #include <fstream>
@@ -64,10 +64,6 @@ void checkParameters()
 
         case 'S' : // Starting from previous simulation
             logFile << "Initializing in mode 'S', starting off from previous simulation" << endl;
-            break;
-
-        case 'A' : // Aligned configuration
-            logFile << "Initializing in mode 'A', particles placed uniformly in the box fully aligned" << endl;
             break;
 
         default :
@@ -140,11 +136,10 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
 {
     double KK, KK2;
     double alpha, Kp, Kn;
-    unsigned long long index;
 
     // Seed the random engines
     rnd_gen.seed (seed);
-    
+
     beta = 1.0;
     betasq = beta*beta;
 
@@ -158,80 +153,48 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
     rlsq = rl*rl;
 
     // initialize particles positions & polarities
-    if (initMode == 'A') {
-        initialConditionsAligned(x,y,p);
-    }
-    else {
-        initialConditionsRandom(x,y,p);
-    }
+    initialConditionsRandom(x,y,p);
 
     // Initialize the coupling array
     switch(couplingMode)
     {
         case 'C' : // Constant coupling
             for(int i=0 ; i<nPart ; i++){
-                // K[i][i] = 0.0;
+                K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
-                    index = getIndex(i,j);
-                    K[index] = K0; 
+                    K[i][j] = K0; 
+                    K[j][i] = K0; 
                 }
             }
             break;
 
-        // case 'T' : // Two-populations
-        //     for(int i=0 ; i<nPart ; i++){
-        //         // K[i][i] = 0.0;
-        //         for(int j=i+1 ; j<nPart ; j++){
-        //             index = getIndex(i,j);
-        //             if(i<nPart/2.0){
-        //                 if(j<nPart/2.0){
-        //                     K[index] = KAA;
-        //                 }else{
-        //                     K[index] = KAB;
-        //                 }
-        //             }else{
-        //                 K[index] = KBB;
-        //             }
-        //         }
-        //     }
-        //     break;
-
-        case 'T' : // Three-populations
+        case 'T' : // Two-populations
             for(int i=0 ; i<nPart ; i++){
-                // K[i][i] = 0.0;
+                K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
-                    index = getIndex(i,j);
-                    if(i<nPart/3.0){
-                        if(j<nPart/3.0){
-                            K[index] = 0;
-                        }else if (j<2*nPart/3.0){
-                            K[index] = KAB;
-                        }else {
-                            K[index] = KAC;
+                    if(i<nPart/2.0){
+                        if(j<nPart/2.0){
+                            K[i][j] = KAA;
+                            K[j][i] = KAA;
+                        }else{
+                            K[i][j] = KAB;
+                            K[j][i] = KAB;
                         }
-                    }else if (i<2*nPart/3.0){
-                        if (nPart/3.0<=j<2*nPart/3.0) {
-                            K[index] = 0;
-                        }else if (j>=2*nPart/3.0) {
-                            K[index] = KBC;
-                        }
-                    else{
-                        if (j>=2*nPart/3.0) {
-                            K[index] = 0;
-                        }
+                    }else{
+                        K[i][j] = KBB;
+                        K[j][i] = KBB;
                     }
                 }
-            }
             }
             break;
 
         case 'G' : // Gaussian distributed couplings
             for(int i=0 ; i<nPart ; i++){
-                // K[i][i] = 0.0;
+                K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
-                    index = getIndex(i,j);
                     KK = KAVG + STDK*normDist(rnd_gen);
-                    K[index] = KK;
+                    K[i][j] = KK;
+                    K[j][i] = KK;
                 }
             }
             break;
@@ -251,22 +214,40 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             }
             cout << " ----> alpha = " << alpha << "; K+ = " << Kp << "; K- = " << Kn << endl;
             for(int i=0 ; i<nPart ; i++){
-                // K[i][i] = 0.0;
+                K[i][i] = 0.0;
                 for(int j=i+1 ; j<nPart ; j++){
-                    index = getIndex(i,j);
                     if(uniDist(rnd_gen) < alpha) {
                         KK = Kp; // Kp is alpha proportion (positive one K+)
                         }
                     else{
                         KK = Kn; // Kn is negative one K-
                     }
-                    K[index] = KK;
+                    K[i][j] = KK;
+                    K[j][i] = KK;
                 }
             }
             break;
 
         case 'A' : // Normally distributed antiferromagnetic couplings
-            {cerr<<"Need to use full coupling store version of code!"<<endl; ::exit(1);}
+            // for(int i=0 ; i<nPart ; i++){
+            //     K[i][i] = 0.0;
+            //     for(int j=i+1 ; j<nPart ; j++){
+            //         do{
+            //             KK = KAVG + STDK*normDist(rnd_gen);    
+            //         }while (KK>0.0);
+            //         K[i][j] = KK;
+            //         K[j][i] = KK;
+            //     }
+            // }
+            for(int i=0 ; i<nPart ; i++){
+                K[i][i] = 0.0;
+                for(int j=i+1 ; j<nPart ; j++){
+                    KK = KAVG + STDK*normDist(rnd_gen);
+                    KK2 = KAVG + STDK*normDist(rnd_gen);
+                    K[i][j] = KK;
+                    K[j][i] = KK2;
+                }
+            }
             break;
     }
 
@@ -377,87 +358,6 @@ void initialConditionsRandom(vector<double>& x, vector<double>& y, vector<double
 }
 
 /////////////////////////////
-// initialConditionsRandom //
-/////////////////////////////
-// Initialize positions of particles at random location using FIRE
-void initialConditionsAligned(vector<double>& x, vector<double>& y, vector<double>& p)
-{
-    double U;
-    double dTF = 0.1;
-
-    startT = 0.0;
-
-    // Open file to write initial conditions
-    if (saveInitPos) {
-        initposFile.open("initpos",ios::out);
-        if (initposFile.fail()) 
-        {cerr << "Can't open initial positions file!" << endl; ::exit(1);}
-        initposFile.precision(8);
-    }
-
-    // Calculate size of the box
-    L = sqrt(double(nPart)/(phi*xTy));
-    
-    xmin = 0.0;
-    xmax = xTy*L;
-    ymin = 0.0;
-    ymax = L;
-
-    Lx = xTy*L;
-    Ly =     L;
-
-    if (eqT>simulT)
-    {cerr << "eqT is larger than simulT!" << endl; ::exit(1);}
-
-
-    // Timing
-    Neq = (int) ceil(eqT/dT);
-    Nsimul = (int) ceil((simulT-eqT)/dT);
-    Nskip = (int) ceil(DT/dT);
-    Nskipexact = (int) ceil(DTex/dT);
-    logFile << "Neq = " << Neq << ", Nsimul = " << Nsimul << " and Nskip = " << Nskip << endl;
-    logFile << "Volume fraction is phi = " << phi << endl;
-
-    // Initialize particles at random positions
-    for (int i=0 ; i<nPart ; i++) {
-        x[i] = Lx*uniDist(rnd_gen);
-        y[i] = Ly*uniDist(rnd_gen);
-        p[i] = 0; // Not random orientations
-    }
-
-    // // Save initial conditions
-    // if (saveInitPos) {
-    //     saveInitFrame(x,y,p,initposFile);
-    // }
-
-    // Initialize lengthscales related to the cell list
-    lx = rl; 
-    ly = rl;
-    mx = (int)floor(Lx/lx);
-    my = (int)floor(Ly/ly);
-    lx = Lx/double(mx);
-    ly = Ly/double(my);
-    nCell = mx*my;
-
-    // Allocation of memory
-    allocateSRKmem();   
-
-    // Build map of cells
-    buildMap();
-
-    // // Proceed to one-step energy minimization via FIRE
-    // U = -1.0;
-    // fire(x,y,dTF,fTOL,U,fHarmonic,dfHarmonic);
-
-    // Save initial conditions
-    if (saveInitPos) {
-        saveInitFrame(x,y,p,initposFile);
-        initposFile.close();
-    }
-    return; 
-}
-
-/////////////////////////////
 // initialConditionsSim //
 /////////////////////////////
 // Initialize positions of particles from exact positions file of previous simulation
@@ -467,8 +367,7 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
     // Find seed
     seedFile.open("seed_p",ios::in);
     if (seedFile.fail())
-    // {cerr << "Can't open seed file!" << endl; ::exit(1);}
-    {seed_p = seed;}
+    {cerr << "Can't open seed file!" << endl; ::exit(1);}
     seedFile >> seed_p;
     seedFile.close();
 
@@ -501,19 +400,17 @@ void initialConditionsSim(vector<double>& x, vector<double>& y, vector<double>& 
 
     posExactFile.close();
 
-    if (ceil(startT)>=simulT)
+    if (startT>simulT)
     {cerr << "Already simulated up to simulT! Exact position file time is " << startT << endl; ::exit(1);}
 
     // Timing
     if (eqT==0)
         {Neq = (int) 0;
         Nsimul = (int) ceil((simulT-startT)/dT);}
-    else if (eqT<startT)
-        {cerr << "eqT is smaller than startT so running longer!" << endl;
-        Neq = (int) 0;
-        Nsimul = (int) ceil((simulT-eqT)/dT);}
     else
-        {Neq = (int) ceil((eqT-startT)/dT);
+        {if (eqT<startT)
+        {cerr << "eqT is less than startT!" << endl; ::exit(1);}
+        Neq = (int) ceil((eqT-startT)/dT);
         Nsimul = (int) ceil((simulT-eqT)/dT);}
     Nskip = (int) ceil(DT/dT);
     Nskipexact = (int) ceil(DTex/dT);
@@ -564,9 +461,7 @@ void allocateSRKmem(void)
     lscl.resize(nPart);
     mp.resize(nCell, vector<int>(nNeighbor));
 
-    // K.resize(nPart, vector<double>(nPart));
-    unsigned long long n_long = nPart;
-    K.resize(n_long*(n_long-1)/2);
+    K.resize(nPart, vector<double>(nPart));
 
     return;
 }
@@ -861,18 +756,12 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
                 // Vicsek alignment
                 if (rijsq <= rpsq){
                     pj = pp[nl[j]];
-                    if (i == nl[j]){
-                        Kij = 0.0;
-                    }
-                    else {
-                        Kij = K[getIndex(i,nl[j])];
-                    }
-                    // Kij = K[i][nl[j]];
+                    Kij = K[i][nl[j]];
                     pij = pi-pj;
                     ff = -Kij*sin(pij);
 
                     ffp[i]     += ff;
-                    // ffp[nl[j]] += ff;  // + instead of - , this is what makes this asymmetric/ non-reciprocal
+                    ffp[nl[j]] -= ff;
 
                     nei[i] += 1.0;
                     nei[nl[j]] += 1.0;
