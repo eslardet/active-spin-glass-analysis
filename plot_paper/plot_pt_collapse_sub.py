@@ -105,7 +105,7 @@ for j in range(2):
 
         K_plot = [(k-coeff)/(K_std) for k in K_avg_range]
 
-        ax.plot(K_plot, p_ss, "-o", color=cols[k], label=r"$\sigma_K=\ $" + str(round(K_std)))
+        ax.plot(K_plot, p_ss, "o", color=cols[k], label=r"$\sigma_K=\ $" + str(round(K_std)))
 
     ax.set_xlim([-0.2,0.2])
     ax.set_xlabel(r"$(\overline{K}-$" + str(round(coeff,3)) + r"$)/\sigma_K$")

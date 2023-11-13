@@ -13,21 +13,22 @@ import time
 # f.snapshot(mode="C", nPart=1000, phi=0.4, K=1.0, seed=2, view_time=10)
 
 
-mode = "G"
+mode = "T"
 nPart = 1000
 phi = 1.0
 noise = "0.70"
-# K_std = 8.0
-# K_avg_range = [0.1]
-# K_avg_range = np.round(np.arange(0.0, 0.8, 0.1),1)
-# K = "5.0_5.0_1.0"
-K = "1.0_0.0"
+KAB = 1.0
+KBA = 0.0
+KBC = 1.0
+KCB = 0.0
+KCA = 1.0
+KAC = 0.0
+K = str(KAB) + "_" + str(KBA) + "_" + str(KBC) + "_" + str(KCB) + "_" + str(KCA) + "_" + str(KAC)
 Rp = 1.0
 xTy = 5.0
 seed = 1
 
-animate(mode, nPart, phi, noise, K, Rp, xTy, seed)
-# animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed)
+animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed)
 # animate_multi_blue(mode, nPart, phi, noise, K, Rp, xTy, seed)
 
 # t0 = time.time()
@@ -37,4 +38,4 @@ animate(mode, nPart, phi, noise, K, Rp, xTy, seed)
 
 # print(time.time()-t0)
 
-del_pos(mode, nPart, phi, noise, K, Rp, xTy, seed)
+# del_pos(mode, nPart, phi, noise, K, Rp, xTy, seed)

@@ -28,9 +28,7 @@ extern double Ly,ymin,ymax;
 extern double xTy;
 
 extern double K0; // mode 'C': K0: Coupling constant
-extern double KAA,KAB,KBB; // mode 'T': KAA: Coupling constant for A-A interactions 
-                           //           KAB: Coupling constant for A-B interactions 
-                           //           KBB: Coupling constant for B-B interactions
+extern double KAB,KBA,KBC,KCB,KAC,KCA;
 extern double KAVG,STDK; // mode 'G', 'A': KAVG: Average coupling constant
                          //                STDK: Standard deviation of coupling constant
 // extern double alpha; // Fraction of particles with +K0 coupling for mode F
@@ -166,7 +164,7 @@ inline void saveInitFrame(std::vector<double> x, std::vector<double> y, std::vec
 // Saves to file the coupling constants
 inline void saveCouplings(std::vector< std::vector<double> > k, std::fstream& File) 
 {
-    if(couplingMode == 'A') {
+    if(couplingMode == 'A' || couplingMode == 'T') {
         for(int i=0 ; i<nPart ; i++)
         {
             for(int j=0 ; j<nPart ; j++){

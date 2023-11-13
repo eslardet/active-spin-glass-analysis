@@ -124,11 +124,14 @@ for (sig=1; sig<=32; sig++)
             logFile << " ----> Coupling Constant K0 = " << K0 << endl; 
             break;
 
-        case 'T' : // Two-populations
+        case 'T' : // Three populations
             inputFile >> KAB; 
+            inputFile >> KBA;
             inputFile >> KBC;
+            inputFile >> KCB;
             inputFile >> KAC;
-            logFile << " ----> Coupling Constants, KAB = " << KAB << ", KBC = " << KBC << ", KAC = " << KAC << endl; 
+            inputFile >> KCA;
+            logFile << " ----> Coupling Constants, KAB = " << KAB << ", KBA = " << KBA << ", KBC = " << KBC << ", KCB = " << KCB << ", KAC = " << KAC << ", KCA = " << KCA << endl; 
             break;
 
         case 'G' : // Gaussian distributed couplings
@@ -334,11 +337,14 @@ for (sig=1; sig<=32; sig++)
             cout << " ----> Coupling Constant K0 = " << K0 << endl; 
             break;
 
-        case 'T' : // Two-populations
+        case 'T' : // Three populations
             inputFile >> KAB; 
+            inputFile >> KBA;
             inputFile >> KBC;
+            inputFile >> KCB;
             inputFile >> KAC;
-            cout << " ----> Coupling Constants, KAB = " << KAB << ", KBC = " << KBC << ", KAC = " << KAC << endl; 
+            inputFile >> KCA;
+            cout << " ----> Coupling Constants, KAB = " << KAB << ", KBA = " << KBA << ", KBC = " << KBC << ", KCB = " << KCB << ", KAC = " << KAC << ", KCA = " << KCA << endl; 
             break;
 
         case 'G' : // Gaussian distributed couplings

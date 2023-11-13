@@ -28,9 +28,7 @@ extern double Ly,ymin,ymax;
 extern double xTy;
 
 extern double K0; // mode 'C': K0: Coupling constant
-extern double KAB,KAC,KBC; // mode 'T': KAA: Coupling constant for A-A interactions 
-                           //           KAB: Coupling constant for A-B interactions 
-                           //           KBB: Coupling constant for B-B interactions
+extern double KAB,KBA,KAC,KCA,KBC,KCB;
 extern double KAVG,STDK; // mode 'G', 'A': KAVG: Average coupling constant
                          //                STDK: Standard deviation of coupling constant
 // extern double alpha; // Fraction of particles with +K0 coupling for mode F
@@ -53,7 +51,7 @@ static std::vector<double> Y,Fy;
 static std::vector<double> P,Fp;
 
 // Define the coupling constant array
-static std::vector<double> K;
+static std::vector< std::vector<double> > K;
 
 // Neighbor list variables
 static double rl,rc; // radius of the neighbor list

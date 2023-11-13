@@ -26,9 +26,7 @@ double xTy,Lx,Ly;
 
 // Coupling constant parameters
 double K0; // mode 'C': K0: Coupling constant
-double KAB,KAC,KBC; // mode 'T': KAA: Coupling constant for A-A interactions 
-                    //           KAB: Coupling constant for A-B interactions 
-                    //           KBB: Coupling constant for B-B interactions
+double KAB,KBA,KAC,KCA,KBC,KCB;
 double KAVG,STDK; // mode 'G', 'A': KAVG: Average coupling constant
                   //                STDK: Standard deviation of coupling constant
 // double alpha; // Fraction of particles with +K0 coupling for mode F

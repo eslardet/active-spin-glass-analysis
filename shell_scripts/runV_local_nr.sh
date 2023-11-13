@@ -17,7 +17,7 @@ bin_dir=$HOME/Code/2D_ActiveSpinGlass_EL/bin
 # Parameters #
 ##############
 
-nPart=400
+nPart=1000
 phi=1.0
 noise=0.20
 
@@ -37,7 +37,7 @@ initMode='R'
 couplingMode='T'
 # can be:
 #    'C' constant, 
-#    'T' for two populations, 
+#    'T' for three populations, 
 #    'G' for Gaussian distribution, 
 #    'F' for fraction, 
 #    'A' for asymmetric
@@ -46,9 +46,12 @@ couplingMode='T'
 # K1=-1.0
 # alpha=0.2
 
-KAB=5.0
-KBC=5.0
-KAC=1.0
+KAB=1.0
+KBA=-1.0
+KBC=1.0
+KCB=-1.0
+KCA=1.0
+KAC=-1.0
 
 # KAVG=0.2
 # STDK=0.0
@@ -70,7 +73,7 @@ intMethod='E'
 if [ "${couplingMode}" == "C" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "T" ]; then
-    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/ThreePopulations_NR/N${nPart}/phi${phi}_n${noise}/K${KAB}_${KBC}_${KAC}/Rp${Rp}/xTy${xTy}/s${seed}
+    run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/ThreePopulations_NR/N${nPart}/phi${phi}_n${noise}/K${KAB}_${KBA}_${KBC}_${KCB}_${KCA}_${KAC}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "G" ]; then
     run_dir=$HOME/Code/2D_ActiveSpinGlass_EL/simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}
 elif [ "${couplingMode}" == "F" ]; then
@@ -167,7 +170,10 @@ else
         echo ${K0} >> 'inpar'
     elif [ "${couplingMode}" == "T" ]; then
         echo ${KAB} >> 'inpar'
+        echo ${KBA} >> 'inpar'
         echo ${KBC} >> 'inpar'
+        echo ${KCB} >> 'inpar'
+        echo ${KCA} >> 'inpar'
         echo ${KAC} >> 'inpar'
     elif [ "${couplingMode}" == "G" ]; then
         echo ${KAVG} >> 'inpar'
@@ -194,6 +200,6 @@ else
     echo ${intMethod} >> 'inpar'
 fi
 
-time ${bin_dir}/vicsek_2D_multi_nr inpar
+time ${bin_dir}/vicsek_2D_nr inpar
 
 echo "2D Vicsek run done."

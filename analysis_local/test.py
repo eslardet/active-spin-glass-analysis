@@ -11,71 +11,66 @@ import time
 from scipy.signal import fftconvolve, correlate2d, convolve2d
 from matplotlib import colors
 
-a = np.array([0,1,2])
+# N = 10000
 
-cols = np.repeat(a,3)
+# K1 = 1.0
+# K2 = -1.0
 
-print(cols)
+# Kstd = 8*np.sqrt(2)
 
-norm = colors.Normalize(vmin=0, vmax=9, clip=True)
-plt.set_cmap('gist_rainbow')
+# vec1 = []
+# for i in range(N):
+#     vec1.append(np.random.normal(1,Kstd))
 
-print(norm(cols))
+# vec2 = []
+# for i in range(N):
+#     vec2.append(np.random.normal(-1,Kstd))
 
+# arr = np.zeros((N,N))
+# for i in range(N):
+#     for j in range(1):
+#         arr[i,j] = (vec1[i]+vec2[j])/2
 
-# D = np.arange(16).reshape(4,4)
-# r_max = 2
-# i=0
-# idx = np.where(D[0,:] <= r_max)[0]
-# print(np.delete(idx, i))
+# print(np.mean(arr), np.std(arr))
 
-# fig, ax = plt.subplots()
-# ax.plot([0,1],[0,1])
-# ax.set_xlim(left=0)
+# arr2 = np.zeros((N,N))
+# for i in range(N):
+#     for j in range(1):
+#         arr2[i,j] = np.random.normal(0,8)
+
+# print(np.mean(arr2), np.std(arr2))
+
+# plt.hist(arr[:,0].flatten(), bins=100, alpha=0.5, label="2 vecs")
+# plt.hist(arr2[:,0].flatten(), bins=100, alpha=0.5, label="1 arr")
+# plt.legend()
 # plt.show()
 
-# print(D[0,:0], D[0,1:])
+N = 6
+K = np.zeros((N,N))
 
-# n = 50
-# x = np.arange(1, n+1, 1)
-# A = np.outer(x, x)
+for i in range(N):
+    K[i,i] = 0
+    for j in range(i+1, N):
+        if i < N/3:
+            if j < N/3:
+                K[i,j] = 1
+                K[j,i] = 1
+            elif j < 2*N/3:
+                K[i,j] = 1
+                K[j,i] = -1
+            else:
+                K[i,j] = -3
+                K[j,i] = 3
+        elif i < 2*N/3:
+            if N/3 <= j < 2*N/3:
+                K[i,j] = 1
+                K[j,i] = 1
+            elif j>= 2*N/3:
+                K[i,j] = 2
+                K[j,i] = -2
+        else:
+            if j >= 2*N/3:
+                K[i,j] = 1
+                K[j,i] = 1
 
-# # t0 = time.time()
-# # corr2d = correlate2d(A,A, mode='full', boundary='wrap')[n-1:,n-1:]
-# # print("correlate2d (control) ", time.time()-t0, "\n")
-
-# # t0 = time.time()
-# # sci_fft = np.round(fftconvolve(A,A[::-1,::-1], mode='same'),0)
-# # print("fftconvolve ", time.time()-t0, np.all(sci_fft==corr2d), "\n")
-
-# # t0 = time.time()
-# # conv2d = convolve2d(A,A[::-1,::-1], mode='full', boundary='wrap')[n-1:,n-1:]
-# # print("convolve2d ", time.time()-t0, np.all(conv2d==corr2d), "\n")
-
-# ## Winner in time and accuracy!
-# t0 = time.time()
-# a=np.fft.fft2(A)
-# b=np.fft.fft2(A[::-1,::-1])
-# c=np.real(np.fft.ifft2(a*b))[::-1,::-1]
-# np_fft = np.round(c,0)
-# # print("np.fft ", time.time()-t0, np.all(np_fft==corr2d), "\n")
-
-# avs = np.outer(np.arange(n,0,-1), np.arange(n,0,-1))
-# # if take_av == True:
-# #     corr = corr/avs
-# # corr = corr/corr[0,0]
-
-# # correlate2d 
-
-# a = []
-
-# b = np.array(([1,2,3,4],[1,2,3,4])).flatten()
-# c = np.array(([2,3,4,0],[1,2,3,0])).flatten()
-
-# print(b[np.where(c!=0)]/c[np.where(c!=0)])
-
-
-# print(np.divide(b,c, where=c!=0))
-
-
-# print(np.mean(a, axis=0))
+print(K)

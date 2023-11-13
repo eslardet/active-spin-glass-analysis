@@ -84,8 +84,8 @@ void checkParameters()
             logFile << "Initializing couplings in mode 'C', couplings are constant" << endl;
             break;
 
-        case 'T' : // Two-populations
-            logFile << "Initializing couplings in mode 'T', two populations with reciprocal couplings (K_AA, K_AB and K_BB)" << endl;
+        case 'T' : // Three populations
+            logFile << "Initializing couplings in mode 'T', three populations with reciprocal couplings A,B,C and no coupling within population" << endl;
             break;
 
         case 'G' : // Gaussian distributed couplings
@@ -564,9 +564,7 @@ void allocateSRKmem(void)
     lscl.resize(nPart);
     mp.resize(nCell, vector<int>(nNeighbor));
 
-    // K.resize(nPart, vector<double>(nPart));
-    unsigned long long n_long = nPart;
-    K.resize(n_long*(n_long-1)/2);
+    K.resize(nPart, vector<double>(nPart));
 
     return;
 }

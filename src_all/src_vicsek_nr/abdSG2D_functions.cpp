@@ -168,21 +168,35 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
             }
             break;
 
-        case 'T' : // Two-populations
+        case 'T' : // Three-populations
             for(int i=0 ; i<nPart ; i++){
-                K[i][i] = 0.0;
-                for(int j=i+1 ; j<nPart ; j++){
-                    if(i<nPart/2.0){
-                        if(j<nPart/2.0){
-                            K[i][j] = KAA;
-                            K[j][i] = KAA;
-                        }else{
+                for(int j=i+1; j<nPart ; j++){
+                    if(i<nPart/3.0){
+                        if(j<nPart/3.0){ // A-A
+                            K[i][j] = 0.0;
+                            K[j][i] = 0.0;
+                        }else if (j<2*nPart/3.0){ // A-B
                             K[i][j] = KAB;
-                            K[j][i] = KAB;
+                            K[j][i] = KBA;
+                        }else { // A-C
+                            K[i][j] = KAC;
+                            K[j][i] = KCA;
                         }
-                    }else{
-                        K[i][j] = KBB;
-                        K[j][i] = KBB;
+                    }else if (nPart/3.0<=i && i<2*nPart/3.0){ 
+                        if (nPart/3.0<=j && j<2*nPart/3.0) { // B-B
+                            K[i][j] = 0.0;
+                            K[j][i] = 0.0;
+                        }
+                        if (j>=2*nPart/3.0) { // B-C
+                        K[i][j] = KBC;
+                        K[j][i] = KCB;
+                        }
+                    }
+                    else{
+                        if (j>=2*nPart/3.0) { // C-C
+                            K[i][j] = 0.0;
+                            K[j][i] = 0.0;
+                        }
                     }
                 }
             }
@@ -720,8 +734,8 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
                         vector<double>& ffx, vector<double>& ffy, vector<double>& ffp)
 {
     double xij,yij,rij,rijsq;
-    double pi,pj,pij,Kij;
-    double ff;
+    double pi,pj,pij,Kij,Kji;
+    double ffij,ffji;
 
     std::vector<float> nei(nPart); // number of neighbours
 
@@ -757,11 +771,13 @@ std::vector<float> force(vector<double> xx, vector<double> yy, vector<double> pp
                 if (rijsq <= rpsq){
                     pj = pp[nl[j]];
                     Kij = K[i][nl[j]];
+                    Kji = K[nl[j]][i];
                     pij = pi-pj;
-                    ff = -Kij*sin(pij);
+                    ffij = -Kij*sin(pij);
+                    ffji = Kji*sin(pij);
 
-                    ffp[i]     += ff;
-                    ffp[nl[j]] -= ff;
+                    ffp[i]     += ffij;
+                    ffp[nl[j]] += ffji;
 
                     nei[i] += 1.0;
                     nei[nl[j]] += 1.0;
