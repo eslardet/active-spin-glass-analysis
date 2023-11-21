@@ -173,8 +173,8 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                 for(int j=i+1; j<nPart ; j++){
                     if(i<nPart/3.0){
                         if(j<nPart/3.0){ // A-A
-                            K[i][j] = 0.0;
-                            K[j][i] = 0.0;
+                            K[i][j] = KAA;
+                            K[j][i] = KAA;
                         }else if (j<2*nPart/3.0){ // A-B
                             K[i][j] = KAB;
                             K[j][i] = KBA;
@@ -184,8 +184,8 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                         }
                     }else if (nPart/3.0<=i && i<2*nPart/3.0){ 
                         if (nPart/3.0<=j && j<2*nPart/3.0) { // B-B
-                            K[i][j] = 0.0;
-                            K[j][i] = 0.0;
+                            K[i][j] = KBB;
+                            K[j][i] = KBB;
                         }
                         if (j>=2*nPart/3.0) { // B-C
                         K[i][j] = KBC;
@@ -194,8 +194,8 @@ void initialize(vector<double>& x, vector<double>& y, vector<double>& p)
                     }
                     else{
                         if (j>=2*nPart/3.0) { // C-C
-                            K[i][j] = 0.0;
-                            K[j][i] = 0.0;
+                            K[i][j] = KCC;
+                            K[j][i] = KCC;
                         }
                     }
                 }

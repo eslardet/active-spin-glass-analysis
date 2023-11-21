@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, colors
 
 def get_couplings(mode, nPart, phi, noise, K, Rp, xTy, seed):
+    """
+    Get couplings as list from save coupling file
+    """
     sim_dir = get_sim_dir(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
     couplingFile = os.path.join(sim_dir, "coupling")
     with open(couplingFile) as f:
@@ -17,6 +20,10 @@ def get_couplings(mode, nPart, phi, noise, K, Rp, xTy, seed):
     return K_list
 
 def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_ex=True, init_pos=False, timestep_range=[0]):
+    """
+    Find couplings Kij and corresponding rij distance values as lists
+    From either: exact pos file, init pos file, or pos file (with specified timesteps)
+    """
     if pos_ex == True:
         posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
         x, y = get_pos_ex_snapshot(file=posFileExact)[:2]
@@ -83,7 +90,9 @@ def get_coupling_rij(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max=None, pos_
 
 def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, 
                             pos_ex=True, init_pos=False, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None, shift=False, save_data=False):
-
+    """
+    Plot 2d histogram of Kij values against rij values
+    """
     K = str(K_avg) + "_" + str(K_std)
     folder = os.path.abspath('../plots/dist_coupling/')
     if init_pos == True:
@@ -123,8 +132,12 @@ def plot_dist_coupling_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed
     ax.set_ylabel(r"$r_{ij}$")
 
     plt.savefig(os.path.join(folder, filename + ".png"))
+    plt.close()
 
 def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, K_std, Rp, xTy, seed, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None):
+    """
+    Plot 2d histogram of Kij values against rij values difference compared to K_avg_compare histogram
+    """
     K = str(K_avg_compare) + "_" + str(K_std)
     K_list_compare, rij_list_compare = get_coupling_rij(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, r_max=r_max, pos_ex=pos_ex, timestep_range=timestep_range)
     K = str(K_avg) + "_" + str(K_std)
@@ -161,6 +174,10 @@ def plot_dist_coupling_hist_diff(mode, nPart, phi, noise, K_avg, K_avg_compare, 
 
 
 def plot_dist_coupling_hist_diff_init(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0], bin_size=100, bin_ratio=1, r_max=None, K_max=None, shift=False):
+    """
+    Plot 2d histogram of Kij values against rij values difference compared to initial random position histogram
+    """
+    
     K = str(K_avg) + "_" + str(K_std)
     K_list = []
     rij_list = []

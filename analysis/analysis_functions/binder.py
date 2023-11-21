@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 
 
 def get_binder(mode, nPart, phi, noise, K, Rp, xTy, seed_range):
+    """
+    Calculate binder cumulant for polar order parameter
+    """
     p_2 = []
     p_4 = []
     for seed in seed_range:

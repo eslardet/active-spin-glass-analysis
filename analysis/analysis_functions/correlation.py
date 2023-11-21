@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 ## Velocity correlations ##
 def plot_correlation(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, timestep_range, pos_ex=False):
     """
-    Plot equal time 2-point correlation function, averaged over time and seeds
+    Plot equal time 2-point correlation function, averaged over time and seeds using Freud
     """
     import freud
     L = np.sqrt(nPart / (phi*xTy))
@@ -240,6 +240,9 @@ def write_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, tim
     corrFile.close()
 
 def read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, d_type, bin_ratio=1):
+    """
+    Read velocity fluctuation correlation function from saved data file and return lists of r and C(r)
+    """
     r_plot = []
     corr_bin_av = []
 
@@ -276,6 +279,9 @@ def read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, d_ty
     return r_plot, corr_bin_av
 
 def plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, x_scale, y_scale, bin_ratio=1):
+    """
+    Plot velocity fluctuation correlation function from saved data file
+    """
     fig, ax = plt.subplots()
     
     r_plot, corr_bin_av = read_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, x_scale, d_type, bin_ratio)
@@ -300,6 +306,9 @@ def plot_corr_vel_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, 
     plt.savefig(os.path.join(folder, filename))
 
 def plot_corr_vel_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, x_scale, y_scale, bin_ratio=1):
+    """
+    Plot velocity fluctuation correlation function from saved data file for different Kavg and Kstd
+    """
     fig, ax = plt.subplots()
     
     for K_avg in K_avg_range:
@@ -331,6 +340,9 @@ def plot_corr_vel_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_r
     plt.savefig(os.path.join(folder, filename))
 
 def plot_corr_vel_file_superimpose_N(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, x_scale, y_scale, bin_ratio=1):
+    """
+    Plot velocity fluctuation correlation function from saved data file for different N
+    """
     fig, ax = plt.subplots()
     
     for nPart in nPart_range:
@@ -363,6 +375,9 @@ def plot_corr_vel_file_superimpose_N(mode, nPart_range, phi, noise, K_avg_range,
     plt.savefig(os.path.join(folder, filename))
 
 def get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_type, min_r=2, max_r=10):
+    """
+    Get correlation decay exponent for velocity fluctuations from file
+    """
     r_plot, corr_bin_av = read_corr_vel(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed_range=seed_range, r_scale="log", d_type=d_type, bin_ratio=1)
     r_plot = np.array(r_plot)
     corr_bin_av = np.array(corr_bin_av)
@@ -376,6 +391,9 @@ def get_exponent_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, d_typ
     return exponent
 
 def plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, d_type, min_r=2, max_r=10):
+    """
+    Plot correlation decay exponent for velocity fluctuations against Kavg
+    """
     fig, ax = plt.subplots()
     for nPart in nPart_range:
         for K_std in K_std_range:
@@ -396,10 +414,10 @@ def plot_exponents_Kavg_corr_vel(mode, nPart_range, phi, noise, K_avg_range, K_s
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
 
-
 def plot_corr_vel(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep=None, linlin=True, loglin=True, loglog=True, d_type='v', r_max=10, r_bin_num=20):
     """
     Plot correlation function for the velocity fluctations perpendicular to the mean heading angle with line from scatterplot
+    (not from saved file)
 
     Type can be: v (usual velocity correlation), dv (fluctuation from mean heading angle), dv_par (flucation parallel to mean heading angle),
     or dv_perp (fluctuation perpendicular to mean heading angle)
@@ -630,6 +648,9 @@ def write_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, t
     corrFile.close()
 
 def read_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio=1):
+    """
+    Read density fluctuation correlation function from saved data file and return lists of r and C(r)
+    """
     r_plot = []
     corr_bin_av = []
 
@@ -675,7 +696,9 @@ def get_distance_matrix(ngridx, ngridy, min_grid_size):
     return dist
 
 def get_r_corr(x,y,inparFile, min_grid_size=1):
-
+    """
+    Find C(r) and r for density fluctuations using grid method and FFT from x,y data at single timestep
+    """
     params = get_params(inparFile)
     nPart = params['nPart']
     phi = params['phi']
@@ -708,6 +731,10 @@ def get_r_corr(x,y,inparFile, min_grid_size=1):
     return dist.flatten(), corr.flatten()
 
 def get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=False, timestep_range=[0], min_grid_size=1):
+    """
+    Find r and C(r) for density fluctuations using grid method and FFT for multiple time steps
+    Return as 1d arrays of r and C(r)
+    """
     r_all = []
     corr_all = []
     for seed in seed_range:
@@ -728,6 +755,9 @@ def get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=False
     return np.array(r_all), np.array(corr_all)
 
 def write_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, max_r=100, pos_ex=True, timestep_range=[0], min_grid_size=1):
+    """
+    Write grid density fluctuation correlation function to file
+    """
     folder = os.path.abspath('../plot_data/correlation_density_grid/')
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -746,6 +776,9 @@ def write_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, max
     corrFile.close()
 
 def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size=1):
+    """
+    Read density fluctuation correlation function from saved data file and return lists of r and C(r)
+    """
     r_all = []
     corr_all = []
 
@@ -763,6 +796,10 @@ def read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_
     return r_all, corr_all
 
 def get_corr_binned_bins(dist, corr, bin_size=1, min_r=0, max_r=10):
+    """
+    Bin correlation function from r and C(r) lists in terms of r by averaging over bins of size bin_size
+    Restrict to range min_r to max_r
+    """
     corr = np.array(corr)
     r_plot = np.linspace(min_r, max_r, num=int(max_r/bin_size))
     corr_plot = []
@@ -781,6 +818,11 @@ def get_corr_binned_bins(dist, corr, bin_size=1, min_r=0, max_r=10):
     return r_plot_2, corr_plot
 
 def get_corr_binned(dist, corr, min_r=0, max_r=10):
+    """
+    Bin correlation function from r and C(r) lists in terms of r by averaging over bins exactly equal to r values
+    (Used for grid method)
+    Restrict to range min_r to max_r
+    """
     r_plot = np.unique(dist)
     r_plot2 = r_plot[np.where((r_plot>=min_r) & (r_plot<=max_r))[0]]
     corr = np.array(corr)
@@ -796,6 +838,9 @@ def get_corr_binned(dist, corr, min_r=0, max_r=10):
     return r_plot2, corr_plot
 
 def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=True, timestep_range=[0], log_y=True, min_grid_size=1, min_r=0, max_r=10):
+    """
+    Plot density fluctuation correlation function directly using FFT method
+    """
     dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size)
     r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
     fig, ax = plt.subplots()
@@ -823,6 +868,9 @@ def plot_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex=Tr
     plt.close()
 
 def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_y=True, min_grid_size=1, min_r=0, max_r=10):
+    """
+    Plot density fluctuation correlation function from saved data file
+    """
     # r_plot, corr_bin_av = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_scale, bin_ratio)
     dist, corr = read_corr_density(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_grid_size)
 
@@ -854,6 +902,10 @@ def plot_corr_density_file(mode, nPart, phi, noise, K, Rp, xTy, seed_range, log_
 
 def plot_corr_density_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, 
                                   pos_ex=True, timestep_range=[0], log_x=False, log_y=True, min_grid_size=1, min_r=0, max_r=10):
+    """
+    Plot density fluctuation correlation function for different Kavg/Kstd values superimposed
+    Calculated directly using FFT method
+    """
     
     colors = plt.cm.GnBu(np.linspace(0.2, 1, len(K_avg_range)*len(K_std_range)))
 
@@ -895,7 +947,10 @@ def plot_corr_density_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_ra
     plt.close()
 
 def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, log_y=True, min_grid_size=1, min_r=0, max_r=10):
-    
+    """
+    Plot density fluctuation correlation function from saved date files for different Kavg/Kstd values superimposed
+    """
+
     colors = plt.cm.GnBu(np.linspace(0.2, 1, len(K_avg_range)*len(K_std_range)))
 
     fig, ax = plt.subplots()
@@ -933,6 +988,9 @@ def plot_corr_density_file_superimpose(mode, nPart, phi, noise, K_avg_range, K_s
     plt.close()
 
 def get_exponent_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_range, min_r, max_r):
+    """
+    Calculate correlation decay exponent for density fluctuations from saved data files using points method
+    """
     r_plot, corr_bin_av = read_corr_density(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed_range=seed_range, min_grid_size=1)
     r_plot = np.array(r_plot)
     corr_bin_av = np.array(corr_bin_av)
@@ -946,6 +1004,9 @@ def get_exponent_corr_density_points(mode, nPart, phi, noise, K, Rp, xTy, seed_r
     return exponent
 
 def get_exponent_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size, min_r, max_r):
+    """
+    Calculate correlation decay exponent for density fluctuations directly using grid and FFT method
+    """
     dist, corr = get_r_corr_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size)
     r_plot, corr_plot = get_corr_binned(dist, corr, min_r=min_r, max_r=max_r)
     r_plot = np.array(r_plot)
@@ -961,6 +1022,9 @@ def get_exponent_corr_density_grid(mode, nPart, phi, noise, K, Rp, xTy, seed_ran
     return exponent
 
 def plot_exponents_Kavg_corr_density_points(mode, nPart_range, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, min_r, max_r):
+    """
+    Plot correlation decay exponent for density fluctuations vs Kavg for different Kstd values using saved file and points method
+    """
     fig, ax = plt.subplots()
     for nPart in nPart_range:
         for K_std in K_std_range:
@@ -982,6 +1046,9 @@ def plot_exponents_Kavg_corr_density_points(mode, nPart_range, phi, noise, K_avg
     plt.savefig(os.path.join(folder, filename))
 
 def plot_exponents_Kstd_corr_density_grid(mode, nPart, phi, noise, K_avg, K_std_range, Rp, xTy, seed_range, pos_ex, timestep_range, min_grid_size, min_r, max_r):
+    """
+    Plot correlation decay exponent for density fluctuations vs Kstd using grid and FFT method
+    """
     fig, ax = plt.subplots()
     exponents = []
     for K_std in K_std_range:

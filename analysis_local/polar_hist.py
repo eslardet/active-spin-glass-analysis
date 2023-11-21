@@ -11,12 +11,12 @@ import csv
 from scipy.stats import circmean, circvar
 
 mode = "G"
-nPart = 1000
+nPart = 100000
 phi = 1.0
 noise = "0.20"
-K = "0.0_8.0"
+K = "0.8_8.0"
 Rp = 1.0
-xTy = 1.0
+xTy = 5.0
 seed = 1
 
 pos_ex_file = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name='pos_exact')
@@ -38,11 +38,11 @@ ax.hist(theta_wrap, bins=200, ec='k')
 
 # del_pos(mode, nPart, phi, noise, K, Rp, xTy, seed)
 
-# folder = os.path.abspath('../plots/polar_hist')
-# filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
-# if not os.path.exists(folder):
-#     os.makedirs(folder)
-# plt.savefig(os.path.join(folder, filename))
+folder = os.path.abspath('../plots/polar_hist')
+filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+if not os.path.exists(folder):
+    os.makedirs(folder)
+plt.savefig(os.path.join(folder, filename))
 
 plt.show()
 

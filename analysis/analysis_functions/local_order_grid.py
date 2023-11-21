@@ -1,3 +1,7 @@
+"""
+Local order paramter calculations with grid method
+"""
+
 import sys
 sys.path.insert(1, '././analysis_functions')
 from import_files import *

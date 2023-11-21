@@ -1,15 +1,15 @@
 #!/bin/sh
 
-nPart=40000
+nPart=50000
 phi=1.0
 noise=0.20
 KAVG=-0.1
 STDK=8.0
 Rp=1.0
-xTy=1.0
+xTy=5.0
 seed=1
 
-for KAVG in -0.1 0.1
+for seed in 1
 do
     run_dir=simulation_data/Gaussian/N${nPart}/phi${phi}_n${noise}/K${KAVG}_${STDK}/Rp${Rp}/xTy${xTy}/s${seed}/
     run_dir_local=/Users/el2021/Code/2D_ActiveSpinGlass_EL/$run_dir

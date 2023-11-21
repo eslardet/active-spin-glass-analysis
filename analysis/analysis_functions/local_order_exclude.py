@@ -1,3 +1,7 @@
+"""
+Local order paramter calculations with point method and excluding particles with 3 or fewer neighbours
+"""
+
 import sys
 sys.path.insert(1, '././analysis_functions')
 from import_files import *
@@ -15,9 +19,11 @@ def pbc_wrap_calc(x, L):
     """
     return x - L*np.round(x/L)
 
-# Calculate distances between all particles
 @numba.jit(nopython=True)
 def get_particle_distances(nPart, phi, xTy, x, y):
+    """
+    Calculate distances between all particles and store in matrix D
+    """
     nPart = len(x)
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
@@ -34,6 +40,11 @@ def get_particle_distances(nPart, phi, xTy, x, y):
 
 # @numba.jit(nopython=True)
 def local_order_param(D, theta, r_max):
+    """
+    Calulcate local polar order parameter within r_max using distance matrix D
+    Return as list of all local order parameter values
+    Exclude
+    """
     nPart = len(theta)
     # order_param = np.zeros(nPart)
     order_param = []
@@ -46,9 +57,16 @@ def local_order_param(D, theta, r_max):
     return order_param
 
 def global_order_param(theta):
+    """
+    Calculate global polar order parameter from theta array
+    """
     return np.sqrt(np.sum(np.cos(theta))**2 + np.sum(np.sin(theta))**2)/len(theta)
 
 def local_order_param_mean(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max_range):
+    """
+    Calculate mean local order parameter for each r_max value
+    Return list of local order parameters for each r_max, and global order parameter
+    """
     posExFile = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name='pos_exact')
     x, y, theta, viewtime = get_pos_ex_snapshot(posExFile)
     x = np.array(x)
@@ -66,6 +84,9 @@ def local_order_param_mean(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max_rang
     return o_plot, g
 
 def local_order_param_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_max):
+    """
+    Get list of all local order parameter values over a range of seeds, for a given r_max
+    """
     o_list = []
     for seed in seed_range:
         posExFile = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name='pos_exact')
@@ -82,6 +103,9 @@ def local_order_param_all(mode, nPart, phi, noise, K, Rp, xTy, seed_range, r_max
     return o_list
 
 def local_order_param_all_time(mode, nPart, phi, noise, K, Rp, xTy, seed_range, timestep_range, r_max):
+    """
+    Get list of all local order parameter values over a range of seeds and timesteps, for a given r_max
+    """
     o_all = []
     for seed in seed_range:
         posFile = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name='pos')
@@ -98,6 +122,9 @@ def local_order_param_all_time(mode, nPart, phi, noise, K, Rp, xTy, seed_range, 
     return o_all
 
 def plot_local_order_vs_l(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, r_max_range, show_g=False):
+    """
+    Plot mean local order parameter vs r_max (called l here) for a range of K_avg and K_std
+    """
     fig, ax = plt.subplots()
 
     for K_avg in K_avg_range:
@@ -128,6 +155,10 @@ def plot_local_order_vs_l(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp,
     plt.show()
 
 def plot_local_order_vs_l_decay(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, r_max_range):
+    """
+    Plot mean local order parameter - global order parameter vs r_max (called l here) for a range of K_avg and K_std
+    """
+    
     fig, ax = plt.subplots()
 
     for K_avg in K_avg_range:
@@ -156,6 +187,10 @@ def plot_local_order_vs_l_decay(mode, nPart, phi, noise, K_avg_range, K_std_rang
     plt.show()
 
 def plot_local_order_hist(mode, nPart, phi, noise, K_avg, K_std, Rp, xTy, seed_range, r_max_range, pos_ex=True, timestep_range=[0]):
+    """
+    Plot local order parameters over space as histogram for a range of r_max
+    Add a line for the smoothed kde of the distribution
+    """
     fig, ax = plt.subplots()
     for r_max in r_max_range:
         K = str(K_avg) + "_" + str(K_std)

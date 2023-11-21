@@ -68,6 +68,7 @@ for k in range(1, num_Kstd):
 
 slope, coeff = np.polyfit(K_std_range, K_avg_crit, 1)
 print(slope, coeff)
+print(np.arange(1,9,1)*slope+coeff)
 
 for k in range(1, num_Kstd):
     params = r[3*k][0].split('\t')
@@ -85,10 +86,10 @@ for k in range(1, num_Kstd):
 
     K_plot = [(k-coeff)/(K_std) for k in K_avg_range]
 
-    ax.plot(K_plot, p_ss, "-o", color=colors[k], label=r"$K_{STD}=\ $" + str(round(K_std)))
+    ax.plot(K_plot, p_ss, "o", color=colors[k], label=r"$\sigma_K=\ $" + str(round(K_std)))
 
 ax.set_xlim([-0.2,0.2])
-ax.set_xlabel(r"$(K_{AVG}-$" + str(round(coeff,3)) + r"$)/K_{STD}$")
+ax.set_xlabel(r"$(\overline{K}-$" + str(round(coeff,3)) + r"$)/\sigma_K$")
 ax.set_ylabel(r"$\Psi$")
 ax.legend()
 

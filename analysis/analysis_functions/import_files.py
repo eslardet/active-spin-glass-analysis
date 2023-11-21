@@ -5,6 +5,9 @@ import os
 ## Find files and import data
 
 def get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed):
+    """
+    Get path as string to simulation data directory
+    """
     if mode == "C":
         mode_name = "Constant"
     elif mode == "T":
@@ -64,10 +67,10 @@ def get_params(inparFile):
         inpar_dict["eqT"] = float(r[13][0])
         inpar_dict["simulT"] = float(r[14][0])
     elif inpar_dict["mode"] == 'T':
-        inpar_dict["dt"] = float(r[15][0])
-        inpar_dict["DT"] = float(r[16][0])
-        inpar_dict["eqT"] = float(r[18][0])
-        inpar_dict["simulT"] = float(r[19][0])
+        inpar_dict["dt"] = float(r[18][0])
+        inpar_dict["DT"] = float(r[19][0])
+        inpar_dict["eqT"] = float(r[21][0])
+        inpar_dict["simulT"] = float(r[22][0])
     else:
         inpar_dict["dt"] = float(r[11][0])
         inpar_dict["DT"] = float(r[12][0])

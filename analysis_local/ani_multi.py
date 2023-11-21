@@ -16,16 +16,19 @@ import time
 mode = "T"
 nPart = 1000
 phi = 1.0
-noise = "0.70"
+noise = "0.20"
+KAA = 0.0
+KBB = 0.0
+KCC = 0.0
 KAB = 1.0
-KBA = 0.0
+KBA = -1.0
 KBC = 1.0
-KCB = 0.0
+KCB = -1.0
 KCA = 1.0
-KAC = 0.0
-K = str(KAB) + "_" + str(KBA) + "_" + str(KBC) + "_" + str(KCB) + "_" + str(KCA) + "_" + str(KAC)
+KAC = -1.0
+K = str(KAA) + "_" + str(KBB) + "_" + str(KCC) + "_" + str(KAB) + "_" + str(KBA) + "_" + str(KBC) + "_" + str(KCB) + "_" + str(KCA) + "_" + str(KAC)
 Rp = 1.0
-xTy = 5.0
+xTy = 1.0
 seed = 1
 
 animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed)

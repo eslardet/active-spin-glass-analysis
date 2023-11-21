@@ -28,7 +28,7 @@ extern double Ly,ymin,ymax;
 extern double xTy;
 
 extern double K0; // mode 'C': K0: Coupling constant
-extern double KAB,KBA,KBC,KCB,KAC,KCA;
+extern double KAA,KBB,KCC,KAB,KBA,KBC,KCB,KAC,KCA;
 extern double KAVG,STDK; // mode 'G', 'A': KAVG: Average coupling constant
                          //                STDK: Standard deviation of coupling constant
 // extern double alpha; // Fraction of particles with +K0 coupling for mode F

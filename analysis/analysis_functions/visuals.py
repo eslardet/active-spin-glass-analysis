@@ -149,7 +149,7 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
         arrows.set_offsets(np.c_[x, y])
         cols = np.mod(theta, 2*np.pi)
         arrows.set_UVC(np.cos(theta), np.sin(theta), norm(cols))
-        ax.set_title("t = " + str(round(n*DT+startT, 1)), fontsize=10, loc='left')
+        ax.set_title("t = " + str(round(n*DT+startT+min_T, 1)), fontsize=10, loc='left')
         
         return arrows,
 
@@ -195,7 +195,7 @@ def animate_highlight(mode, nPart, phi, noise, K, Rp, xTy, seed, h, min_T=None, 
     Lx = L*xTy
     
     fig, ax = plt.subplots(figsize=(5*xTy,5))
-
+    
     nh = list(set(list(range(nPart))) - set(h))
 
     # mapper = cm.ScalarMappable(norm=norm, cmap=cm.hsv)
@@ -221,7 +221,6 @@ def animate_highlight(mode, nPart, phi, noise, K, Rp, xTy, seed, h, min_T=None, 
         arrows.set_offsets(np.c_[x, y])
         arrows.set_UVC(np.cos(theta), np.sin(theta))
         ax.set_title("t = " + str(round(n*DT+startT+min_T, 1)), fontsize=10, loc='left')
-        
         return arrows,
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=20, blit=True)
@@ -250,6 +249,17 @@ def animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=N
     seed = inpar_dict["seed"]
     xTy = inpar_dict["xTy"]
 
+    K_vals = K.split("_")
+    KAA = K_vals[0]
+    KBB = K_vals[1]
+    KCC = K_vals[2]
+    KAB = K_vals[3]
+    KBA = K_vals[4]
+    KBC = K_vals[5]
+    KCB = K_vals[6]
+    KCA = K_vals[7]
+    KAC = K_vals[8]
+
     if min_T == None:
         min_T = 0
 
@@ -266,6 +276,7 @@ def animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=N
     Lx = L*xTy
     
     fig, ax = plt.subplots(figsize=(10*xTy,10))
+    fig.suptitle(r"$K_{AA}=$" + KAA + r", $K_{BB}=$" + KBB + r", $K_{CC}=$" + KCC + "\n" + r"$K_{AB}=$" + KAB + r", $K_{BA}=$" + KBA + r", $K_{BC}=$" + KBC + r", $K_{CB}=$" + KCB + r", $K_{CA}=$" + KCA + r", $K_{AC}=$" + KAC)
 
     # norm = colors.Normalize(vmin=0, vmax=2, clip=True)
     # plt.set_cmap('rainbow')
