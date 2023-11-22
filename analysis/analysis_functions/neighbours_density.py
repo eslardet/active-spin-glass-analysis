@@ -10,7 +10,9 @@ import bisect
 
 
 def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1], print_stats=True, n_max=None, c_max=None):
-    
+    """
+    Plot histogram of number of neighbours inside radius of r_max for each particle
+    """
     av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex, timestep_range)
 
     if print_stats == True:
@@ -38,6 +40,9 @@ def neighbour_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True
 
 
 def get_nlist(posFile, nPart, box, timestep, r_max):
+    """
+    Get freud neighbour list for given snapshot and radius
+    """
     import freud
     x, y, theta = get_pos_snapshot(posFile=posFile, nPart=nPart, timestep=timestep)
 
@@ -55,6 +60,10 @@ def get_nlist(posFile, nPart, box, timestep, r_max):
     return nlist
 
 def write_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, tape_time):
+    """
+    Write to file 'contact' time between particles defined as within r_max of each other
+    Using freud neighbour list
+    """
     import freud
     # Initialize stuff
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
@@ -116,6 +125,15 @@ def write_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, tape_time):
 
 
 def read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max):
+    """
+    Read contacts file
+
+    Returns:
+    i, j: particle indices of contacts
+    duration: duration time of contact
+    r_max: contact radius
+    tape_time: time interval of interest in simulation
+    """
     sim_dir = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
     if not os.path.exists(os.path.join(sim_dir, 'contacts_r' + str(r_max))):
         raise Exception("Contacts file does not exist")
@@ -138,6 +156,9 @@ def read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max):
 
 ## Add seed range?
 def plot_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, log=False):
+    """
+    Plot histogram of contact duration
+    """
     i, j, contact_duration, r_max, tape_time = read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max)
 
     fig, ax = plt.subplots()
@@ -159,6 +180,9 @@ def plot_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, log=False):
     plt.savefig(os.path.join(folder, filename))
 
 def plot_K_vs_contact_time(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, log_x=False, log_y=False, n_max=None):
+    """
+    Plot coupling value Kij vs contact duration of i,j
+    """
     ix, jx, contact_duration, r_max, tape_time = read_contacts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max)
 
     Kij = get_couplings(mode, nPart, phi, noise, K, Rp, xTy, seed)

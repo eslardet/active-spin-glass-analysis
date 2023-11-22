@@ -205,6 +205,9 @@ def local_density_var(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size=2
 
 ## Neighbours ##
 def neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
+    """
+    Count number of neighbours within radius r_max for each particle
+    """
     import freud
     L = np.sqrt(nPart / (phi*xTy))
     Ly = L
@@ -231,7 +234,9 @@ def neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=Tr
     return n_nei
 
 def neighbour_stats(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex=True, timestep_range=[1]):
-    
+    """
+    Statistics of the number of neighbours within radius r_max for each particle
+    """
     av_nei_i = neighbour_counts(mode, nPart, phi, noise, K, Rp, xTy, seed, r_max, pos_ex, timestep_range)
 
     nei_av = np.mean(av_nei_i)

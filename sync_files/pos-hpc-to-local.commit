@@ -2,9 +2,9 @@
 
 nPart=50000
 phi=1.0
-noise=0.20
-KAVG=-0.1
-STDK=8.0
+noise=0.70
+KAVG=1.0
+STDK=5.0
 Rp=1.0
 xTy=5.0
 seed=1

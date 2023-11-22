@@ -43,6 +43,51 @@ def plot_density_profile(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_siz
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+    plt.close()
+
+def plot_density_profile_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed, min_grid_size=2):
+    """
+    Plot x-directional density profile for the final snapshot for multiple Kavg/ Kstd values
+    """
+    fig, ax = plt.subplots()
+    for K_avg in K_avg_range:
+        for K_std in K_std_range:
+            K = str(K_avg) + "_" + str(K_std)
+            posFileExact = get_file_path(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed, file_name='pos_exact')
+            x, y, theta, view_time = get_pos_ex_snapshot(file=posFileExact)
+
+            L = np.sqrt(nPart / (phi*xTy))
+            Ly = L
+            Lx = L*xTy
+
+            x = pbc_wrap(x,Lx)
+
+            ngrid_x = int(Lx // min_grid_size)
+            grid_size_x = Lx / ngrid_x
+
+            grid_area = grid_size_x*Ly
+
+            grid_counts = np.zeros(ngrid_x)
+
+            for i in range(nPart):
+                gridx = int(x[i]//grid_size_x)
+                grid_counts[gridx] += 1
+            n_density = grid_counts / grid_area
+
+            x_vals = np.arange(0, Lx, grid_size_x)
+            ax.plot(x_vals, n_density, label = r"$\overline{K}=$" + str(K_avg) + r"; $\sigma_K=$" + str(K_std))
+
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(r"Local density")
+    ax.legend()
+
+    folder = os.path.abspath('../plots/density_profile/')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    plt.savefig(os.path.join(folder, filename))
+    plt.close()
+
 
 
 def plot_band_profiles(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
@@ -141,6 +186,7 @@ def plot_band_profiles(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size=
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
+    plt.close()
 
 
 def plot_average_band_profile(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed_range, timestep_range=[1], pos_ex=True, min_grid_size=2, cutoff=1.5, peak_cutoff=2):
@@ -160,7 +206,7 @@ def plot_average_band_profile(mode, nPart, phi, noise, K_avg_range, K_std_range,
 
     x_vals = np.arange(0, Lx, grid_size_x)
 
-    extra_left = int(100 / grid_size_x)
+    extra_left = int(200 / grid_size_x)
     extra_right = int(50 / grid_size_x)
     total_len = extra_left + extra_right
 
@@ -291,7 +337,7 @@ def plot_average_band_profile(mode, nPart, phi, noise, K_avg_range, K_std_range,
     if not os.path.exists(folder):
         os.makedirs(folder)
     plt.savefig(os.path.join(folder, filename))
-    plt.show()
+    plt.close()
 
 
 def plot_var_density_noise(mode, nPart, phi, noise_range, K, Rp, xTy, seed_range, min_grid_size=2):

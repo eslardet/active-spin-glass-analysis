@@ -233,7 +233,7 @@ def animate_highlight(mode, nPart, phi, noise, K, Rp, xTy, seed, h, min_T=None, 
 
 def animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
     """
-    Make animation from positions file
+    Make animation from positions file for 3-population model
     """
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
 
@@ -316,7 +316,7 @@ def animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=N
 
 def animate_multi_blue(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
     """
-    Make animation from positions file
+    Make animation from positions file for 3-population model for only population A (in blue)
     """
     inparFile, posFile = get_files(mode=mode, nPart=nPart, phi=phi, noise=noise, K=K, Rp=Rp, xTy=xTy, seed=seed)
 
@@ -386,6 +386,9 @@ def animate_multi_blue(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, ma
     ani.save(os.path.join(folder, filename))
 
 def plot_polar_hist(mode, nPart, phi, noise, K, Rp, xTy, seed, bins=100):
+    """
+    Plot histogram of particle orientations in polar coordinates
+    """
     pos_ex_file = get_file_path(mode, nPart, phi, noise, K, Rp, xTy, seed, file_name='pos_exact')
     x, y, theta, view_time = get_pos_ex_snapshot(pos_ex_file)
 
