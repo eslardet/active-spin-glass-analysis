@@ -80,7 +80,7 @@ def snapshot(mode, nPart, phi, noise, K, Rp, xTy, seed, view_time=None, pos_ex=T
             folder = get_sim_dir(mode, nPart, phi, noise, K, Rp, xTy, seed)
             filename = 'snapshot.png'
         else:
-            folder = os.path.abspath('../snapshots_vicsek')
+            folder = os.path.abspath('../snapshots')
             filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.png'
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -155,7 +155,7 @@ def animate(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=None):
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=50, blit=True)
 
-    folder = os.path.abspath('../animations_vicsek')
+    folder = os.path.abspath('../animations/particles')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -225,7 +225,7 @@ def animate_highlight(mode, nPart, phi, noise, K, Rp, xTy, seed, h, min_T=None, 
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=20, blit=True)
 
-    folder = os.path.abspath('../animations_vicsek')
+    folder = os.path.abspath('../animations/particles_highlighted')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_highlights.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -308,7 +308,7 @@ def animate_multi(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, max_T=N
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=50, blit=True)
 
-    folder = os.path.abspath('../animations_multi_pop')
+    folder = os.path.abspath('../animations/multi_pop')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -379,8 +379,8 @@ def animate_multi_blue(mode, nPart, phi, noise, K, Rp, xTy, seed, min_T=None, ma
 
     ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=50, blit=True)
 
-    folder = os.path.abspath('../animations_multi_pop')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
+    folder = os.path.abspath('../animations/multi_pop')
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_blue.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))
