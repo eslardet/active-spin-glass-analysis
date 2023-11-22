@@ -91,7 +91,7 @@ def update(n):
 
 ani = FuncAnimation(fig, update, init_func=init, frames=len(theta_all), interval=50, blit=True)
 
-folder = os.path.abspath('../animations_polar_hist')
+folder = os.path.abspath('../animations/polar_hist')
 filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_both.mp4'
 if not os.path.exists(folder):
     os.makedirs(folder)
@@ -128,7 +128,7 @@ def update(n):
 
 ani = FuncAnimation(fig, update, frames=300, interval=50)
 
-folder = os.path.abspath('../animations_polar_hist')
+folder = os.path.abspath('../animations/polar_hist')
 filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
 if not os.path.exists(folder):
     os.makedirs(folder)
