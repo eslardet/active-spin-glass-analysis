@@ -82,7 +82,8 @@ def pbc_wrap(x, L):
     """
     Wrap points into periodic box with length L (from 0 to L) for display
     """
-    return x - L*np.round(x/L) + L/2
+    # return (x - L*np.round(x/L) + L/2)
+    return x % L
 
 def pbc_wrap_calc(x, L):
     """
@@ -97,25 +98,25 @@ def get_pos_arr(inparFile, posFile, min_T=None, max_T=None):
     """
     inpar_dict = get_params(inparFile)
     
-    nPart = inpar_dict["nPart"]
-    DT = inpar_dict["DT"]
-    eqT = inpar_dict["eqT"]
-    if min_T == None:
-        min_T = 0
-    if max_T == None:
-        max_T = inpar_dict["simulT"]
-    
     with open(posFile) as f:
         reader = csv.reader(f, delimiter="\t")
         r = list(reader)[6:]
 
     startT = float(r[0][0])
 
+    nPart = inpar_dict["nPart"]
+    DT = inpar_dict["DT"]
+    eqT = inpar_dict["eqT"]
+    if min_T == None:
+        min_T = max(eqT - startT,0)
+    if max_T == None:
+        max_T = inpar_dict["simulT"] - startT
+
     x_all = []
     y_all = []
     theta_all = []
 
-    for i in range(max(int((min_T-startT+eqT)/DT),0), int((max_T-startT)/DT)+1):
+    for i in range(int(min_T/DT), int((max_T)/DT)+1):
         x_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,0])
         y_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,1])
         theta_all.append(np.array(r[(nPart+1)*i+1:(nPart+1)*i+1+nPart]).astype('float')[:,2])
@@ -131,15 +132,19 @@ def get_theta_arr(inparFile, posFile, min_T=None, max_T=None):
     Nx = int(np.ceil(np.sqrt(nPart)))
     nPart = Nx*Nx
 
-    DT = inpar_dict["DT"]
-    if min_T == None:
-        min_T = 0
-    if max_T == None:
-        max_T = inpar_dict["simulT"]
-    
     with open(posFile) as f:
         reader = csv.reader(f, delimiter="\t")
         r = list(reader)[6:]
+
+    startT = float(r[0][0])
+
+    nPart = inpar_dict["nPart"]
+    DT = inpar_dict["DT"]
+    eqT = inpar_dict["eqT"]
+    if min_T == None:
+        min_T = max(eqT - startT,0)
+    if max_T == None:
+        max_T = inpar_dict["simulT"] - startT
 
     theta = []
     for i in range(int(min_T/DT), int(max_T/DT)+1):
