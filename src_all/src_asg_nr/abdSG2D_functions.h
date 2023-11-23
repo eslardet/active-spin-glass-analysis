@@ -2,7 +2,7 @@
 // ====================
 // Declaration of all functions necessary to run activeSpinGlass_2D.cpp
 // Created by Thibault Bertrand on 2022-04-19
-// Last update by TB 2022-04-19
+// Last update by EL 2023-11-23
 
 #ifndef abdSG2Dfunctions_h
 #define abdSG2Dfunctions_h

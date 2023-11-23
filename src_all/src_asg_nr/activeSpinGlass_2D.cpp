@@ -9,7 +9,7 @@
 //      -Couplings are stored as the full NxN matrix in memory
 //
 //  Created by Thibault Bertrand on 2022-04-19
-//  Last update by TB 2023-11-23
+//  Last update by EL 2023-11-23
 
 #include <iostream>
 #include <fstream>
