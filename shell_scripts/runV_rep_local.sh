@@ -91,7 +91,7 @@ fi
 # Run 2D Active Spin Glass #
 ############################
 
-echo "Starting Vicsek 2D run..."
+echo "Starting ASG 2D run..."
 
 cd $run_dir
 
@@ -167,6 +167,6 @@ else
     echo ${potMode} >> 'inpar'
 fi
 
-time ${bin_dir}/vicsek_2D_rep_MS inpar
+time ${bin_dir}/asg_2D_rep_MS inpar
 
-echo "2D Vicsek run done."
+echo "2D ASG run done."

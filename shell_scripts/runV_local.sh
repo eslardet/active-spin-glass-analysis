@@ -83,20 +83,6 @@ if [ "${initMode}" == 'A' ]; then
     run_dir+="_a"
 fi
 
-# # Cluster
-# if [ "${couplingMode}" == "C" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/Constant/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# elif [ "${couplingMode}" == "T" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/TwoPopulations/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# elif [ "${couplingMode}" == "G" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/Gaussian/N${nPart}/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# elif [ "${couplingMode}" == "F" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/Ferromagnetic/N${nPart}/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# elif [ "${couplingMode}" == "A" ]; then
-#     run_dir=$HOME/Vicsek_2D/simulation_data/Antiferromagnetic/N${nPart}/N${nPart}/phi${phi}_n${noise}/K${K0}/xTy${xTy}/s${seed}
-# fi
-
-
 ###################################
 # Create directories if necessary #
 ###################################
@@ -109,7 +95,7 @@ fi
 # Run 2D Active Spin Glass #
 ############################
 
-echo "Starting Vicsek 2D run..."
+echo "Starting ASG 2D run..."
 
 cd $run_dir
 
@@ -194,6 +180,6 @@ else
     echo ${intMethod} >> 'inpar'
 fi
 
-time ${bin_dir}/vicsek_2D inpar
+time ${bin_dir}/asg_2D inpar
 
-echo "2D Vicsek run done."
+echo "2D ASG run done."

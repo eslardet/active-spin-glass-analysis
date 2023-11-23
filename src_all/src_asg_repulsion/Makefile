@@ -1,9 +1,12 @@
-app = activeSpinGlass_2D_lattice
+app = asg_2D_rep_MS
 
 srcExt = cpp
-srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_all/src_lattice
+srcDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/src_all/src_asg_repulsion
 objDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/obj
 binDir = $(HOME)/Code/2D_ActiveSpinGlass_EL/bin
+# srcDir = $(HOME)/Vicsek_2D_rep_MS/src
+# objDir = $(HOME)/obj
+# binDir = $(HOME)/bin
 inc = 
 
 debug = 0
