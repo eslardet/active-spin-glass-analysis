@@ -38,9 +38,11 @@ for i in range(len(K_list)):
 
     l_list = np.array([np.sqrt(n/rho) for n in n_list])
 
+    psi_list_shift = [p+1-psi_list[0] for p in psi_list]
 
     ## Plot L vs Psi with fitted curve
-    ax.plot(l_list, psi_list, 'o-', label = K_list[i])
+    # ax.plot(l_list, psi_list, 'o-', label = K_list[i])
+    ax.plot(l_list, psi_list_shift, 'o-', label = K_list[i])
 
 ax.set_yscale('log')
 ax.set_xscale('log')
@@ -48,5 +50,5 @@ ax.set_xlabel(r"$L$")
 ax.set_ylabel(r"$\Psi$")
 ax.legend()
 
-# plt.savefig(os.path.abspath('../plots/p_order_vs_N/K1_1_superimpose.png'), bbox_inches="tight")
-plt.show()
+plt.savefig(os.path.abspath('../plots/p_order_vs_N/K1_1_superimpose_shifted.png'), bbox_inches="tight")
+# plt.show()

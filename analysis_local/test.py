@@ -11,6 +11,16 @@ import time
 from scipy.signal import fftconvolve, correlate2d, convolve2d
 from matplotlib import colors
 
+x = 500.0
+grid_size_x = 5.0
+
+# gridx = int(x//grid_size_x)
+# print(gridx)
+# print(x//grid_size_x)
+x = np.array([1,2,3])
+print(x % 5)
+print(pbc_wrap(x, 5))
+# print(500*np.round(3250/500))
 # N = 10000
 
 # K1 = 1.0
@@ -45,32 +55,32 @@ from matplotlib import colors
 # plt.legend()
 # plt.show()
 
-N = 6
-K = np.zeros((N,N))
+# N = 6
+# K = np.zeros((N,N))
 
-for i in range(N):
-    K[i,i] = 0
-    for j in range(i+1, N):
-        if i < N/3:
-            if j < N/3:
-                K[i,j] = 1
-                K[j,i] = 1
-            elif j < 2*N/3:
-                K[i,j] = 1
-                K[j,i] = -1
-            else:
-                K[i,j] = -3
-                K[j,i] = 3
-        elif i < 2*N/3:
-            if N/3 <= j < 2*N/3:
-                K[i,j] = 1
-                K[j,i] = 1
-            elif j>= 2*N/3:
-                K[i,j] = 2
-                K[j,i] = -2
-        else:
-            if j >= 2*N/3:
-                K[i,j] = 1
-                K[j,i] = 1
+# for i in range(N):
+#     K[i,i] = 0
+#     for j in range(i+1, N):
+#         if i < N/3:
+#             if j < N/3:
+#                 K[i,j] = 1
+#                 K[j,i] = 1
+#             elif j < 2*N/3:
+#                 K[i,j] = 1
+#                 K[j,i] = -1
+#             else:
+#                 K[i,j] = -3
+#                 K[j,i] = 3
+#         elif i < 2*N/3:
+#             if N/3 <= j < 2*N/3:
+#                 K[i,j] = 1
+#                 K[j,i] = 1
+#             elif j>= 2*N/3:
+#                 K[i,j] = 2
+#                 K[j,i] = -2
+#         else:
+#             if j >= 2*N/3:
+#                 K[i,j] = 1
+#                 K[j,i] = 1
 
-print(K)
+# print(K)

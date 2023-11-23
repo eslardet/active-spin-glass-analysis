@@ -54,9 +54,9 @@ KAVG=1.0
 STDK=0.0
 
 dT=0.005
-DT=100.0
+DT=1.0
 DTex=1000.0
-eqT=1000.0
+eqT=1800.0
 simulT=2000.0
 
 savePos=1
