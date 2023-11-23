@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rsync -rvltoD /Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis el2021@login.hpc.ic.ac.uk:/rds/general/user/el2021/home/Vicsek_2D
+rsync -rvltoD /Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis el2021@login.hpc.ic.ac.uk:/rds/general/user/el2021/home/ASG_2D
 
 ##rsync -rvltoD /Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis el2021@dtn-b.hpc.ic.ac.uk:/rds/general/user/el2021/home/Vicsek_2D
 ##rsync -rvltoD /Users/el2021/Code/2D_ActiveSpinGlass_EL/Active_Spin_Glass/analysis/analysis_functions el2021@dtn-b.hpc.ic.ac.uk:/rds/general/user/el2021/home/Vicsek_2D/analysis

@@ -3,7 +3,7 @@
 nPart=100000
 phi=1.0
 noise=0.20
-KAVG=-0.1
+KAVG=0.2
 STDK=8.0
 Rp=1.0
 xTy=5.0
@@ -19,5 +19,5 @@ do
         echo "Creating directory : $run_dir_local"
     fi
 
-    rsync -rvltoD el2021@login.hpc.ic.ac.uk:/rds/general/user/el2021/home/Vicsek_2D/$run_dir $run_dir_local
+    rsync -rvltoD el2021@login.hpc.ic.ac.uk:/rds/general/user/el2021/home/ASG_2D/$run_dir $run_dir_local
 done

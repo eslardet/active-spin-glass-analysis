@@ -14,7 +14,7 @@ K_avg_range = [1.0]
 # K_std = 0.0
 #K_std_range = np.round(np.arange(1,8.1,1),1)
 K_std_range = [0.0]
-K = "-0.1_8.0"
+K = "0.2_8.0"
 Rp = 1.0
 xTy = 5.0
 seed_range = np.arange(1,2,1)
@@ -23,7 +23,7 @@ timestep_range = range(1)
 #r_max = 10
 #r_bin_num = 100
 # timestep_range = range(10)
-min_grid_size = 5
+min_grid_size = 10
 min_T = 0
 max_T = 1000
 
@@ -34,6 +34,7 @@ max_T = 1000
 
 # plot_density_profile_superimpose(mode, nPart, phi, noise, K_avg_range, K_std_range, Rp, xTy, seed, min_grid_size=5)
 
-# animate_density_profile(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size, min_T, max_T)
+animate_density_profile(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size=5, min_T=min_T, max_T=max_T)
+animate_density_profile(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_size=10, min_T=min_T, max_T=max_T)
 
 del_pos(mode, nPart, phi, noise, K, Rp, xTy, seed)

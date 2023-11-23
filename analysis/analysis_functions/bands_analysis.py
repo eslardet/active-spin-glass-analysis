@@ -465,7 +465,7 @@ def animate_density_profile(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_
     ani = FuncAnimation(fig, update, init_func=init, frames=len(x_all), interval=50, blit=False)
 
     folder = os.path.abspath('../animations/density_profile')
-    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '.mp4'
+    filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_g' + str(min_grid_size) + '.mp4'
     if not os.path.exists(folder):
         os.makedirs(folder)
     ani.save(os.path.join(folder, filename))
