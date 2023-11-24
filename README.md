@@ -10,9 +10,8 @@ Once simulations have been run and text files have been generated, these data ca
 
 ## Model details
 We model the microscopic dynamics using coupled overdamped Langevin equations with metric alignment interactions through a mean-sine force. These alignment interactions have coupling values $K_{ij}$, which can follow a number of distributions and can be changed with the `mode` parameter (e.g. constant, Gaussian).
-
-$$\dot{\rbf}_i = v_0 \pbf_i \\
-    \dot{\theta}_i = \frac{1}{n_i} \sum_{j\in\mathcal{N}_i} \kij \sin{(\theta_j-\theta_i)} + \eta \xi_i$$
+$$\dot{\bf{r}}_i = v_0 \hat{\bf{p}}_i$$
+$$\dot{\theta}_i = \frac{1}{n\_i} \sum\_{j\in\mathcal{N}\_i} K\_{ij} \sin{(\theta_j-\theta_i)} + \eta \xi_i$$
 
 The Langevin equations are integrated and solved numerically using either an Euler-Maruyama or Stochastic Runge-Kutta scheme.
 
