@@ -442,27 +442,22 @@ def animate_density_profile(mode, nPart, phi, noise, K, Rp, xTy, seed, min_grid_
     n_density = grid_counts / grid_area
     ax.plot(x_vals, n_density)
 
-    def init():
-        # line.set_data([], [])
-        ax.set_xlabel(r"$x$")
-        ax.set_ylabel(r"Local density")
-        # return line,
 
     def update(n):
         ax.clear()
-        ax.set_ylim(0, 5)
         x = pbc_wrap(x_all[n],Lx)
         grid_counts = np.zeros(ngrid_x)
         for i in range(nPart):
             gridx = int(x[i]//grid_size_x)
             grid_counts[gridx] += 1
         n_density = grid_counts / grid_area
-        # line.set_data(x_vals, n_density)
         ax.plot(x_vals, n_density)
+        ax.set_ylim(0, 1.5)
+        ax.set_xlabel(r"$x$")
+        ax.set_ylabel(r"Local density")
         ax.set_title("t = " + str(round(n*DT+startT, 1)), fontsize=10, loc='left')
-        # return line,
 
-    ani = FuncAnimation(fig, update, init_func=init, frames=len(x_all), interval=50, blit=False)
+    ani = FuncAnimation(fig, update, frames=len(x_all), interval=50, blit=False)
 
     folder = os.path.abspath('../animations/density_profile')
     filename = mode + '_N' + str(nPart) + '_phi' + str(phi) + '_n' + str(noise) + '_K' + str(K) + '_Rp' + str(Rp) + '_xTy' + str(xTy) + '_s' + str(seed) + '_g' + str(min_grid_size) + '.mp4'

@@ -10,48 +10,36 @@ Once simulations have been run and text files have been generated, these data ca
 
 ## Model details
 We model the microscopic dynamics using coupled overdamped Langevin equations with metric alignment interactions through a mean-sine force. These alignment interactions have coupling values $K_{ij}$, which can follow a number of distributions and can be changed with the `mode` parameter (e.g. constant, Gaussian).
+
+$$\begin{aligned}
+    \dot{\rbf}_i &= v_0 \pbf_i \\
+    \dot{\theta}_i &= \frac{1}{n_i} \sum_{j\in\mathcal{N}_i} \kij \sin{(\theta_j-\theta_i)} + \eta \xi_i
+  \end{aligned}$$
+
 The Langevin equations are integrated and solved numerically using either an Euler-Maruyama or Stochastic Runge-Kutta scheme.
 
 ## Model parameters
-* Note these for standard ASG model, some variations e.g.
+*Note these are for standard ASG model simulation*
 
-nPart: number of particles
-
-phi: number density of particles
-
-noise: orientational noise strength
-
-seed: seed for random number generator
-
-vp: particle speed
-
-Rp: radius of alignment interaction
-
-xTy: ratio of Lx/Ly
-
-initMode: initialization mode ('R' for random, 'A' for all particles aligned, 'S' for restarting from previous simulation)
-
-couplingMode: couple distribution mode ('C' constant, 'T' for two/ three populations, 'G' for Gaussian distribution, 'F' for bimodal, 'A' for non-reciprocal)
-
-K0 : constant coupling value for couplingMode='C'
-
-KAA,KAB, etc. : couplings for intra/inter-populations interactions for couplingMode='T'
-
-KAVG, STDK : mean and standard deviation for distributions in mode 'G', 'F' and 'A'
-
-dT: timestep (general = 0.005)
-
-DT : time difference between saving positions and orientations to position file
-
-DTex : time difference between exact (full precision) positions file update
-
-eqT : equilibration time to run before starting to save positions to file
-
-simulT: end simulation time to run to
-
-savePos, saveInitPos, saveForce, saveCoupling : whether to save text files for position, initial position, force, coupling (0 for no and 1 for yes)
-
-intMethod : integration method for solving equations ('E' for Euler-Maruyama and 'S' for Stochastic RK)
+- `nPart`: number of particles
+- `phi`: number density of particles
+- `noise`: orientational noise strength
+- `seed`: seed for random number generator
+- `vp`: particle speed
+- `Rp`: radius of alignment interaction
+- `xTy`: ratio of Lx/Ly
+- `initMode`: initialization mode ('R' for random, 'A' for all particles aligned, 'S' for restarting from previous simulation)
+- `couplingMode`: couple distribution mode ('C' constant, 'T' for two/ three populations, 'G' for Gaussian distribution, 'F' for bimodal, 'A' for non-reciprocal)
+- `K0` : constant coupling value for couplingMode='C'
+- `KAA`,`KAB`, etc. : couplings for intra/inter-populations interactions for couplingMode='T'
+- `KAVG`, `STDK` : mean and standard deviation for distributions in mode 'G', 'F' and 'A'
+- `dT`: timestep (general = 0.005)
+- `DT` : time difference between saving positions and orientations to position file
+- `DTex` : time difference between exact (full precision) positions file update
+- `eqT` : equilibration time to run before starting to save positions to file
+- `simulT`: end simulation time to run to
+- `savePos`, `saveInitPos`, `saveForce`, `saveCoupling` : whether to save text files for position, initial position, force, coupling (0 for no and 1 for yes)
+- `intMethod` : integration method for solving equations ('E' for Euler-Maruyama and 'S' for Stochastic RK)
 
 
 ## Possible files generated in simulation folder
