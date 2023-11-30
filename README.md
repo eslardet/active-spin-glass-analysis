@@ -1,7 +1,8 @@
 # Active Spin Glass
+*NOTE: This repository does not contain the source code for the simulations as they cannot be made public yet.*
 
 ## Overview
-Agent based modelling of aligning self-propelled particles with random couplings. Simulations are run in C++ using source code in `src`. 
+Agent based modelling of aligning self-propelled particles with random couplings. Simulations are run in C++ using source code in `src` (Note: not available publicly yet). 
 This must first be compiled using `make -f Makefile` in the relevant folder, then run using one of the `runASG.sh` scripts. 
 Additionally, code can be run from an HPC using a `bashASG.pbs` script. This is especially useful for job parallelization for different seed realizations or arrays of parameters.
 
